@@ -1,0 +1,94 @@
+\RequirePackage{fix-cm}
+\documentclass[cleveref,12pt,noabbrev,capitalize]{jmlrXiv} %
+
+\usepackage{times}
+\usepackage{enumitem}
+\usepackage{algorithm}
+\usepackage{xfrac}
+\usepackage[clean]{macro/main}
+
+\title[Adversarial Learning in Games with Bandit Feedback]{Adversarial Learning in Games with Bandit Feedback: \\ Logarithmic Pure-Strategy Maximin Regret}
+
+
+
+\confauthor{%
+ \Name{Shinji Ito} \Email{shinji@mist.i.u-tokyo.ac.jp}\\
+ \addr The University of Tokyo and RIKEN
+ \AND
+ \Name{Haipeng Luo} \Email{haipengl@usc.edu}\\
+ \addr University of Southern California
+ \AND
+ \Name{Arnab Maiti} \Email{arnabm2@uw.edu}\\
+ \addr University of Washington
+ \AND
+ \Name{Taira Tsuchiya} \Email{tsuchiya@mist.i.u-tokyo.ac.jp}\\
+ \addr The University of Tokyo and RIKEN
+ \AND
+ \Name{Yue Wu} \Email{wu.yue@usc.edu}\\
+ \addr University of Southern California
+}
+
+\begin{document}
+
+\maketitle
+\ifanonsubmission\else
+\blfootnote{Authors are listed in alphabetical order.}
+\fi
+
+\begin{abstract}%
+Learning to play zero-sum games %
+is a fundamental problem in game theory and machine learning.
+While significant progress has been made in minimizing external regret in the self-play settings or with full-information feedback,
+real-world applications often force learners to play against unknown, arbitrary opponents
+and restrict learners to bandit feedback where only the reward of the realized action is observable.
+In such challenging settings, it is well-known that $\Omega(\sqrt T)$ external regret is unavoidable (where $T$ is the number of rounds).
+To overcome this barrier, we investigate
+adversarial learning in zero-sum games under bandit feedback,
+aiming to minimize the deficit against the maximin pure strategy --- a metric we term Pure-Strategy Maximin Regret.
+
+We analyze this problem under two bandit feedback models:
+\emph{uninformed} (only the realized reward is revealed)
+and
+\emph{informed} (both the reward and the opponent's action are revealed).
+For uninformed bandit learning of normal-form games,
+we show that the Tsallis-INF algorithm achieves
+$\order(c \log T)$ instance-dependent regret
+with a game-dependent parameter $c$.
+Crucially, we prove an information-theoretic lower bound showing that
+the dependence on $c$ is necessary.
+To overcome this hardness,
+we turn to the informed setting and introduce \PureUCB{}, which obtains another regret bound of the form $\order(c' \log T)$ for a different game-dependent parameter $c'$ that could potentially be much smaller than $c$. 
+Finally, we generalize both results to bilinear games over an arbitrary, large action set,
+proposing \TsallisSPM{} and \PureLinUCB{} for the uninformed and informed settings respectively
+and establishing similar game-dependent logarithmic regret bounds.
+\end{abstract}
+
+\begin{keywords}%
+  Learning in Games; Bandit Learning; Instance-Dependent Bound; Zero-Sum Games; Adversarial Learning
+\end{keywords}
+
+\input{sec/10_intro}
+\input{sec/20_related_work}
+\input{sec/30_prelim}
+\input{sec/40_finite_game}
+\input{sec/60_linear_game}
+\input{sec/80_discussion}
+
+
+
+\bibliography{ref}
+
+\newpage
+\appendix
+\crefalias{section}{appendix} %
+\input{sec/app/11_uninformed_name}
+\input{sec/app/05_lemmas}
+\input{sec/app/42_proof_comparison}
+\input{sec/app/45_proof_lower_bound}
+\input{sec/app/50_proof_pureucb}
+\input{sec/app/55_proof_tsallis_bilinear}
+\input{sec/app/60_proof_linucb}
+
+
+
+\end{document}

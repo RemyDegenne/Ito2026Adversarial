@@ -1,0 +1,47 @@
+% In this file you should put the actual content of the blueprint.
+% It will be used both by the web and the print version.
+% It should *not* include the \begin{document}
+
+\part{Adversarial learning in games with bandit feedback}
+\label{part:main}
+
+\textbf{Overview}
+
+This blueprint guides the Lean formalization of the paper \emph{Adversarial Learning in Games with
+Bandit Feedback: Logarithmic Pure-Strategy Maximin Regret} by Shinji Ito, Haipeng Luo, Arnab
+Maiti, Taira Tsuchiya and Yue Wu (COLT 2026, \cite{ito2026adversarial}). A learner repeatedly plays
+a zero-sum game $u : \X \times \Y \to [-1, 1]$ against an adaptive adversary and receives noisy
+rewards; she observes either the reward only (\emph{uninformed}) or also the adversary's action
+(\emph{informed}). The performance measure is the \emph{pure-strategy maximin regret}
+$\PSMR_T = \E[\sum_t (\vstar - u(x_t, y_t))]$, $\vstar = \max_x \min_y u(x, y)$. The paper shows
+that Tsallis-INF has game-dependent logarithmic $\PSMR$ in the uninformed setting
+(Theorem~\ref{thm:tsallis}), with an unavoidable $1/(\DRmin \DCmin)$ dependence
+(Theorem~\ref{thm:uninformed_lb}), that Maximin-UCB has another logarithmic bound in the informed
+setting (Theorem~\ref{thm:pureucb}), and extends both to bilinear games with large action sets
+(Theorems~\ref{thm:tsallis_bilinear}, \ref{thm:purelinucb_informal} and~\ref{thm:purelinucb}).
+
+\textbf{Formalization.} The protocol is that of the \emph{Lean Machine Learning} library (LML):
+the learner is an LML algorithm, the adversary another LML algorithm acting on the history seen
+from its side, and the reward is drawn from a history-dependent kernel with conditional mean
+$u(x_t, y_t)$; the statements quantify over all adversaries, all such reward kernels and all runs.
+The statements were checked against the paper; several are corrected
+(Remarks~\ref{rem:tsallis_statement}, \ref{rem:pureucb_statement},
+\ref{rem:tsallis_bilinear_statement} and~\ref{rem:delta_comparison_statement}): in particular, a
+game without pure Nash equilibrium need not have $\vnash > \vstar$ (Remark~\ref{rem:no_psne_gap}).
+The analyses of Tsallis-INF and Tsallis-FTRL-SPM that the paper cites are prerequisites of the
+formalization (Chapter~\ref{chap:prereq_ftrl}), and so is the confidence ellipsoid of linear
+bandits (Chapter~\ref{chap:prereq_concentration}).
+
+\input{chapters/setting.tex}
+\input{chapters/games.tex}
+\input{chapters/tsallis_inf.tex}
+\input{chapters/lower_bound.tex}
+\input{chapters/maximin_ucb.tex}
+\input{chapters/bilinear.tex}
+
+\part{Prerequisites to be added to Mathlib and LML}
+\label{part:prereq}
+
+\input{chapters/prereq_ftrl.tex}
+\input{chapters/prereq_concentration.tex}
+\input{chapters/prereq_information.tex}

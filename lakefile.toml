@@ -1,0 +1,47 @@
+name = "Ito2026Adversarial"
+defaultTargets = ["Ito2026Adversarial"]
+lintDriver = "batteries/runLinter"
+
+[leanOptions]
+pp.unicode.fun = true
+autoImplicit = false
+relaxedAutoImplicit = false
+weak.linter.mathlibStandardSet = true
+
+[[require]]
+name = "LeanMachineLearning"
+git = "https://github.com/LeanMachineLearning/LML"
+rev = "rename"
+
+[[require]]
+name = "checkdecls"
+git = "https://github.com/PatrickMassot/checkdecls.git"
+
+[[lean_lib]]
+name = "Ito2026Adversarial"
+
+# Comparator (https://github.com/leanprover/comparator) challenge/solution modules for the
+# headline results listed in formalization.yaml; see comparator/README.md. One library with a
+# stub root: tools that import every library root (checkdecls, referee) must not load the
+# challenge modules, which redeclare project and LML names, so those are globs, not roots.
+# Add one "Challenge_<name>" entry per line of comparator/targets.txt.
+[[lean_lib]]
+name = "Comparator"
+srcDir = "comparator"
+leanOptions = { weak.linter.mathlibStandardSet = false }
+globs = [
+  "Comparator",
+  "Solution",
+  "Challenge_exists_psmr_tsallisINFHalf_le",
+  "Challenge_exists_forall_psmr_ge",
+  "Challenge_exists_psmr_maximinUCB_le",
+  "Challenge_forall_exists_psmr_tsallisSPMPaper_le",
+  "Challenge_exists_forall_exists_psmr_maximinLinUCB_le",
+  "Challenge_sqrt_mul_sub_mul_le",
+  "Challenge_le_add_sqrt_add_of_le_sqrt_add",
+  "Challenge_klDiv_twoPoint_le",
+  "Challenge_sq_entryGap_div_four_le_mixGap",
+  "Challenge_probReal_forall_abs_sub_div_le_ge",
+  "Challenge_exists_psmr_maximinLinUCB_le",
+  "Challenge_probReal_forall_sqrt_mahalanobisSq_le_ge",
+]

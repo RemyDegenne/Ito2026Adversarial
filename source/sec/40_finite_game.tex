@@ -1,0 +1,297 @@
+\section{Uninformed Learning in Normal-Form Games}\label{h1:finite-games}
+
+In this section, we focus on the uninformed setting and present our results for normal-form games, where $\calX$ and $\calY$ are standard basis sets in $\dR^{m_x}$ and $\dR^{m_y}$. In this case, $A$ is the standard utility matrix, with utilities given by $u(e_i,e_j)=A_{ij}$.
+Mixed strategies correspond to vectors $p,q$ in the simplexes $\simplex^{m_x}, \simplex^{m_y}$, with expected utility $u(p,q)=\inner{p}{Aq}$.
+
+
+
+\subsection{Results and Analysis for Tsallis-INF}\label{h2:tsallis-inf}
+We consider using the Tsallis-INF algorithm of~\citet{zimmert2021tsallisinf} in this setting. 
+Tsallis-INF was originally proposed for the multi-armed bandit problem and shown to be optimal for both the stochastic setting and the adversarial setting.
+Since then, it has been extended and analyzed in many other settings, including self-play in games~\citep{ito2025instancedependent}.
+However, in all previous studies, achieving logarithmic regret bounds requires either a stationary or a self-play environment, 
+and it is unclear at all whether it still works in our problem where the environment is controlled by an arbitrary opponent.
+Somewhat surprisingly, we show that it does still achieve a certain game-dependent logarithmic regret in our problem.
+
+
+Specifically, Tsallis-INF is an instance of the well-known Follow-the-Regularized-Leader (FTRL) framework.
+It uses the negative Tsallis entropy as the regularizer, defined as (for a parameter $\alpha \in (0,1)$):
+\begin{equation}
+\varphi_{\alpha}(p)=\frac{1}{\alpha} \sum_{i} \rbr{p_i^\alpha - p_i},\label{eq:tsallis}
+\end{equation}
+along with standard importance-weighted reward estimators and a simple time-varying learning rate $\eta_t$.
+See \Cref{alg:tsallis-inf} for the complete pseudocode.
+
+\begin{algorithm}[t]
+\caption{Tsallis-INF}\label{alg:tsallis-inf}
+\begin{algorithmic}[1]
+\Require A Tsallis entropy parameter $\alpha\in [0, 1]$ and a sequence of learning rates $\{\eta_t\}$.
+\For{$t=1,2,\dots$}
+  \State Let $p!t = \argmax_{p\in \simplex^{m_x}} \cbrm[\big]{\inner{p}{\sum_{s<t} g!s} + \frac{1}{\eta_t} \varphi_\alpha(p)}.$
+  \State Sample $x!t\in \calX$ from the distribution specified by $p!t$ and play it.
+  \State Observe the reward $r_t$.
+  \State Set the reward estimator $g!t\in \dR^{\calX}$, where
+      $g!t_x = \begin{cases}
+          1-(1-r_t) / p!t_x, & \text{if } x!t=x, \\
+          1, & \text{otherwise.}
+      \end{cases}$
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+We show that Tsallis-INF achieves different game-dependent logarithmic PSMR bounds for the case when: a) the game has a strict PSNE, or b) no PSNE exists. If a strict PSNE $(x^*, y^*)$ exists, the bound depends on the following sub-optimality gap parameters:
+\begin{align*}
+    \DeltaR_x &= u(x^*,y^*)-u(x,y^*), \quad
+    \DeltaC_y = u(x^*,y)-u(x^*,y^*).
+\end{align*}
+From the definition of strict PSNEs, we know that these parameters are strictly positive. We further define $\DRmin = \min_{x\neq x^*}\DeltaR_x$ and $\DCmin = \min_{y\neq y^*}\DeltaC_y$. 
+We point out that these parameters also characterize the sample complexity of finding a PSNE~\citep{maiti2024nearoptimal} and the external regret for self-play~\citep{ito2025instancedependent}.
+
+On the other hand, if PSNEs do not exist, we know that the Nash value $\vMix$ is strictly higher than the pure-strategy maximin value $\vStar$, and our bound depends on the gap between them: $\DeltaMix\defeq\vMix-\vStar>0$.
+More concretely, our main result is summarized in the following theorem.
+
+\begin{theorem}\label{thm:tsallis} 
+    In every game $u(\cdot, \cdot)$, against any adaptive adversary, Tsallis-INF with $\alpha=\frac 12$ and $\eta_t = \frac{1}{2\sqrt{t}}$ achieves a regret bound of $\psmr_T = \order\rbrm[\big]{\sqrt{m_x T}}$. Additionally,
+
+    \begin{itemize}[topsep=0pt,noitemsep]
+        \item If the game has a strict PSNE, we further have $\psmr_T = \order\rbrm[\big]{\frac{1}{\DCmin} \sum_{x\neq x^*} \frac{\log T}{\DeltaR_x}}$.
+        \item If the game has no PSNEs, we further have $\psmr_T = \order\rbrm[\big]{\frac{m_x }{\DeltaMix}}$.
+    \end{itemize}
+\end{theorem}
+
+
+
+
+\begin{proof}
+Since our model is a special case of adversarial bandit, Theorem~1 of \citet{zimmert2021tsallisinf} directly implies that $\psmr_T\leq \ER_T\leq 8\sqrt{m_x T}+2$ (the difference in constant factors is due to our reward range $[-1,1]$ being twice as wide as theirs).
+
+For the instance-dependent PSMR in the no-PSNE case, we observe that $\NR_T-\psmr_T=\rbrm[\big]{\vMix-\vStar}T=\DeltaMix T$. Together with the $\ER_T$ bound, we have
+\begin{align*}
+    \psmr_T=\NR_T-\DeltaMix T\leq \ER_T-\DeltaMix T=2+8\sqrt{m_x T}-\DeltaMix T.
+\end{align*}
+The function $T\mapsto 8\sqrt{m_x T}-\DeltaMix T$ is maximized at $T=\frac{16 m_x}{(\DeltaMix)^2}$ with a value of $\frac{16 m_x}{\DeltaMix}$ (see \Cref{lem:sqrt-func}), so $\psmr_T\leq \frac{16 m_x}{\DeltaMix}+2$.
+
+For the instance-dependent PSMR in the strict PSNE case, let $(x^*, y^*)$ be the strict PSNE and $C\in [0, T]$ be the expected number of times the adversary deviates from the NE, that is, 
+$
+C\defeq\EE\sbrm[\Big]{\sum_{t=1}^T \one[y!t \neq y^*]}.
+$
+We then have
+\begin{align*}
+    \ER_T(x^*)-\psmr_T
+    & = \EE\sbrm[\bigg]{\sum_{t=1}^T \rbrm[\Big]{u(x^*,y!t)-\vStar}}
+      = \EE\sbrm[\bigg]{\sum_{t=1}^T \rbrm[\Big]{u(x^*,y!t)-u(x^*,y^*)}}\\
+    & = \EE\sbrm[\bigg]{\sum_{t=1}^T \one[y!t \neq y^*] \DeltaC_{y!t}}
+      \geq C \DCmin. \yestag\label{eq:er-nr-difference}
+\end{align*}
+
+Further,
+\begin{align*}
+    \EE\bigg[
+        \sum_{t=1}^T \anglem[\big]{\DeltaR,p!t}
+        \bigg] - \ER_T(x^*)
+    & = \EE\sbrm[\bigg]{\sum_{t=1}^T \DeltaR_{x!t}} 
+      - \EE\sbrm[\bigg]{\sum_{t=1}^T \rbrm[\Big]{u(x^*,y!t)-u(x!t,y!t)}}
+      \\
+    & = \EE\bigg[
+        \sum_{t=1}^T \rbrm[\Big]{{
+        u(x^*,y^*)-u(x^*,y!t)+u(x!t,y!t)-u(x!t,y^*)}}
+        \bigg].
+\end{align*}
+Each summand in the RHS is equal to $0$ when $y!t=y^*$, and bounded by $4$ otherwise, so the entire expectation is bounded as $\EE\sbrm[\big]{
+        \sum_{t=1}^T \anglem[\big]{\DeltaR,p!t}
+        } - \ER_T(x^*) \leq 4C$.
+Next, we apply the following key external regret bound
+of Tsallis-INF (see e.g.,~\citealp[Theorem 1]{ito2025instancedependent}):
+\begin{align*}
+    \ER_T(x^*) 
+    \leq \ER_T 
+    & \leq 19 \EE\sbrm[\Bigg]{
+        \sum_{t=1}^T \frac{1}{\sqrt{t}}
+        \sum_{x\neq x^*} \sqrt{p!t_x}
+        }.
+\end{align*}
+This is further bounded by Cauchy-Schwarz as
+\begin{align*}
+    \ER_T(x^*) & \leq 19 \EE\sbrm[\Bigg]{
+        \sum_{t=1}^T
+        \sum_{x\neq x^*} \sqrt{\frac{1}{t\DeltaR_x} \DeltaR_x p!t_x}
+    } 
+    \leq 19 \EE\sbrm[\Bigg]{\sqrt{
+        \rbrm[\Bigg]{\sum_{t=1}^T
+        \sum_{x\neq x^*} \frac{1}{t\DeltaR_x}} \rbrm[\Bigg]{\sum_{t=1}^T
+        \sum_{x\neq x^*} \DeltaR_x p!t_x}
+        }
+    } \\
+    & \leq 19 \EE\sbrm[\Bigg]{\sqrt{
+        \sum_{x\neq x^*} \frac{H_T}{\DeltaR_x}
+        \sum_{t=1}^T \anglem[\big]{\DeltaR, p!t}
+        }
+    }
+    \leq 19 \EE\sbrm[\Bigg]{\sqrt{
+        \sum_{x\neq x^*} \frac{H_T}{\DeltaR_x}
+        \rbrm[\big]{\ER_T(x^*)+4C}
+        }
+    } \\
+    & \leq 361 \sum_{x\neq x^*} \frac{H_T}{\DeltaR_x} + 38 \sqrt{C \sum_{x\neq x^*} \frac{H_T}{\DeltaR_x}},
+\end{align*}
+where $H_T=\sum_{t=1}^T \frac{1}{t} \leq 1+ \log T$ is the sum of a harmonic series, and the last step is a standard self-bounding argument and can be shown with
+elementary algebra (\Cref{lem:self-bound}).
+Combining this with \eqref{eq:er-nr-difference}, we can bound $\psmr_T$ as follows:
+\begin{align*}
+    \psmr_T \leq \ER_T(x^*) - C \DCmin \leq 361 \sum_{x\neq x^*} \frac{H_T}{\DeltaR_x} + 38 \sqrt{C \sum_{x\neq x^*} \frac{H_T}{\DeltaR_x}} - C \DCmin.
+\end{align*}
+Another application of \Cref{lem:sqrt-func} finally eliminates $C$ and proves our desired bound in the strict PSNE case,\footnote{Throughout this paper, no attempts are made to optimize global constants.}
+\let\jmlrQED\relax %
+\begin{align*}
+     \psmr_T \leq 361 \rbrm[\Big]{1+ \frac{1}{\DCmin}} \sum_{x\neq x^*} \frac{H_T}{\DeltaR_x} \leq 361 \rbrm[\Big]{1+ \frac{1}{\DCmin}} \sum_{x\neq x^*} \frac{1 + \log T}{\DeltaR_x}.\mqed
+\end{align*}
+\end{proof}
+
+
+
+From the proof of \Cref{thm:tsallis}, it is clear that the $\order\rbrm[\big]{\frac{m_x}{\DeltaMix}}$ instance-dependent bound in fact holds for any algorithms with a worst-case $\order(\sqrt{m_x T})$ external regret bound.
+Also, for the case when a non-strict PSNE exists, $\psmr_T=\Omega(\sqrt{T})$ is in fact unavoidable; see \Cref{rem:sqrt-t-lb} below.
+
+There is no prior work we can directly compare our bounds to for this uninformed setting.
+However, since our results obviously also apply to the easier informed setting, which~\citet{maiti2025limitations} studied, we make the following comparisons to their bound.
+
+
+As mentioned, \citet{maiti2025limitations} only considered a $2\times 2$ zero-sum game $A=\rbrm[\Big]{\begin{matrix}a & b \\ c & d\end{matrix}}$ with a unique NE,
+and they achieved $\NR_T = \order\rbrm[\big]{\frac{\log T}{\DeltaEntry^3}+\frac{\log^2 T}{\DeltaEntry^2}}$ for another game-dependent constant $\DeltaEntry=\min\{|a-b|,|a-c|,|b-d|,|c-d|\}$.
+Besides the fact that our results hold without the uniqueness assumption and that a worst-case guarantee  $\order(\sqrt{T})$ always holds, our bounds are also better in the following sense:
+\begin{itemize}[itemsep=2pt,topsep=2pt]
+    \item When the unique NE is pure, $\psmr_T$ is equal to $\NR_T$, and since $\DCmin\geq \DeltaEntry$ and $\DeltaR_x\geq \DeltaEntry$, our bound $\frac{1}{\DCmin} \sum_{x\neq x^*} \frac{\log T}{\DeltaR_x}$ is at most $\frac{\log T}{\DeltaEntry^2}$, strictly improving upon theirs.
+    \item When the unique NE is mixed, our $\psmr_T$ metric is weaker than their $\NR_T$, but at the same time, our bound is also strictly better since $\frac{m_x}{\DeltaMix}\leq\frac{8}{\DeltaEntry^2}$ by the fact $\DeltaMix \geq \frac{\DeltaEntry^2}{4}$ from \Cref{lem:delta-comparison}.
+\end{itemize}
+
+
+\subsection{Lower Bound}\label{h2:uninformed-lb}
+
+
+
+
+In the case when a strict PSNE exists, \citet{ito2025instancedependent} proved that Tsallis-INF enjoys $\ER_T=\order\rbrm[\big]{(\sum_x \frac{1}{\DeltaR_x}+\sum_y \frac{1}{\DeltaC_y})\log T}$ in the self-play setting.
+While not directly comparable to our setting, it naturally makes one wonder whether our bound $\order\rbrm[\big]{\frac{1}{\DCmin} \sum_{x\neq x^*} \frac{\log T}{\DeltaR_x}}$ is improvable.
+Indeed, their dependency on the gap parameters is of order $\frac{1}{\DRmin}+\frac{1}{\DCmin}$, thus strictly better than ours, which is of order $\frac{1}{\DRmin\DCmin}$.
+It turns out that such $\frac{1}{\DRmin\DCmin}$ dependency is unavoidable in our setting, meaning that uninformed adversarial learning in games is inherently more difficult than self-play. This is summarized in the following theorem.
+
+
+
+\begin{theorem}\label{thm:uninformed-lb}
+    For small enough $\DRmin, \DCmin$, large enough $T$, and any uninformed learner, there exist an adversary and a game $u(\cdot, \cdot)$ with $m_x=m_y=2$ and a strict PSNE, such that the learner's PSMR is at least $\Omega\rbrm[\big]{\min\cbrm[\big]{\frac{1}{\DRmin\DCmin},\sqrt{T}}}$.
+\end{theorem}
+
+In the following, we will show a simplified, informal argument for the $\Omega(\frac{1}{\DRmin\DCmin})$ lower bound, using big-$\order$ to hide constant factors. A full proof with a careful analysis of constant factors is deferred to \Cref{h1a:proof-lower-bound}. \\
+
+\begin{proof}(sketch).
+    In this sketch, we focus on the more interesting case when $\frac{1}{\DRmin\DCmin}=\order(\sqrt T)$ and show that $\psmr_T = \Omega\rbrm[\big]{\frac{1}{\DRmin\DCmin}}$.
+    Consider a game matrix
+    $
+        A=\rbrm[\bigg]{\begin{matrix}
+            0 &        \DeltaC \\ 
+            -\DeltaR & K - \DeltaR 
+          \end{matrix}},
+    $
+    parameterized by $K$, $\DeltaR$, and $\DeltaC$. We assume that all entries are in $[-1, +1]$ and $\DeltaR, \DeltaC>0$. We know that $A$ admits a strict PSNE $(x^*,y^*)=(e_1,e_1)$ with a value of $v^*=0$. The two gap variables $\DeltaR,\DeltaC$ are exactly $\DRmin$ and $\DCmin$ of $A$. We set the noise model to be binary on $\{\pm 1\}$, i.e., at round $t$, the reward comes from a two-point distribution so that $r_t\in \{-1,+1\}$ and $\EE[r_t]=u(x!t,y!t)$.
+    
+    The adversary is parameterized by $\eps\in (0,1)$ and $T'\in \bbN_+$, $T'\leq T$, where he plays a sample from the distribution $y!t\sim q!t=(1-\eps,\eps)$ for $t\leq T'$ and $y!t=y^*$ for $t>T'$. Then, for $t\leq T'$, we have
+    $
+        A q!t = \rbrm[\bigg]{\begin{matrix}
+            \eps \DeltaC\\
+            K \eps - \DeltaR
+        \end{matrix}}.
+    $
+
+    Let $\delta=\eps\DeltaC-K \eps+\DeltaR$. In each round up to $t=T'$, the KL divergence between the reward distributions of the two actions of the learner can be bounded by $\order(\delta^2)$ (see \Cref{lem:kl-bernoulli}). Using standard arguments (see Chapter 15.1 of \citet{lattimore2020bandit}), the total KL divergence between the two arms at the end of the $T'$-th round is bounded by $\delta^2T'$. 
+
+    We let $K=1$ and $\eps=\DeltaR-12\DeltaR\DeltaC$, and thus $\delta=\DeltaR\DeltaC(13-12\DeltaC)=\Theta(\DeltaR\DeltaC)$. By choosing some $T'\leq T$ such that $T'=\Theta\rbrm[\big]{\frac{1}{(\DeltaR\DeltaC)^2}}$ and $\delta^2 T'\leq 1$, which is possible because $\frac{1}{\DeltaR\DeltaC}=\order(\sqrt T)$, we can see that the total KL divergence is $\order(1)$.
+    This means that the learner cannot distinguish between the two actions beyond a constant error probability, and that the worse action is selected at least $\frac1{12}$ of the time. In this case, the accumulated PSMR up to time $T'$ is at least
+    \begin{align*}
+        \psmr_{T'}&\geq T'\rbrm[\Big]{\frac{1}{12} (\DeltaR-K\eps)-\frac{11}{12} \eps\DeltaC} \yestag\label{eq:psmr-lb-main}\\
+        &\geq \frac{T'}{12}\DeltaR\DeltaC=\Theta\rbrm[\big]{\frac{1}{\DeltaR\DeltaC}}.
+    \end{align*}
+
+    Finally, note that for $t\in [T'+1,T]$, the adversary plays the PSNE action and thus the PSMR can only increase, proving that $\psmr_T$ is indeed also of order $\frac{1}{\DRmin\DCmin}$.
+\end{proof}
+
+\begin{remark}\label{rem:sqrt-t-lb}
+    In the construction above, we can let $\DeltaR=\DeltaC=0$, $K=-1$, and let the adversary play $(1-\eps, \eps)$ with $\eps=\frac{1}{\sqrt T}$ for all $T'=T$ rounds. We can verify that the accumulated KL divergence is $\order(1)$ as well. 
+    This matrix, $\rbrm[\Big]{\,\begin{matrix}
+        0 & 0 \\ 
+        0 & -1
+        \end{matrix}}$,
+    has a non-strict PSNE, meaning that $\DRmin=\DCmin=\DeltaMix=0$, and \eqref{eq:psmr-lb-main} shows that $\psmr_T = \Omega(\sqrt{T})$.
+    This shows that, beyond the two cases considered in \Cref{thm:tsallis} where we prove game-dependent logarithmic PSMR, any algorithm must suffer $\psmr_T=\Omega(\sqrt T)$.
+\end{remark}
+
+
+\section{Informed Learning in Normal-Form Games}\label{h1:pure-ucb}
+
+The previous section demonstrates a gap between adversarial and self-play learning in games.
+To improve performance in the adversarial bandit setting, we turn to the informed setting and grant the algorithm access to extra side information, the opponent's action $y!t$. 
+Note that previous work~\citep{odonoghue2021matrix,maiti2025limitations} has implicitly assumed this feedback model.
+
+
+\begin{algorithm}[t]
+\caption{\PureUCB}\label{alg:pure-ucb}
+\begin{algorithmic}[1]
+\Require A high-probability parameter $\delta$.
+\State Initialize the accumulated rewards $R!0(x,y)=0$, and the number of pulls $N!0(x,y)=0$.
+\For{$t=1,2,\dots$}
+  \State Define the UCB for any pair $(x,y)$ as $U!{t}(x, y)\gets 1$ if $N!{t-1}(x,y)=0$, or else\\
+  {$U!{t}(x, y)\gets
+    \frac{R!{t-1}(x,y)}{N!{t-1}(x,y)}+\sqrt{\frac{4\log (1/\delta)+2\log (1+N!{t-1}(x,y))}{N!{t-1}(x,y)}}
+  $} if $N!{t-1}(x,y)>0$. \label{code:ucb-confidence}
+  \State Let $x!t=\argmax_{x\in \calX}\min_{y\in \calY} U!{t}(x,y)$ with ties broken arbitrarily.\label{code:ucb-maximin}
+  \State Play $x!t$. Observe the adversarial action $y!t$ and the reward $r_t$.
+  \State Update $N!t(x!t,y!t)\gets N!{t-1}(x!t,y!t)+1$. \label{code:ucb-n}
+  \State Update $R!t(x!t,y!t)\gets R!{t-1}(x!t,y!t)+r_t$. \label{code:ucb-sum}
+  \State All other entries of $N!t$ and $R!t$ are the same as $N!{t-1}$ and $R!{t-1}$.
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+With such extra information, it becomes natural to directly build estimates on the game matrix $A$ and apply the optimism principle as in the standard UCB algorithm~\citep{auer2002using}.
+This leads to our proposed algorithm \PureUCB{} (\Cref{alg:pure-ucb}). 
+Specifically, at the beginning of each round $t$, it constructs an estimate $U!t(x,y)$ for every action pair $(x,y)$, representing an upper confidence bound of the utility $u(x,y)$. %
+The algorithm then simply plays the optimistic pure maximin strategy $\argmax_{x\in \calX}\min_{y\in \calY} U!{t}(x,y)$ in round $t$, that is, the action that maximizes the worst-case optimistic reward.
+
+We point out that  \PureUCB{} is very close to Algorithm~1 of \citet{odonoghue2021matrix},
+with the only difference being that their algorithm plays the optimistic \textit{mixed} maximin strategy $\argmax_{p\in \simplex^{m_x}}\min_{y\in \calY} U!{t}(p,y)$ instead.
+While they only prove that their algorithm achieves
+$\NR=\tilde{\order}(\sqrt{m_x m_y T})$ (which is in fact even worse than using a standard adversarial bandit algorithm), 
+we prove the following game-dependent logarithmic PSMR for our slightly different algorithm \PureUCB{}, using yet another sub-optimality gap parameter: $\Delta_{xy}=\vStar-u(x,y)$ for all $(x,y)\in \calX\times \calY$.
+(Note that $\Delta_{xy}$ can be negative.)
+
+\begin{theorem}\label{thm:pureucb}
+    For any game $u$, \PureUCB{} with $\delta=\frac{1}{T}$ simultaneously achieves an instance-dependent regret of $\psmr_T=\order\rbrm[\big]{\sum_{x, y : \Delta_{xy} > 0} \rbrm[\big]{\Delta_{xy}+\frac{1}{\Delta_{xy}}\log T}}$ and a worst-case bound of $\psmr_T=\order\rbrm[\big]{\sqrt{m_x m_y T \log T}}$, against any adaptive adversary.
+\end{theorem}
+
+The proof mostly extends standard UCB proofs and argues that each $(x,y)$ pair can be encountered at most  $\tilde{\order}\rbrm{1/\Delta_{xy}^2}$ if its gap $\Delta_{xy}>0$; see \Cref{h1a:proof-pureucb} for a rigorous proof.
+Note that unlike \Cref{thm:tsallis} where different cases were discussed, the results of \Cref{thm:pureucb} hold always (regardless whether a PSNE exists or not).
+The instance-dependent bounds in these two theorems are generally incomparable (setting aside the fact that their feedback models are also different):
+\begin{itemize}[itemsep=2pt,topsep=2pt]
+    \item There are games where Tsallis-INF achieves a much better bound. For example, consider $A=\rbrm[\Big]{\begin{matrix}
+        0 & 1 \\ 
+        -1 & -\eps
+        \end{matrix}}$ for a small $\eps > 0$,
+        in which case Tsallis-INF achieves $\psmr_T=\order(\log T)$ since $\DRmin=\DCmin=1$, 
+        while \PureUCB{} achieves $\order(\frac{\log T}{\eps})$ since $\Delta_{2,2} = \eps$.
+    %
+     
+     \item Conversely, there are also games where \PureUCB{} achieves a much better bound. For example, consider $A=\rbrm[\Big]{\begin{matrix}
+    0 & \eps \\ 
+    -1 & 1
+    \end{matrix}\,}$ for a small $\eps > 0$,
+    in which case Tsallis-INF achieves $\psmr_T=\order(\frac{\log T}{\eps})$ since $\DRmin=\eps$ and $\DCmin=1$, 
+    while \PureUCB{} achieves $\order(\log T)$ since the only non-negative gap is $\Delta_{2,1} = 1$.
+\end{itemize}
+
+Similarly, using the same examples, we see that \Cref{thm:pureucb} and the result of~\citet{maiti2025limitations} are also directly incomparable:
+in the first example, we have $\DeltaEntry=1-\eps$ and thus \citet{maiti2025limitations} achieve $\psmr_T=\NR_T=\order(\log^3 T)$, better than \PureUCB{}'s bound $\order(\frac{\log T}{\eps})$;
+in the second example, we have $\DeltaEntry=\eps$ and thus \citet{maiti2025limitations} achieve $\psmr_T=\NR_T=\order\rbrm[\big]{\frac{\log T}{\eps^3}+\frac{\log^2 T}{\eps^2}}$, much worse than \PureUCB's bound $\order(\log T)$. %
+
+ 
+
+
+

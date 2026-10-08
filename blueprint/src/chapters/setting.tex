@@ -1,0 +1,135 @@
+\chapter{Setting (Section 3)}
+\label{chap:setting}
+
+\begin{definition}[Zero-sum game, equilibria]
+  \label{def:game}
+  \lean{Learning.ZeroSumGame.IsPSNE, Learning.ZeroSumGame.IsStrictPSNE,
+    Learning.ZeroSumGame.HasPSNE, Learning.ZeroSumGame.mixedUtility, Learning.ZeroSumGame.IsMSNE}
+  \leanok
+  A zero-sum game on finite action sets $\X$, $\Y$ is a utility $u : \X \times \Y \to \R$ (the
+  learner maximizes). A pair $(x^\star, y^\star)$ is a \emph{pure-strategy Nash equilibrium}
+  (PSNE) if $u(x, y^\star) \le u(x^\star, y^\star) \le u(x^\star, y)$ for all $x$, $y$, and a
+  \emph{strict} PSNE if the inequalities are strict for $x \ne x^\star$, $y \ne y^\star$. For
+  distributions $p$, $q$, $u(p, q) = \sum_{x, y} p_x q_y u(x, y)$; $(p^\star, q^\star)$ is a
+  mixed-strategy Nash equilibrium (MSNE) if $u(p, q^\star) \le u(p^\star, q^\star) \le u(p^\star, q)$
+  for all $p$, $q$.
+\end{definition}
+
+\begin{definition}[Values and gaps]
+  \label{def:values}
+  \lean{Learning.ZeroSumGame.pureMaximin, Learning.ZeroSumGame.nashValue,
+    Learning.ZeroSumGame.mixGap, Learning.ZeroSumGame.rowGap, Learning.ZeroSumGame.colGap,
+    Learning.ZeroSumGame.rowGapMin, Learning.ZeroSumGame.colGapMin, Learning.ZeroSumGame.pairGap,
+    Ito2026Adversarial.IsGapThreshold, Ito2026Adversarial.entryGap}
+  \leanok
+  \uses{def:game}
+  The pure-strategy maximin value is $\vstar = \max_x \min_y u(x, y)$ and the Nash value is
+  $\vnash = \max_p \min_q u(p, q)$; $\Dmix = \vnash - \vstar \ge 0$. For a strict PSNE
+  $(x^\star, y^\star)$: $\DR_x = u(x^\star, y^\star) - u(x, y^\star)$,
+  $\DC_y = u(x^\star, y) - u(x^\star, y^\star)$, $\DRmin = \min_{x \ne x^\star} \DR_x$,
+  $\DCmin = \min_{y \ne y^\star} \DC_y$ (in Lean, infima over the other actions, $0$ when there is
+  none). $\Delta_{xy} = \vstar - u(x, y)$; $\Dlin > 0$ is a gap threshold if
+  $\Delta_{xy} \in (-\infty, 0] \cup [\Dlin, \infty)$ for all $(x, y)$. For a $2 \times 2$ game
+  $\begin{pmatrix} a & b \\ c & d \end{pmatrix}$,
+  $\DM = \min\{\abs{a - b}, \abs{a - c}, \abs{b - d}, \abs{c - d}\}$.
+\end{definition}
+
+\begin{definition}[Repeated game with bandit feedback]
+  \label{def:repeated_game}
+  \lean{Learning.RepeatedGame.Player, Learning.RepeatedGame.Player.ofUninformed,
+    Learning.RepeatedGame.RewardKernel, Learning.RepeatedGame.RewardKernel.HasMean,
+    Learning.RepeatedGame.RewardKernel.RewardsIn, Learning.RepeatedGame.gameEnv,
+    Learning.RepeatedGame.Hist.swapPlayers}
+  \leanok
+  \uses{def:game}
+  At each round $t$ the learner plays $x_t \in \X$ and the adversary simultaneously plays
+  $y_t \in \Y$, as functions (possibly randomized) of the past; then the learner receives a reward
+  $r_t$ with conditional mean $u(x_t, y_t)$ given the past and the two actions, with values in
+  $[-1, 1]$. An \emph{informed} learner observes $(y_t, r_t)$ (an LML algorithm with actions $\X$
+  and feedback $\Y \times \R$), an \emph{uninformed} learner only $r_t$ (an LML algorithm with
+  feedback $\R$, lifted by ignoring $y_t$). The adversary is an informed player of the game with
+  the roles exchanged, acting on the history seen from its side: it sees the past actions and
+  rewards of the learner, but not $x_t$. The reward is drawn from a reward kernel (from the past
+  rounds and $(x_t, y_t)$ to $\R$). The environment of the learner is \texttt{gameEnv opp R}.
+\end{definition}
+
+\begin{definition}[Regrets]
+  \label{def:regrets}
+  \lean{Learning.RepeatedGame.psmr, Learning.RepeatedGame.externalRegretAgainst,
+    Learning.RepeatedGame.externalRegret, Learning.RepeatedGame.nashRegret,
+    Learning.RepeatedGame.pairCount, Learning.RepeatedGame.pairSum}
+  \leanok
+  \uses{def:values, def:repeated_game}
+  For a run with actions $(x_t, y_t)$: $\PSMR_T = \E[\sum_{t < T} (\vstar - u(x_t, y_t))]$,
+  $\ER_T(x) = \E[\sum_{t < T} (u(x, y_t) - u(x_t, y_t))]$, $\ER_T = \max_x \ER_T(x)$,
+  $\NR_T = \E[\sum_{t < T} (\vnash - u(x_t, y_t))]$. $N_t(x, y)$ and $R_t(x, y)$ are the number of
+  rounds among the first $t$ in which $(x, y)$ was played and the sum of their rewards.
+\end{definition}
+
+\begin{definition}[Tsallis-INF, Algorithm 1]
+  \label{def:tsallis_inf}
+  \lean{Bandits.tsallisINF, Ito2026Adversarial.tsallisINFHalf, Learning.tsallisEntropy,
+    Learning.ftrlSimplex}
+  \leanok
+  \uses{def:repeated_game}
+  With the Tsallis entropy $\varphi_\alpha(p) = \frac1\alpha \sum_i (p_i^\alpha - p_i)$, a learning
+  rate $\eta_t$ and the cumulative estimate $G_t = \sum_{s < t} g_s$: play $x_t \sim p_t$ with
+  $p_t = \argmax_{p \in \simplex} \langle p, G_t\rangle + \varphi_\alpha(p)/\eta_t$, and set
+  $g_t(x) = 1 - (1 - r_t)\indic\{x_t = x\}/p_t(x)$. Theorem~\ref{thm:tsallis} uses $\alpha = 1/2$
+  and $\eta_t = 1/(2\sqrt t)$ ($t \ge 1$; in Lean rounds are numbered from $0$).
+\end{definition}
+
+\begin{definition}[Maximin-UCB, Algorithm 2]
+  \label{def:maximin_ucb}
+  \lean{Ito2026Adversarial.ucbIndex, Ito2026Adversarial.ucbAction, Ito2026Adversarial.maximinUCB}
+  \leanok
+  \uses{def:regrets}
+  $U_t(x, y) = 1$ if $N_{t-1}(x, y) = 0$, and otherwise
+  $U_t(x, y) = R_{t-1}(x, y)/N_{t-1}(x, y) + \sqrt{(4 \log(1/\delta) + 2 \log(1 + N_{t-1}(x, y)))
+  / N_{t-1}(x, y)}$; play $x_t = \argmax_x \min_y U_t(x, y)$ (fixed tie-breaking).
+\end{definition}
+
+\begin{definition}[Bilinear games]
+  \label{def:bilinear}
+  \lean{Ito2026Adversarial.bilinearUtility, Ito2026Adversarial.bilinearGame,
+    Ito2026Adversarial.IsBilinearGame, Ito2026Adversarial.pairFeature, Ito2026Adversarial.vecMatrix,
+    Ito2026Adversarial.designOf, Ito2026Adversarial.HasVarianceRatio}
+  \leanok
+  \uses{def:game}
+  Finite action sets with features $\phi(x) \in \R^{d_x}$, $\psi(y) \in \R^{d_y}$ of norm at most
+  $1$ spanning the spaces, and $u(x, y) = \langle \phi(x), A \psi(y)\rangle$ with $\norm{A}_2 \le 1$.
+  $u(x, y) = \langle \vect(A), \vect(x y^\top)\rangle$. $S(p) = \E_{x \sim p}[x x^\top]$; an
+  exploration distribution $p_0$ has variance ratio $c$ if $S(p_0)$ is positive definite and
+  $\langle x, S(p_0)^{-1} x\rangle \le c\, d_x$ for all $x$.
+\end{definition}
+
+\begin{definition}[Tsallis-FTRL-SPM, Algorithm 3]
+  \label{def:tsallis_spm}
+  \lean{Ito2026Adversarial.hybridEntropy, Ito2026Adversarial.spmHat, Ito2026Adversarial.zCoef,
+    Ito2026Adversarial.spmDist, Ito2026Adversarial.spmEstimate, Ito2026Adversarial.spmUpdate,
+    Ito2026Adversarial.tsallisSPM, Ito2026Adversarial.spmAlpha, Ito2026Adversarial.spmBetaBar,
+    Ito2026Adversarial.tsallisSPMPaper}
+  \leanok
+  \uses{def:bilinear, def:tsallis_inf}
+  $\hat p_t = \argmax_p \langle p, G_t\rangle + \beta_t \varphi_\alpha(p) + \bar\beta
+  \varphi_{1-\alpha}(p)$, $z_t = d_x \min\{\norm{\hat p_t}_\infty, 1 - \norm{\hat p_t}_\infty\}^{1 -
+  \alpha}/(1 - \alpha)$, $\gamma_t = 4 c z_t/\beta_t$, $p_t = (1 - \gamma_t)\hat p_t + \gamma_t
+  p_0$, $g_t(x) = r_t \langle x_t, S(p_t)^{-1} x\rangle$,
+  $\beta_{t+1} = \beta_t + z_t/(\beta_t \varphi_\alpha(\hat p_t))$. Theorem~\ref{thm:tsallis_bilinear}
+  uses $\alpha = 1 - 1/(4 \log m_x)$, $\beta_1 = 8 c d_x/(1 - \alpha)$,
+  $\bar\beta = 32 d_x/((1 - \alpha)^2 \beta_1)$.
+\end{definition}
+
+\begin{definition}[Maximin-LinUCB, Algorithm 4]
+  \label{def:maximin_linucb}
+  \lean{Ito2026Adversarial.linUpdate, Ito2026Adversarial.linIndex, Ito2026Adversarial.linAction,
+    Ito2026Adversarial.maximinLinUCB, Ito2026Adversarial.linRadius, Ito2026Adversarial.linState,
+    Bandits.Linear.ridgeUpdate, Bandits.Linear.ridgeEstimate}
+  \leanok
+  \uses{def:bilinear}
+  With $V_0 = \lambda I$, $b_0 = 0$, $a_t = \vect(x_t y_t^\top)$, $V_t = V_{t-1} + a_t a_t^\top$,
+  $b_t = b_{t-1} + r_t a_t$, $\hat A_t = \operatorname{mat}(V_{t-1}^{-1} b_{t-1})$:
+  $U_t(x, y) = \langle x, \hat A_t y\rangle + \beta_t \norm{\vect(x y^\top)}_{V_{t-1}^{-1}}$ and
+  $x_t = \argmax_x \min_y U_t(x, y)$;
+  $\beta_t = \sqrt{\lambda d} + \sqrt{2 \log(1/\delta) + d \log(1 + t/(d \lambda))}$, $d = d_x d_y$.
+\end{definition}

@@ -1,0 +1,16 @@
+{
+    "challenge_module": "Challenge_probReal_forall_abs_sub_div_le_ge",
+    "solution_module": "Solution",
+    "theorem_names": [
+        "Ito2026Adversarial.probReal_forall_abs_sub_div_le_ge",
+        "Learning.RepeatedGame.gameEnv._proof_1",
+        "Learning.RepeatedGame.gameEnv._proof_2",
+        "Learning.RepeatedGame.gameEnv._proof_3",
+        "Learning.RepeatedGame.gameEnv._proof_4"
+    ],
+    "permitted_axioms": [
+        "propext",
+        "Quot.sound",
+        "Classical.choice"
+    ]
+}

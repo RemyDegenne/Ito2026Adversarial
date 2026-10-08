@@ -1,0 +1,154 @@
+\section{Proof of \Cref{thm:tsallis-bilinear}}\label{h1a:proof-tsallis-bilinear}
+
+In this section, we provide a full proof of \Cref{thm:tsallis-bilinear}.
+
+We first specify the exploration distribution $\pzero$ used in the algorithm. To recall, the variance function $S(\cdot)$ is defined as
+\begin{equation*}
+    S(p)\defeq \EE_{x\sim p}[xx^\trans].
+\end{equation*}
+Given a set $\calX$, there exists a distribution $p\in \simplex^\calX$ such that $\inner{x}{S(p)^{-1}x}\leq d_x$ for every $x\in \calX$; this is a result known as the Kiefer-Wolfowitz theorem \citep{kiefer1960equivalence}. We choose a $\pzero\in \simplex^\calX$ such that
+\begin{equation}
+    \forall x\in \calX, \inner{x}{S(\pzero)^{-1}x}\leq c d_x
+\end{equation}
+for some constant $c=\order(1)$.
+
+
+
+
+As in the proof of \Cref{thm:tsallis}, we use $C=\EE\sbrm[\big]{\sum_{t=1}^T \one[y!t \neq y^*]}$ to denote the expected number of times the adversary deviates from playing $y^*$.
+Then, the external regret compared against~$x^*$ is lower bounded as
+\begin{align}
+    \ER_T(x^*)
+    &=
+    \EE\left[ \sum_{t=1}^T \left( u(x^*,y!t) - u(x!t,y!t) \right) \right]
+    \nonumber \\ 
+    &=
+    \EE\Bigg[ 
+        \sum_{t=1}^T \left( u(x^*,y^*) - u(x!t,y^*) \right) 
+        +
+        \sum_{t=1}^T \left( u(x^*,y!t) - u(x^*,y^*) \right) 
+        \nonumber \\ 
+        &\qquad\qquad\qquad+
+        \sum_{t=1}^T \left( u(x!t,y^*) - u(x!t,y!t) \right) 
+    \Bigg]
+    \nonumber \\
+    &
+    =
+    \EE\left[ 
+        \sum_{t=1}^T \langle p_x!t, \DeltaR_{x} \rangle
+        +
+        \sum_{t=1}^T \langle p_y!t, \DeltaC_{y} \rangle
+        -
+        \sum_{t=1}^T \left( u(x!t,y^*) - u(x!t,y!t) \right) 
+    \right]
+    \nonumber \\ 
+    &
+    \geq
+    \EE\left[ 
+        \sum_{t=1}^T \langle p_x!t, \DeltaR_{x} \rangle
+        -
+        2 C
+    \right]
+    ,
+    \label{eq:ereg_lower_bilinear}
+\end{align}
+where the last inequality follows from the definition of $C$ and the assumption that $\|x\|_2 \leq 1$ and $\|y\|_2 \leq 1$ for any $x \in \mathcal{X}$ and $y \in \mathcal{Y}$.
+
+We then upper bound the external regret by using the upper bound of \TsallisSPM{} \citep{ito2024adaptive}\footnote{The arXiv and published versions of \citet{ito2024adaptive} have different numberings for their theorems and equations. We use the published version to avoid confusion.} instead of using the Tsallis-INF upper bound.
+From  Eq.~(26) and the choice of parameters in Section 4.3 (see discussion around Eqs.~(35) and (36)) in \citet{ito2024adaptive}, 
+the external regret is upper bounded as
+\begin{align}
+    &
+    \ER_T(x^*)
+    \nonumber \\ 
+    &\leq
+    O\rbr{
+    \EE\sbr{
+        \min\left\{
+        \sqrt{\frac{d_x m_x^{1-\alpha} T}{\alpha(1-\alpha)}}
+        ,\,
+        \sqrt{ 
+            \frac{d_x}{\alpha(1-\alpha)} \frac{m_x^{1-\alpha}}{\DRmin} 
+            \sum_{t=1}^T \langle p_x!t, \DeltaR_{x} \rangle
+            \log T
+        }
+        \right\}
+    }
+    \!+\! m_x \log m_x
+    }
+    .
+    \label{eq:regret_alpha_tsallis}
+\end{align}
+%
+
+The first $\min$ in \eqref{eq:regret_alpha_tsallis} with $\alpha=1-\frac{1}{4\log m_x}$ yields
+$\ER_T(x^*) \leq O(\sqrt{T d_x \log m_x} + m_x \log m_x)$.
+Hence, we obtain
+$\psmr_T \leq \ER_T(x^*) \leq O(\sqrt{T d_x \log m_x} + m_x \log m_x)$.
+If the game has no PSNEs, similar to \Cref{thm:tsallis}, the $\DeltaMix$-dependent bound is a direct implication of this worst-case bound, the fact that $\psmr_T\leq \ER_T-\DeltaMix T$, and \Cref{lem:sqrt-func}.
+
+We next focus on the games with a strict PSNE.
+From the second branch in the minimum in \eqref{eq:regret_alpha_tsallis} combined with Jensen's inequality and \eqref{eq:ereg_lower_bilinear}, we also have
+\begin{equation*}
+    \ER_T(x^*)
+    \leq
+    O\rbr{
+    \sqrt{ 
+        \frac{d_x}{\alpha(1-\alpha)} \frac{m_x^{1-\alpha}}{\DRmin} 
+        \left( \ER_T(x^*) + 2 C \right)
+        \log T
+    }
+    + m_x \log m_x
+    }
+    .
+\end{equation*}
+Plugging $\alpha=1-\frac{1}{4\log m_x}$ in the last inequality and applying \Cref{lem:self-bound},
+we obtain
+\begin{equation}
+    \ER_T(x^*)
+    \leq
+    O\left(
+    \frac{d_x \log m_x \log T}{\DRmin}
+    +
+    \sqrt{\frac{C d_x \log m_x \log T}{\DRmin}}
+    +
+    m_x \log m_x
+    \right)
+    .
+    \nonumber
+\end{equation}
+Since we have $\psmr_T \leq \ER_T(x^*) - \DCmin C$ (from the same analysis as in \eqref{eq:er-nr-difference}), combining this with the last inequality yields
+\begin{align*}
+    \psmr_T 
+    &
+    \leq
+    \ER_T(x^*) - \DCmin C
+    \nonumber \\
+    &\leq
+    O\left(
+    \frac{d_x \log m_x \log T}{\DRmin}
+    +
+    \sqrt{\frac{C d_x \log m_x \log T}{\DRmin}}
+    +
+    m_x \log m_x
+    \right)
+    - 
+    \DCmin C
+    \\
+    &=
+    O\left(
+    \frac{d_x \log m_x \log T}{\DRmin}
+    +
+    \frac{d_x \log m_x \log T}{\DRmin \DCmin}
+    +
+    m_x \log m_x
+    \right)
+    ,
+\end{align*}
+where in the last inequality we considered the worst-case with respect to $C$ (recall \Cref{lem:sqrt-func}).
+This completes the proof of \Cref{thm:tsallis-bilinear}.
+%
+
+
+
+

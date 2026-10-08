@@ -1,0 +1,109 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+# formalization.yaml (v0.4): repo-root metadata for formalization projects.
+# See https://github.com/mathlib-initiative/formalization.yaml for the fields.
+
+version: "v0.4"
+
+project:
+  name: "Ito2026Adversarial"
+  description: >-
+    A Lean 4 / Mathlib formalization of "Adversarial Learning in Games with Bandit Feedback:
+    Logarithmic Pure-Strategy Maximin Regret" (Ito, Luo, Maiti, Tsuchiya, Wu, COLT 2026): a
+    learner repeatedly plays a zero-sum game against an adaptive adversary with bandit feedback,
+    and the pure-strategy maximin regret PSMR_T = E[sum_t (v* - u(x_t, y_t))] of Tsallis-INF
+    (uninformed feedback) and Maximin-UCB (informed feedback) is game-dependent and logarithmic,
+    with a matching dependence on the gaps in a lower bound; the results extend to bilinear games
+    with Tsallis-FTRL-SPM and Maximin-LinUCB. Learners, adversaries and environments are those of
+    the LML (Lean Machine Learning) library; the regret analyses of Tsallis-INF and
+    Tsallis-FTRL-SPM, the anytime confidence bounds and the confidence ellipsoid of linear
+    bandits, which the paper cites, are formalized in library generality, to be contributed to
+    LML and Mathlib. The development is blueprint-driven and proceeds in two phases: phase 1
+    states the results (this file lists them; their statements are `sorry`-ed challenge
+    statements for leanprover/comparator), phase 2 proves them.
+  authors:
+    - "Rémy Degenne"
+  responsible_maintainers:
+    - "Rémy Degenne"
+  license: "Apache-2.0"
+  # extra keys (tolerated by the schema), kept for convenience:
+  repository: "https://github.com/RemyDegenne/Ito2026Adversarial"
+  blueprint: "https://remydegenne.github.io/Ito2026Adversarial/blueprint/"
+
+# This repository is the substantive formalization, not a packaging or comparison layer.
+repository:
+  role: "substantive-development"
+
+sources:
+  - title: "Adversarial Learning in Games with Bandit Feedback: Logarithmic Pure-Strategy Maximin Regret"
+    authors:
+      - "Shinji Ito"
+      - "Haipeng Luo"
+      - "Arnab Maiti"
+      - "Taira Tsuchiya"
+      - "Yue Wu"
+    id: "COLT 2026; arXiv:2602.06348"
+    type: "conference-paper"
+    location: "Theorems 1, 2, 4, 5, 6, 12 and Lemmas 7-11, 13; see status.scope"
+    relationship: "formalizes"
+    license: ""
+    author_endorsement: "not-contacted"
+    note: >-
+      The LaTeX source of the paper (arXiv 2602.06348) is vendored in this repository under
+      `source/`. The formalization is driven by a blueprint (`blueprint/src/`, written by Claude
+      with the formalizer's review) that decomposes the paper's proofs into small lemmas and
+      plans the proofs of the results the paper cites (regret bounds of Tsallis-INF and
+      Tsallis-FTRL-SPM, self-normalized confidence bounds); the blueprint is a derived artifact
+      of this project, not an independent source. The statements started from the
+      statement-only formalization of the paper in `LMLPapers` (COLT2026/Ito2026Adversarial).
+      The formalizer is not an author of the paper.
+
+related_formalizations: []   # no earlier or parallel formalization with proofs is known
+
+# Online learning, bandits, game theory, concentration.
+classification:
+  arxiv: ["cs.LG", "cs.GT", "stat.ML"]
+  msc2020:
+    - "68T05"   # learning and adaptive systems
+    - "91A05"   # 2-person games
+    - "91A26"   # rationality and learning in game theory
+    - "62L05"   # sequential statistical design
+
+status:
+  scope: >-
+    Phase 1 (statements), 2026-10-08. The results of the paper are stated in Lean, each as a
+    `sorry`-ed theorem (headline results, comparator targets listed in `comparator/targets.txt`),
+    over definitions written in library generality. Namespace `Ito2026Adversarial`, files
+    `Ito2026Adversarial/ILMTW2026/<Result>.lean`; blueprint labels in parentheses.
+
+    Setting (Section 3, `Setting.lean` and the library files `Game/ZeroSum.lean`,
+    `Game/RepeatedGame.lean`): zero-sum games, (strict) pure and mixed Nash equilibria, the
+    values `v*` and `v^Nash` and the gaps; the repeated game with an adaptive adversary (an LML
+    player acting on the history seen from its side), history-dependent reward kernels with
+    conditional mean `u` and rewards in `[-1, 1]`, uninformed and informed learners; PSMR,
+    external and Nash regrets; Algorithms 1-4 (Tsallis-INF, Maximin-UCB, Tsallis-FTRL-SPM,
+    Maximin-LinUCB); bilinear games.
+    Theorem 1 (`exists_psmr_tsallisINFHalf_le`, `thm:tsallis`), Theorem 2
+    (`exists_forall_psmr_ge`, `thm:uninformed_lb`), Theorem 4 (`exists_psmr_maximinUCB_le`,
+    `thm:pureucb`), Theorem 5 (`forall_exists_psmr_tsallisSPMPaper_le`, `thm:tsallis_bilinear`),
+    Theorem 6 (`exists_forall_exists_psmr_maximinLinUCB_le`), Lemmas 7-11
+    (`sqrt_mul_sub_mul_le`, `le_add_sqrt_add_of_le_sqrt_add`, `klDiv_twoPoint_le`,
+    `sq_entryGap_div_four_le_mixGap`, `probReal_forall_abs_sub_div_le_ge`), Theorem 12
+    (`exists_psmr_maximinLinUCB_le`), Lemma 13 (`probReal_forall_sqrt_mahalanobisSq_le_ge`).
+    Not formalized: Remark 3 and the discussion sections.
+
+    Corrections to the paper's statements (`notes/blueprint-outline.md`, section 3): the
+    strict-PSNE bounds of Theorems 1 and 5 are stated in the form their proofs give,
+    `(1 + 1/Δᶜ_min)(1 + log T)` (the paper's form is false in Lean for an adversary with one
+    action, `Δᶜ_min` being then `0`); the no-PSNE bounds of Theorems 1 and 5 assume
+    `Δ^mix > 0`, since a game without PSNE need not have `v^Nash > v*` (counterexample with rows
+    `(0, 0)`, `(1, -1)`, `(-1, 1)`), contrary to the paper's claim; Theorem 4's instance-dependent
+    bound carries the additive term `m_x m_y` of its failure event, which the paper claims to
+    absorb; the variance ratio of Theorem 5 requires a positive definite design matrix; Lemma
+    10 assumes no PSNE instead of a unique equilibrium (it is false for a unique pure one).
+
+    The blueprint (9 chapters) decomposes every proof into labelled lemmas; the plan is in
+    `notes/blueprint-outline.md`. The 12 comparator challenges compile (`lake build Comparator`);
+    the definitions in their closure avoid the numeral `2` that makes auxiliary theorems
+    challenge-gen cannot reproduce (outline, section 6).
+  sorry_count: 12
+  sorry_in_definitions: 0

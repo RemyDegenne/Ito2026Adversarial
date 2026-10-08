@@ -1,0 +1,63 @@
+\section{Proof of \Cref{thm:uninformed-lb}}\label{h1a:proof-lower-bound}
+
+In this section, we provide full mathematical rigor to the informal proof in \Cref{h2:uninformed-lb}.
+
+Consider the games determined by the following two matrices,
+\begin{equation*}
+    A=\begin{pmatrix}
+        0 &        \DeltaC \\ 
+        -\DeltaR & K - \DeltaR 
+      \end{pmatrix},
+    \quad 
+    B=\begin{pmatrix}
+        -\DeltaR & K - \DeltaR \\
+        0 &        \DeltaC \\ 
+      \end{pmatrix},
+\end{equation*}
+parameterized by $K$, $\DeltaR$, and $\DeltaC$. We assume $\DeltaR, \DeltaC \in (0, 1]$ and $K-\DeltaR\in [-1, 1]$. The two gap variables $\DeltaR,\DeltaC$ are exactly $\DRmin$ and $\DCmin$ of our matrices. We set the noise model to be binary on $\{\pm 1\}$, i.e., at round $t$, $\eps_t$ comes from a two-point distribution so that $r_t\in \{-1,+1\}$ and $\EE[r_t]=u(x!t,y!t)$; we denote this distribution as $r_t\sim \Twopoint(u(x!t,y!t))$.
+
+We will show that any uninformed algorithm suffers $\psmr_T = \Omega\rbrm[\big]{\min\cbrm[\big]{\frac{1}{\DRmin\DCmin},\sqrt{T}}}$ for some adversary and for at least one of the games defined by $A$ and $B$.
+
+From the definitions of $A$ and $B$, we know that $A$ admits a strict PSNE $(x^*,y^*)=(e_1,e_1)$, and $B$ admits a strict PSNE $(x^*,y^*)=(e_2,e_1)$. We have $v^*=0$ for both games. We design an adversary parameterized by $\eps\in (0,1)$ and $T'\in \bbN_+$, $T'\leq T$, where he plays a sample from the distribution $y!t\sim q!t=(1-\eps,\eps)$ for $t\leq T'$ and $y!t=y^*$ for $t>T'$. Then, for $t\leq T'$,
+\begin{equation*}
+    A q!t = \begin{pmatrix}
+        \eps \DeltaC\\
+        K \eps - \DeltaR
+    \end{pmatrix},
+    \quad
+    B q!t = \begin{pmatrix}
+        K \eps - \DeltaR\\
+        \eps \DeltaC
+    \end{pmatrix}.
+\end{equation*}
+
+Let $\delta=\eps\DeltaC-K \eps+\DeltaR$. In each round, the KL divergence between distributions corresponding to $A q!t$ and $B q!t$ is either $\KL(\Twopoint(\eps \DeltaC)\,\|\,\Twopoint(K\eps - \DeltaR))$ or $\KL(\Twopoint(K\eps - \DeltaR)\,\|\,\Twopoint(\eps \DeltaC))$, both bounded by $\delta^2$ by \Cref{lem:kl-bernoulli}. Using the divergence decomposition theorem (standard tool from bandit lower bounds, see e.g. Chapter~15.1 of \citet{lattimore2020bandit}), the total KL divergence between the probability measures at the end of the $T'$-th round is bounded by $\delta^2T'$. Let $\PP_A, \PP_B$ denote these two measures.
+
+If $\delta^2 T'$ is bounded by a constant, say $\delta^2 T'\leq 1$, then the algorithm cannot distinguish these two measures beyond a constant accuracy. This is captured in the Bretagnolle-Huber inequality \citep{bretagnolle1979estimation}: for any event $S$ and its complement $S^\compl$,
+\begin{equation*}
+    \PP_A[S]+\PP_B[S^\compl]\geq \frac12 \exp(-\KL(\PP_A\,\|\,\PP_B)).
+\end{equation*}
+
+Assuming $\delta^2 T'\leq 1$, we take $S=[x!t=e_2]$, $S^\compl=[x!t=e_1]$ and sum this inequality over $t=1,2,\dots,T'$. We obtain
+\begin{equation*}
+    \EE_A\sbrm[\bigg]{\sum_{t=1}^{T'} \one[x!t=e_2]}+\EE_B\sbrm[\bigg]{\sum_{t=1}^{T'} \one[x!t=e_1]}\geq \frac12 \exp(-1) T' \geq \frac16 T'.
+\end{equation*}
+At least one expectation in the LHS is larger than $\frac1{12}T'$; without loss of generality, we assume it is the first one. Then $\EE_A\sbrm[\big]{\frac{1}{T'}\sum_{t=1}^{T'} p!t_2}\geq \frac1{12}$, or in English, the algorithm chooses the second arm more than $\frac1{12}$ of the time in expectation. Assume $K\eps<\DeltaR$, and we then have
+\begin{align*}
+    \psmr_T
+    & = \EE_A\sbrm[\bigg]{\sum_{t=1}^{T}(v^*-u_A(x!t,y!t))}
+    = \EE_A\sbrm[\bigg]{\sum_{t=1}^{T}\rbrm[\Big]{0-\anglem[\big]{p!t,A q!t}}} \\
+    & \geq \EE_A\sbrm[\bigg]{\sum_{t=1}^{T'}-\anglem[\big]{p!t,A q!t}} \tag{$\psmr\geq 0$ when $t>T'$ and $y!t=y^*$ is a NE} \\
+    & = \EE_A\sbrm[\bigg]{\sum_{t=1}^{T'}-\rbrm[\big]{p!t_1 \eps \DeltaC+p!t_2 (K\eps-\DeltaR)}}
+    \geq T'\rbrm[\Big]{\frac{1}{12} (\DeltaR-K\eps)-\frac{11}{12} \eps\DeltaC}. \yestag\label{eq:psmr-lb}
+\end{align*}
+The other case can be proven by replacing $A$ with $B$ and swapping actions $1$ and $2$, arriving at the same bound.
+
+For any tuple $(\DeltaR, \DeltaC, T)$ with $\DeltaR,\DeltaC<\frac 1{13}$, $T\geq 169$, we construct $(K,\eps,T')$ as follows:
+\begin{itemize}
+    \item If $\frac{1}{\DeltaR\DeltaC}<13\sqrt{T}$, we let $K=1$, $\eps=\DeltaR-12\DeltaR\DeltaC$, and $T'=\rbrm[\big]{\frac{1}{13\DeltaR\DeltaC}}^2$.
+    We can check that our assumptions are satisfied with $K-\DeltaR>0>-1$, $K\eps=\DeltaR-12\DeltaR\DeltaC<\DeltaR$ and $\delta=13\DeltaR\DeltaC-12\DeltaR\DeltaC\DeltaC<\frac{1}{\sqrt{T'}}$.
+    Our PSMR bound \eqref{eq:psmr-lb} expands to $\psmr_T\geq \frac{T'}{12}(12\DeltaR\DeltaC-11\DeltaR\DeltaC+132\DeltaR\DeltaC\DeltaC)\geq T'\DeltaR\DeltaC/12=\frac{1}{2028\DeltaR\DeltaC}$.
+    \item If $\frac{1}{\DeltaR\DeltaC}\geq13\sqrt{T}$, we let $T'=T$, $\eps=\min\cbrm[\big]{1,\frac{1}{13\DeltaC\sqrt{T}}}\leq\DeltaR$, and $K=\frac{\DeltaR-\frac{12}{13\sqrt{T}}}{\eps}$. Again, our assumptions are satisfied with $K\leq \frac{\DeltaR}{\eps}\leq 1$, $K\geq\min\cbrm[\Big]{\frac{\DeltaR-\frac{12}{13\sqrt{T}}}{1},\frac{\DeltaR-\frac{12}{13\sqrt{T}}}{(13\DeltaC\sqrt{T})^{-1}}}\geq \min\cbrm[\big]{\DeltaR-\frac{12}{13\sqrt{T}},13\DeltaR\DeltaC\sqrt{T}-12\DeltaC}\geq -\frac{12}{13}$ which implies $K-\DeltaR>-1$, $K\eps=\DeltaR-\frac{12}{13\sqrt T}<\DeltaR$, and $\delta=\frac{12}{13\sqrt T}+\min\rbrm[\big]{\frac{1}{13 \sqrt{T}},\DeltaC}\leq\frac{1}{\sqrt T}$. Therefore, \eqref{eq:psmr-lb} expands to $\psmr_T\geq \frac{T}{12}\rbrm[\big]{\frac{12}{13\sqrt T}-\frac{11}{13\DeltaC\sqrt T}\DeltaC}\geq \frac1{156}\sqrt T$.
+\end{itemize}
+Together, we can prove the final lower bound $\psmr_T\geq \frac{1}{156}\min\cbrm[\big]{\frac{1}{13\DRmin\DCmin},\sqrt{T}}$. \qed

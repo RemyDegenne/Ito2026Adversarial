@@ -1,0 +1,50 @@
+\section{Introduction}
+
+
+
+Learning to play against an opponent is a fundamental problem in game theory and machine learning.
+Recent years have seen significant progress on the self-play setting (that is, the same algorithm is deployed by all players) with full gradient feedback,
+establishing fast convergence to different equilibrium concepts by showing external or swap regret results that are better than the worst-case $\order(\sqrt{T})$ bounds after $T$ rounds; see e.g.,~\citet{rakhlin2013optimization, syrgkanis2015fast, daskalakis2021near, farina2022near, anagnostides2022near, anagnostides2022uncoupled, soleymani2025cautious}.
+More recently, self-play with the more challenging bandit feedback (where only the reward of the selected action is observable) has also been investigated by~\citet{ito2025instancedependent}, demonstrating similar fast convergence that additionally depends on certain game-dependent constants.
+
+
+
+
+
+
+However, in many practical situations, self-play becomes an unrealistic requirement.
+Instead, very often, the opponents behave in an unknown, arbitrary, or even adversarial way.
+In such cases, there is generally no hope to achieve better than $\order(\sqrt{T})$ external/swap regret.
+To get around this obstacle, a line of recent works adopted a weaker yet still meaningful performance measure called \textit{Nash-value regret}, which compares the learner's reward to the Nash value of the game.
+In particular, 
+\citet{maiti2025limitations} showed that game-dependent and a polylogarithmic (in $T$) Nash-value regret bound is achievable, albeit only for $2\times 2$ matrix games with a unique equilibrium.
+This raised a natural question: 
+{\bfseries Can we achieve similar game-dependent and polylogarithmic regret bounds in general zero-sum games when playing against an arbitrary opponent?}
+
+
+
+In this work, we provide an affirmative answer to this question.
+Specifically, we focus on a new regret notion that we term \textit{Pure-Strategy Maximin Regret} (PSMR), defined as the accumulated deficit of the learner compared to the pure-strategy maximin value, %
+a safety value that a deterministic player can guarantee if the game were known.
+Although PSMR is generally weaker than the notion of Nash-value regret, they coincide when the game has a pure-strategy Nash equilibrium (PSNE), a scenario that is already challenging enough and receives significant attention recently~\citep{maiti2023instancedependent, maiti2024nearoptimal, 
+ito2025instancedependent}.
+Under this metric,
+we propose algorithms, analysis, and lower bounds for a comprehensive set of settings, discussed in more detail below.
+
+\paragraph{Contributions and Organization.}
+We study two models of bandit feedback: the \emph{uninformed} setting, where the learner observes only noisy rewards of played actions, and the \emph{informed} setting, where the learner additionally observes the opponent's action.
+The uninformed feedback model is similar to adversarial bandit and is used in the self-play result of \citet{ito2025instancedependent}, while the informed feedback model is considered by \citet{odonoghue2021matrix} and \citet{maiti2025limitations}.
+We present comprehensive results in all four quadrants formed by two feedback models (uninformed versus informed) and two game structures (normal-form versus general bilinear games).
+Our main contributions are structured as below.
+\begin{itemize}[itemsep=2pt,topsep=2pt]
+    \item In \Cref{h1:prelim}, we formalize the problem of adversarial learning in games and define the feedback model and the PSMR.
+    \item \Cref{h1:finite-games} focuses on uninformed learning in finite normal-form games, where we show the Tsallis-INF algorithm~\citep{zimmert2021tsallisinf} obtains an $\order(c \log T)$ PSMR bound against any adversary when the game has a strict PSNE, where the constant $c$ depends on the game only (and not the adversary).
+    Although similar bounds for Tsallis-INF have been shown for stochastic multi-armed bandits~\citep{zimmert2021tsallisinf} %
+    or self-play in games~\citep{ito2025instancedependent},
+    our result is not only novel but also surprising since unlike previous work, the environment in which Tsallis-INF operates is completely arbitrary in our setting. %
+    Moreover, we prove in \Cref{h2:uninformed-lb} that the dependence on $c$ is unavoidable. 
+    More generally, for games without a PSNE, we further prove another game-dependent bound that is independent of $T$. 
+    \item To overcome the aforementioned hardness, we turn to the informed learning setting in \Cref{h1:pure-ucb}. We propose an algorithm called \PureUCB{} that plays the pure maximin strategy of the upper confidence bound of the unknown game matrix. %
+    We show that \PureUCB{} enjoys a different PSMR bound of the form $\order(c' \log T)$ for another game-dependent constant $c'$ that is incomparable to $c$ in general but could be potentially much smaller. 
+    \item Finally, in \Cref{h1:linear-games}, we generalize these results to bilinear games with finite but large action sets. We introduce \TsallisSPM{} and \PureLinUCB{} for the two settings respectively and show that they each obtain similar bounds as their normal-form counterparts, importantly with logarithmic or even no dependence on the number of actions.  %
+\end{itemize}

@@ -1,0 +1,60 @@
+\chapter{Informed learning with Maximin-UCB (Section 5, Appendix D)}
+\label{chap:maximin_ucb}
+
+\begin{lemma}[Anytime confidence bounds, Lemma 11]
+  \label{lem:ucb_ucb}
+  \lean{Ito2026Adversarial.probReal_forall_abs_sub_div_le_ge}
+  \leanok
+  \uses{def:regrets, lem:bounded_noise_subgaussian, lem:mixture_supermartingale, lem:ville}
+  In a run of any informed player against any adaptive adversary, with reward noise of conditional
+  mean $u$ and rewards in $[-1, 1]$, for every pair $(x, y)$ and $\delta \in (0, 1)$, with probability
+  at least $1 - \delta$, for all $t$ with $N_t(x, y) > 0$,
+  $\abs{u(x, y) - \frac{R_t(x, y)}{N_t(x, y)}} \le \sqrt{\frac{4 \log(1/\delta) + 2 \log(1 + N_t(x,
+  y))}{N_t(x, y)}}$.
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:bounded_noise_subgaussian, lem:mixture_supermartingale, lem:ville}
+  $M_t = R_t(x, y) - N_t(x, y) u(x, y)$ is a sum of noises over the rounds where $(x, y)$ is played,
+  each conditionally $1$-sub-Gaussian (Lemma~\ref{lem:bounded_noise_subgaussian}), and the
+  indicator of playing $(x, y)$ is predictable. By Lemma~\ref{lem:mixture_supermartingale},
+  $\bar Z_t = (1 + N_t)^{-1/2} \exp(\frac{M_t^2}{2(1 + N_t)})$ is a nonnegative supermartingale with
+  $\bar Z_0 = 1$; by Ville's inequality (Lemma~\ref{lem:ville}), with probability at least
+  $1 - \delta$, $\frac{M_t^2}{2(1 + N_t)} \le \log\frac1\delta + \frac12 \log(1 + N_t)$ for all $t$,
+  and $\frac{1 + N_t}{N_t} \le 2$ when $N_t > 0$.
+\end{proof}
+
+\begin{theorem}[Theorem 4]
+  \label{thm:pureucb}
+  \lean{Ito2026Adversarial.exists_psmr_maximinUCB_le}
+  \leanok
+  \uses{def:maximin_ucb, lem:ucb_ucb, def:regrets}
+  There is a universal constant $C$ such that for every game $u$ with utilities in $[-1, 1]$, every
+  adaptive adversary, every reward noise with conditional mean $u$ and rewards in $[-1, 1]$ and every
+  $T \ge 2$, Maximin-UCB with $\delta = 1/T$ has
+  $\PSMR_T \le C (\sum_{(x, y) : \Delta_{xy} > 0} (\Delta_{xy} + \frac{\log T}{\Delta_{xy}}) + m_x m_y)$
+  and $\PSMR_T \le C \sqrt{m_x m_y T \log T}$.
+\end{theorem}
+
+\begin{proof}
+  \uses{lem:ucb_ucb}
+  On the event $G$ where the bounds of Lemma~\ref{lem:ucb_ucb} hold for all pairs (probability at
+  least $1 - m_x m_y/T$), $u \le U_t$ everywhere, so with $x^\star$ a pure maximin action,
+  $\vstar = \min_y u(x^\star, y) \le \min_y U_t(x^\star, y) \le \min_y U_t(x_t, y) \le U_t(x_t, y_t)$.
+  At the last round in which a pair with $\Delta_{xy} > 0$ is played,
+  $\sqrt{(4 \log T + 2 \log(1 + N))/N} \ge \Delta_{xy}$ with $N = N_{t-1}(x, y)$, so
+  $N_T(x, y) \le 1 + \frac{6 \log T}{\Delta_{xy}^2}$ (using $N \le T$). On $G$,
+  $\sum_t (\vstar - u(x_t, y_t)) \le \sum_{\Delta_{xy} > 0} N_T(x, y) \Delta_{xy}$; on $G^c$ it is at
+  most $2T$, which contributes at most $2 m_x m_y$. This gives the first bound. For the second, split
+  the pairs at the threshold $\Delta = \sqrt{6 m_x m_y \log T/T}$: the pairs below contribute at most
+  $\Delta T$ on $G$, those above at most $2 + \frac{6 \log T}{\Delta}$ each; and
+  $3 m_x m_y \le C \sqrt{m_x m_y T \log T}$ when $m_x m_y \le T$, while $\PSMR_T \le 2T$ always.
+\end{proof}
+
+\begin{remark}
+  \label{rem:pureucb_statement}
+  The paper states the first bound without the term $m_x m_y$, which its proof obtains from the
+  failure event and claims to be absorbed by the big-$O$; this is not the case when few action pairs
+  have a positive gap. In the paper's last display, $2 \sqrt{6 m_x m_y \log T}$ should read
+  $2 \sqrt{6 m_x m_y T \log T}$.
+\end{remark}

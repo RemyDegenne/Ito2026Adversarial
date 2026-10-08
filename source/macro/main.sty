@@ -1,0 +1,229 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{macro/main}
+
+\DeclareOption{draft}{\PassOptionsToPackage{draft}{macro/draftmode}}
+\DeclareOption{clean}{\PassOptionsToPackage{clean}{macro/draftmode}}
+\ProcessOptions\relax
+
+% Important: macros_math loaded first, as amsmath has to be loaded before cleveref
+\RequirePackage{macro/draftmode}
+\RequirePackage{amsmath, amssymb, mathtools, diffcoeff, mleftright, bbm}
+\RequirePackage{macro/letters}
+\RequirePackage{xparse}
+\RequirePackage{pifont}
+\RequirePackage{tikz,graphicx,transparent}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% HOUSEKEEPING & COLLABORATION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\ifdraftmode
+    \newcommand\hl[1]{{\color{magenta}\small [HL: {#1}]}}
+    \newcommand\am[1]{{\color{red}\small [AM: {#1}]}}
+    \newcommand\yw[1]{{\color{orange}\small [YW: {#1}]}}
+    \newcommand\taira[1]{{\bfseries \small [TT: {#1}]}}
+\else
+    \newcommand\hl[1]{}
+    \newcommand\am[1]{}
+    \newcommand\yw[1]{}
+    \newcommand\taira[1]{}
+\fi
+
+\newcommand\cn{\textsuperscript{\color{red}[citation needed]}}
+
+\newcommand\yestag{\addtocounter{equation}{1}\tag{\theequation}} % To use in {align*} environment, like the opposite of \notag
+
+\makeatletter
+\let\save@thefootnote\thefootnote
+\let\save@footnoteseptext\footnoteseptext
+\newcommand\blfootnote[1]{% footnote without number
+  \let\thefootnote\relax%
+  \let\footnoteseptext\relax
+  \footnotetext{#1}%
+  \let\thefootnote\save@thefootnote%
+  \let\footnoteseptext\save@footnoteseptext%
+}
+\makeatother
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PAPER SPECIFIC DEFINITIONS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% TEXT-MODE
+\newcommand{\PureUCB}{{Maximin-UCB}}
+\newcommand{\PureLinUCB}{{Maximin-LinUCB}}
+\newcommand{\TsallisSPM}{{Tsallis-FTRL-SPM}}
+\newcommand{\TsallisSPMLong}{{Tsallis-FTRL with Stability-Penalty Matching (SPM) learning rate schedule}}
+
+% MATH-MODE
+\newcommand{\psmr}{\mathrm{PSMR}}
+\newcommand{\ER}{\mathrm{EReg}}
+\newcommand{\NR}{\mathrm{NReg}}
+\newcommand{\vMix}{v^{\mathrm{Nash}}}
+\newcommand{\vStar}{v^*}
+\newcommand{\DeltaR}{\Delta^{\mathrm{r}}}
+\newcommand{\DeltaC}{\Delta^{\mathrm{c}}}
+\newcommand{\DeltaLin}{\Delta^{\mathrm{lin}}}
+\newcommand{\DeltaMix}{\Delta^{\mkern-1mu\mathrm{mix}}}
+\newcommand{\DeltaEntry}{\Delta_{\mathrm{M}}}
+\newcommand{\DRmin}{\DeltaR_{\mathrm{min}}}
+\newcommand{\DCmin}{\DeltaC_{\mathrm{min}}}
+\newcommand{\pzero}{p_{\circ}}
+\newcommand{\confset}{\mathfrak{A}}
+\newcommand{\Twopoint}{\mathcal{B}_{\pm 1}}
+% \newcommand{\Bernoulli}{\mathrm{B}}
+\newcommand{\KL}{\operatorname{D}_{\mathrm{KL}}}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% MATH LETTERS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\Reg}{\mathcal{R}}
+\newcommand{\dD}{\mathbb{D}}
+\newcommand{\dR}{\mathbb{R}}
+\newcommand{\dN}{\mathbb{N}}
+\newcommand{\EE}{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\II}{\mathbb{I}}
+\newcommand{\one}{\mathbbm{1}}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\order}{\mathcal{O}}
+\newcommand{\softo}{\tilde{\order}}
+\newcommand{\Vertex}{\mathcal{V}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% MULTI-LETTER NAMES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\br}{\mathrm{br}}
+\newcommand{\col}{\mathrm{col}}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argsup}{arg\,sup}
+\DeclareMathOperator*{\arginf}{arg\,inf}
+\DeclareMathOperator{\vect}{vec}
+\DeclareMathOperator{\mat}{mat}
+\DeclareMathOperator{\trace}{tr}
+\DeclareMathOperator*{\sign}{sign}
+\DeclareMathOperator*{\polylog}{polylog}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% BINARY OPERATIONS / RELATIONS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\defeq}{\overset{\text{\tiny def}}{=}}
+\newcommand*{\trans}{{\mkern-1.5mu\mathsf{T}}}
+\newcommand*{\compl}{{\mathsf{c}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SINGLE CHAR FIGURES
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\cmark}{\ding{51}{}}
+\newcommand{\xmark}{\ding{55}{}}
+\newcommand*{\qed}[1][$\blacksquare$]{%
+\leavevmode\unskip\penalty9999 \hbox{}\nobreak\hfill
+    \quad\hbox{#1}%
+}
+\newcommand{\mqed}{\tag*{$\blacksquare$}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PARENS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\paren}[1]{\mleft({#1}\mright)}
+\newcommand{\rbr}{\paren}    % round brackets
+\newcommand{\brackets}[1]{\mleft[{#1}\mright]}
+\newcommand{\sbr}{\brackets} % square brackets
+\newcommand{\braces}[1]{\mleft\{{#1}\mright\}}
+\newcommand{\cbr}{\braces}   % curly brackets
+\newcommand{\norm}[1]{\mleft\|{#1}\mright\|}
+\newcommand{\nbr}[1]{\norm{#1}}
+\newcommand{\abs}[1]{\mleft|{#1}\mright|}
+\newcommand{\abr}[1]{\abs{#1}}
+
+% \newcommand{\Bigrbr}[1]{\Big(#1\Big)}
+% \newcommand{\Biggrbr}[1]{\Bigg(#1\Bigg)}
+% \newcommand{\Bigsbr}[1]{\Big[#1\Big]}
+% \newcommand{\Biggsbr}[1]{\Bigg[#1\Bigg]}
+% REMOVED, use \rbrm[\Big] etc.
+
+\newcommand{\floor}[1]{\mleft\lfloor{#1}\mright\rfloor}
+
+\newcommand{\inner}[2]{\mleft\langle {#1},{#2} \mright\rangle}
+\newcommand{\tuple}[1]{\mleft\langle{#1}\mright\rangle}
+
+
+\DeclarePairedDelimiter{\rbrm}()
+\DeclarePairedDelimiter{\sbrm}[]
+\DeclarePairedDelimiter{\cbrm}\{\}
+\DeclarePairedDelimiter{\absm}||
+\DeclarePairedDelimiter{\ceilm}\lceil\rceil
+\DeclarePairedDelimiter{\normm}\|\|
+\DeclarePairedDelimiter{\anglem}\langle\rangle
+
+\makeatletter
+\newcommand{\biggg}{\bBigg@\thr@@}
+\newcommand{\Biggg}{\bBigg@{3.5}}
+\makeatother
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CUSTOM SYNTAX
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% PLEASE READ:
+% In this paper, we use the custom syntax $a!i$ to denote $a^{(i)}$.
+
+% 1. Create a definition for the active ! character
+% We use a group to keep the \catcode change local during definition
+{\catcode`!=\active \gdef!#1{^{(#1)}}}
+% 2. Assign the mathcode "8000 to !, making it active in math mode only
+\mathcode`!="8000
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CUSTOM LETTER: \simplex
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \newcommand{\simplex}{\Delta}
+
+\newsavebox{\simplexBox}
+\sbox{\simplexBox}{%
+  \begin{tikzpicture}[baseline=0, line join=round, line cap=round]
+    \coordinate (A) at (0.4ex,0);
+    \coordinate (B) at (1.6ex, 0.2ex);
+    \coordinate (C) at (0.8ex, 1.6ex);
+    \coordinate (Back) at (0, 0.3ex); 
+
+    \draw[line width=0.12ex] (A) -- (B) -- (C) -- (Back) -- cycle;
+    \draw[line width=0.09ex] (A) -- (C);
+  \end{tikzpicture}%
+}
+
+\newcommand{\simplex}{%
+  \mathchoice
+    {\buildSimplex{\displaystyle}{1}}
+    {\buildSimplex{\textstyle}{1}}
+    {\buildSimplex{\scriptstyle}{0.7}}     % Subscript
+    {\buildSimplex{\scriptscriptstyle}{0.5}} % Sub-subscript
+}
+
+% Helper macro
+% Overlays the simplex symbol over the regular \Delta (transparent), so you can select and copy the symbol
+% #1 = Math style (e.g., \scriptstyle)
+% #2 = Scale factor
+\newcommand{\buildSimplex}[2]{%
+  \mathord{% Use \mathord so it spaces like a variable, not a binary operator
+    \ooalign{%
+      % LAYER 1: The invisible Delta
+      % We explicitely pass "#1" so the hidden Delta shrinks correctly in subscripts.
+      \texttransparent{0}{$#1\Delta$}\cr
+      % LAYER 2: The graphic
+      % \hidewidth centers the graphic relative to the Delta
+      \hidewidth
+      \scalebox{#2}{\usebox{\simplexBox}}%
+      \hidewidth
+      \cr
+    }%
+  }%
+}

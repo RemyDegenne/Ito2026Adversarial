@@ -1,0 +1,80 @@
+\chapter{Concentration}
+\label{chap:prereq_concentration}
+
+\begin{lemma}[Bounded noise is sub-Gaussian]
+  \label{lem:bounded_noise_subgaussian}
+  \uses{def:repeated_game}
+  If the reward has conditional mean $u(x_t, y_t)$ and values in $[-1, 1]$, the noise
+  $r_t - u(x_t, y_t)$ is conditionally $1$-sub-Gaussian given the past and $(x_t, y_t)$.
+\end{lemma}
+
+\begin{proof}
+  Hoeffding's lemma (Mathlib) for a centered variable in an interval of length $2$, applied to the
+  reward kernel at each history and action pair.
+\end{proof}
+
+\begin{lemma}[Ville's inequality]
+  \label{lem:ville}
+  For a nonnegative supermartingale $Z$ with $Z_0 = 1$, $\Prob(\exists t, Z_t \ge 1/\delta) \le
+  \delta$.
+\end{lemma}
+
+\begin{proof}
+  In LMLPapers (\texttt{ForMathlib/Probability/Martingale/Ville.lean}).
+\end{proof}
+
+\begin{lemma}[Gaussian mixture supermartingale, dimension one]
+  \label{lem:mixture_supermartingale}
+  \uses{lem:bounded_noise_subgaussian}
+  Let $M_t = \sum_{s < t} I_s \eps_s$ with predictable $I_s \in \{0, 1\}$ and conditionally
+  $1$-sub-Gaussian $\eps_s$, and $N_t = \sum_{s < t} I_s$. Then
+  $(1 + N_t)^{-1/2} \exp(\frac{M_t^2}{2(1 + N_t)})$ is a nonnegative supermartingale with initial
+  value $1$.
+\end{lemma}
+
+\begin{proof}
+  For each $\lambda$, $\exp(\lambda M_t - \lambda^2 N_t/2)$ is a supermartingale; integrate in
+  $\lambda \sim \mathcal N(0, 1)$ (mixtures of supermartingales: the Wang2026Almost material in
+  LMLPapers) and compute the Gaussian integral.
+\end{proof}
+
+\begin{lemma}[Self-normalized bound, Abbasi-Yadkori, Pál, Szepesvári]
+  \label{lem:self_normalized}
+  \uses{lem:ville}
+  Let $S_t = \sum_{s < t} \eps_s a_s$ with predictable $a_s \in \R^d$ and conditionally
+  $1$-sub-Gaussian $\eps_s$, $V_t = \lambda I + \sum_{s < t} a_s a_s^\top$, $\lambda > 0$. With
+  probability at least $1 - \delta$, for all $t$,
+  $\norm{S_t}^2_{V_t^{-1}} \le 2 \log(1/\delta) + \log(\det V_t/\lambda^d)$.
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:ville}
+  For each $\theta$, $\exp(\langle \theta, S_t\rangle - \frac12 \norm{\theta}^2_{V_t - \lambda I})$
+  is a supermartingale; the mixture over $\theta \sim \mathcal N(0, \lambda^{-1} I)$ equals
+  $(\lambda^d/\det V_t)^{1/2} \exp(\frac12 \norm{S_t}^2_{V_t^{-1}})$ (Gaussian integral of a quadratic
+  form); Ville's inequality.
+\end{proof}
+
+\begin{lemma}[Determinant bound]
+  \label{lem:log_det_le}
+  If $\norm{a_s} \le 1$, then $\log \det V_t \le d \log(\lambda + t/d)$.
+\end{lemma}
+
+\begin{proof}
+  AM--GM on the eigenvalues of the positive definite $V_t$: $\det V_t \le (\operatorname{tr} V_t /
+  d)^d$, and $\operatorname{tr} V_t = \lambda d + \sum_s \norm{a_s}^2$.
+\end{proof}
+
+\begin{lemma}[Elliptical potential]
+  \label{lem:elliptical_potential}
+  \uses{lem:log_det_le}
+  With $\lambda \ge 1$ and $\norm{a_s} \le 1$,
+  $\sum_{t < T} \norm{a_t}^2_{V_t^{-1}} \le 2 \log(\det V_T/\lambda^d) \le 2 d \log(1 + T/(d\lambda))$.
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:log_det_le}
+  $\det V_{t+1} = \det V_t (1 + \norm{a_t}^2_{V_t^{-1}})$ (matrix determinant lemma), and
+  $x \le 2 \log(1 + x)$ for $x \in [0, 1]$ ($\norm{a_t}^2_{V_t^{-1}} \le \norm{a_t}^2/\lambda \le 1$);
+  telescope, then Lemma~\ref{lem:log_det_le}.
+\end{proof}

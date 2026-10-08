@@ -1,0 +1,34 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{macro/draftmode}[2026/01/15 Draft mode with package options]
+
+% Required packages
+\RequirePackage{xcolor}
+\RequirePackage{comment}
+
+% Internal switch (default: clean = off)
+\newif\ifdraftmode
+\draftmodefalse
+
+% Package options
+\DeclareOption{draft}{\draftmodetrue}
+\DeclareOption{clean}{\draftmodefalse}
+\ExecuteOptions{clean}
+\ProcessOptions\relax
+
+% Draft-only inline command
+\newcommand{\draftonly}[1]{%
+  \ifdraftmode
+    {\color{violet}#1}%
+  \fi
+}
+
+% Draft-only environment
+\ifdraftmode
+  % Draft mode ON: show content in violet
+  \newenvironment{draftpart}
+    {\begingroup\color{violet}}
+    {\endgroup}
+\else
+  % Draft mode OFF: ignore content entirely
+  \excludecomment{draftpart}
+\fi

@@ -1,0 +1,18 @@
+{
+    "challenge_module": "Challenge_exists_forall_psmr_ge",
+    "solution_module": "Solution",
+    "theorem_names": [
+        "Ito2026Adversarial.exists_forall_psmr_ge",
+        "Learning.Algorithm.comap._proof_1",
+        "Learning.Algorithm.comapFeedback._proof_1",
+        "Learning.RepeatedGame.gameEnv._proof_1",
+        "Learning.RepeatedGame.gameEnv._proof_2",
+        "Learning.RepeatedGame.gameEnv._proof_3",
+        "Learning.RepeatedGame.gameEnv._proof_4"
+    ],
+    "permitted_axioms": [
+        "propext",
+        "Quot.sound",
+        "Classical.choice"
+    ]
+}

@@ -1,0 +1,16 @@
+\section{Conclusion and Future Research}\label{h1:discuss}
+
+In this work, we investigated the problem of learning to play zero-sum games against an arbitrary adversary under bandit feedback. We introduced the PSMR metric to quantify the learner's performance against the safety value a deterministic learner can achieve against the worst-case adversary. We provide comprehensive results, tackling both uninformed and informed feedback models and covering both normal-form and bilinear games.
+
+Our results point toward several promising future directions. First,
+as discussed, the regret bounds of Tsallis-INF and \PureUCB{} are incomparable. 
+    Is it possible to achieve both simultaneously in the informed setting?
+    Taking one step further, what are the instance-optimal bounds for this setting? 
+    
+    
+Second, while our results for general bilinear games are analogous to those for normal-form games, it has been shown that in the special case of stochastic linear bandits ($|\calY|=1$), such bounds are not instance-optimal~\citep{lattimore2017end}.
+    Therefore, understanding what fundamental quantity characterizes the difficulty of a general bilinear game is a promising direction.
+    
+
+Finally, our results are restricted to $\psmr$. While it coincides with $\NR$ when a PSNE exists, investigating how to achieve similar results for $\NR$ in the general case is an interesting direction.
+

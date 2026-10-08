@@ -1,0 +1,69 @@
+\section{Preliminary}\label{h1:prelim}
+
+\paragraph{Notations.}
+We use the notation $\simplex^d$ to denote the $(d-1)$-dimensional standard simplex in $\dR^d$: $\simplex^d = \cbrm[\big]{x\in \dR^d_+ \mid  \sum_{i=1}^d x_i=1}$. We similarly use $\simplex^A$ for a finite set $A$ to denote the set of distributions over $A$. %
+A sequence of vectors changing over time is indexed using superscript for the time dimension and subscript for the inherent dimension of the vector; for example, $v!t_i$ is the $i$-th dimension of the vector $v$ at the $t$-th round. %
+For an integer $m$, $[m]$ represents the set $\{1, \dots, m\}$.
+
+\paragraph{Problem Statement.}
+A learner plays a zero-sum game against an adversary. They can choose their actions from finite action sets $\calX\subset \dR^{d_x}$ and $\calY\subset \dR^{d_y}$ respectively, which have cardinalities $m_x=|\calX|$ and $m_y=|\calY|$.
+The game is identified with a utility function $u : \calX\times\calY\to  [-1, 1]$, where $u(x,y)$ is the expected reward received by the learner if she plays $x$ and the adversary plays $y$.
+We assume the utility function is bilinear, i.e., $u(x,y)=\inner{x}{Ay}$ for some unknown matrix $A\in \dR^{d_x\times d_y}$.
+This general formulation captures all finite normal-form games as special cases where $\calX$ and $\calY$ are standard basis sets.
+
+The learner obtains information about the game by repeatedly playing.
+Specifically, in each round $t=1, 2, \dots$, the learner selects an action $x!t \in \calX$, and the adversary simultaneously selects $y!t \in \calY$. We consider an \emph{adaptive adversary} who can select $y!t$ based on the realization of the history, including the learner's past actions
+$x!1, \dots, x!{t-1}$.
+After both players commit to their actions, the player receives a noisy reward $r_t = u(x!t, y!t) + \eps_t$, assumed to be in $[-1, 1]$. 
+The noise sequence $\{\eps_t\}$ is a martingale difference sequence; specifically, conditional on the history and chosen actions, the bias $\EE[\eps_t]$ is $0$. %
+
+\paragraph{Feedback Models.}
+We study two feedback settings depending on the information the learner observes after each round:
+\begin{itemize}[noitemsep,topsep=3pt]
+    \item {\itshape Uninformed}: The learner only observes  the reward $r_t$. This is the same feedback model used in the self-play analysis by \citet{ito2025instancedependent}.
+    \item {\itshape Informed}: The learner observes both the reward $r_t$ and the adversary's action $y!t$. This is the feedback model used by \citet{odonoghue2021matrix} and \citet{maiti2025limitations}.
+\end{itemize}
+
+
+\paragraph{Properties of the Game.}
+If a pair of actions $(x^*,y^*)\in \calX\times\calY$ satisfies \begin{equation}
+    u(x,y^*)\leq u(x^*,y^*)\leq u(x^*,y), \label{eq:ne}
+\end{equation}
+for any $x\in \calX$ and $y\in \calY$, we say that $(x^*,y^*)$ is a \emph{pure-strategy Nash equilibrium} (PSNE). If \eqref{eq:ne} holds with strict inequality whenever $x\neq x^*$ and $y\neq y^*$, we say the pair is a \emph{strict} PSNE.
+
+For a pair of distributions over actions $(p, q)\in \simplex^\calX\times \simplex^\calY$, we slightly abuse the notation of the utility function and define $u(p,q)=\EE_{x\sim p,y\sim q}[u(x,y)]=\sum_{x\in \calX}\sum_{y\in \calY}p_x q_y u(x,y)$ to be the expected reward of the learner if she plays a sample from $p$ and the adversary plays a sample from $q$. If a pair of distributions over actions $(p^*, q^*)\in \simplex^\calX\times \simplex^\calY$ satisfies
+\begin{equation}
+    u(p,q^*)\leq u(p^*,q^*)\leq u(p^*,q),
+\end{equation}
+for any $p\in \simplex^\calX$ and $q\in \simplex^\calY$, we say that $(p^*,q^*)$ is a \emph{mixed-strategy Nash equilibrium} (MSNE). The celebrated minimax theorem by \citet{vonneumann1928theory} proves that an MSNE always exists, and that all Nash equilibria yield the same expected value $\vMix=u(p^*,q^*)$, which is also equal to $\max_{p\in \simplex^\calX}\min_{q\in \simplex^\calY} u(p, q)$ and $\min_{q\in \simplex^\calY}\max_{p\in \simplex^\calX} u(p, q)$.
+
+In contrast, central to our work is the concept of pure-strategy maximin value, defined as $\vStar\defeq \max_{x\in \calX} \min_{y\in \calY} u(x,y)$, which is the maximum utility a deterministic learner can guarantee in the worst case.
+By definition, $\vStar$ is no more than $\vMix$, but when a PSNE exists, these two values coincide.
+
+\paragraph{Goal.}
+From the learner's perspective, this problem can be seen as an instance of adversarial multi-armed bandits~\citep{auer2002nonstochastic}, where the standard goal is to minimize \textit{external regret}, which compares the learner's total reward to that of the best fixed action in hindsight.
+Specifically, let $\ER_T(x) \defeq \EE\sbrm[\Big]{\sum_{t=1}^T \rbrm[\big]{u(x,y!t)-u(x!t,y!t)}}$ be the regret compared to action $x$.
+Then external regret is defined as
+$\ER_T \defeq \max_{x\in \calX} \cbrm[\big]{\ER_T(x)}$.
+Applying standard algorithms such as Exp3~\citep{auer2002nonstochastic} guarantees $\ER_T = \tilde{\order}(\sqrt{m_xT})$, which is generally not improvable even for simple games, as shown in~\citet[Theorem~3]{maiti2025limitations}.
+
+To get around this obstacle,
+we propose to consider the following new regret metric, termed \emph{Pure-Strategy Maximin Regret} (PSMR), as the learner's performance measure:
+\begin{equation}
+    \psmr_T\defeq \EE\sbrm[\Bigg]{\sum_{t=1}^T \rbrm[\big]{\vStar-u(x!t,y!t)}},
+    \label{eq:psmr-def}
+\end{equation}
+where the expectation is taken over the randomness of the algorithm, the noise in the reward, and potentially the adversary.
+In words, PSMR measures the learner's accumulated deficit compared to the pure-strategy maximin value.
+On the other hand, the Nash-value regret considered in prior work such as~\citet{odonoghue2021matrix, maiti2025limitations} is defined as $\NR_T \defeq\EE\sbrm[\Big]{\sum_{t=1}^T \rbrm[\big]{\vMix-u(x!t,y!t)}}$, which measures the learner's accumulated deficit compared to the Nash value (equivalently, the mixed-strategy maximin value).
+
+By definition, it is clear that $\psmr_T \leq \NR_T \leq \ER_T$; the first inequality is due to $\vStar\leq \vMix$, and the second due to $\NR_T=\EE\sbrm[\Big]{\sum_{t=1}^T \rbrm[\big]{u(p^*, q^*)-u(x!t,y!t)}}\leq\EE_{x\sim p^*}[\ER_T(x)]\leq \ER_T$ for any NE $(p^*,q^*)$.
+When the game has a PSNE, however, $\psmr_T$ and $\NR_T$ coincide. 
+
+Finally, we point out that in the special case when the opponent has only one action ($|\calY|=1$), our problem is simply the standard stochastic linear bandit~\citep{abbasi-yadkori2011improved} or
+stochastic multi-armed bandit~\citep{lai1985asymptotically} if $\calX$ is the standard basis.
+In this case,
+both $\psmr_T$ and $\NR_T$ recover $\ER_T$.
+Therefore, our results can also be seen as a generalization of the classical instance-dependent bounds for stochastic bandits achieved by, for example, the UCB algorithm~\citep{auer2002using}.
+
+

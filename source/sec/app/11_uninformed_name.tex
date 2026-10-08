@@ -1,0 +1,15 @@
+\section{Notes on Uninformed and Informed Bandit Feedback}\label{h1a:uninformed-informed}
+
+Existing literature on bandit-feedback learning in games exhibits a subtle but critical difference in the feedback model. For instance, the self-play framework in \citet{ito2025instancedependent} assumes the learner observes only the reward of the realized actions.
+In contrast, the algorithms proposed by \citet{odonoghue2021matrix}, including variants of UCB, Thompson Sampling, and K-learning, operate under the assumption that the learner observes the reward and, in addition, the action taken by the opponent.
+As this distinction is rarely addressed by prior work,
+we introduce the terms ``uninformed'' and ``informed'' to formally differentiate between these two settings based on the availability of the opponent's action.
+
+A similar distinction on informedness exists in the broader field of learning Markov games.
+A Markov game is a game where the utility depends on the action of players and a state, and the state is changed every round in a Markovian way determined by the players' actions.
+Our setting is a special case of Markov games with only one state.
+Post-hoc observations on opponents' actions is assumed by some research \citep{wei2017online, bai2020provable, xie2020learning, liu2021sharp},
+but in some other work, this information is hidden \citep{tian2021online, mao2022improving, cai2023uncoupled, appel2025regret}.
+Out of these papers, \citet{cai2023uncoupled} define ``uncoupled'' learning, and \citet{mao2022improving} use the term ``decentralized'' learning, both of which imply the lack of observation of the opponent's actions (our ``uninformed'' feedback).
+
+

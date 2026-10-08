@@ -1,0 +1,13 @@
+{
+    "challenge_module": "Challenge_klDiv_twoPoint_le",
+    "solution_module": "Solution",
+    "theorem_names": [
+        "Ito2026Adversarial.klDiv_twoPoint_le",
+        "ProbabilityTheory.twoPoint._proof_1"
+    ],
+    "permitted_axioms": [
+        "propext",
+        "Quot.sound",
+        "Classical.choice"
+    ]
+}

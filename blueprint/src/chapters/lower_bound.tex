@@ -1,0 +1,64 @@
+\chapter{Lower bound for uninformed learners (Section 4.2, Appendix C)}
+\label{chap:lower_bound}
+
+\begin{lemma}[Lemma 9]
+  \label{lem:kl_bernoulli}
+  \lean{Ito2026Adversarial.klDiv_twoPoint_le, ProbabilityTheory.twoPoint}
+  \leanok
+  Let $\TwoPoint(x)$ be the law on $\{-1, 1\}$ with mean $x$. For $\abs a, \abs b \le \frac12$,
+  $\KL(\TwoPoint(a) \,\|\, \TwoPoint(b)) \le (a - b)^2$.
+\end{lemma}
+
+\begin{proof}
+  $\KL = \frac{1 + a}{2} \log \frac{1 + a}{1 + b} + \frac{1 - a}{2} \log \frac{1 - a}{1 - b}$. With
+  $f_a(b) = \KL - (a - b)^2$, $f_a(a) = 0$ and $f_a'(b) = (b - a)(\frac{1}{1 - b^2} - 2)$, which has
+  the sign of $a - b$ for $\abs b \le \frac12$; so $f_a \le 0$ on $[-\frac12, \frac12]$.
+\end{proof}
+
+\begin{lemma}[Observations of an uninformed learner against an oblivious adversary]
+  \label{lem:uninformed_oblivious}
+  \uses{def:repeated_game, lem:divergence_decomposition_nonstationary}
+  Let the adversary draw $y_t \sim q_t$ independently of the past (oblivious), and the reward kernel
+  be $r_t \sim \TwoPoint(u(x_t, y_t))$. In a run of an uninformed learner, the actions and rewards
+  $(x_t, r_t)$ form a run of the learner against the non-stationary bandit
+  $\nu_t(x) = \TwoPoint(u(x, q_t))$, $u(x, q_t) = \sum_y q_t(y) u(x, y)$.
+\end{lemma}
+
+\begin{proof}
+  Given the past and $x_t$, $y_t \sim q_t$ independently, and a mixture of two-point laws is the
+  two-point law of the mixed mean. The uninformed learner reads only $(x_s, r_s)$.
+\end{proof}
+
+\begin{theorem}[Theorem 2]
+  \label{thm:uninformed_lb}
+  \lean{Ito2026Adversarial.exists_forall_psmr_ge}
+  \leanok
+  \uses{lem:kl_bernoulli, lem:uninformed_oblivious, lem:divergence_decomposition_nonstationary,
+    lem:bretagnolle_huber, def:regrets}
+  There are $c > 0$, $\Delta_0 > 0$ and $T_0$ such that for all $\DR, \DC \in (0, \Delta_0)$, all
+  $T \ge T_0$ and every uninformed learner, there are a $2 \times 2$ game with utilities in
+  $[-1, 1]$ and a strict PSNE with $\DRmin = \DR$ and $\DCmin = \DC$, an adversary and a reward
+  noise (conditional mean $u$, rewards in $[-1, 1]$) under which
+  $\PSMR_T \ge c \min\{\frac{1}{\DR \DC}, \sqrt T\}$.
+\end{theorem}
+
+\begin{proof}
+  \uses{lem:kl_bernoulli, lem:uninformed_oblivious, lem:divergence_decomposition_nonstationary,
+    lem:bretagnolle_huber}
+  The paper's construction, with $\Delta_0 = \frac1{13}$, $T_0 = 169$: the games
+  $A = \begin{pmatrix} 0 & \DC \\ -\DR & K - \DR \end{pmatrix}$ and $B$ ($A$ with the rows
+  swapped), with strict PSNEs $(e_1, e_1)$ and $(e_2, e_1)$ and $\vstar = 0$, two-point rewards, and
+  the adversary playing $y_t \sim (1 - \eps, \eps)$ for $t < T'$ and $y^\star$ afterwards. By
+  Lemmas~\ref{lem:uninformed_oblivious}, \ref{lem:divergence_decomposition_nonstationary}
+  and~\ref{lem:kl_bernoulli}, the divergence between the laws of the observations of the first $T'$
+  rounds under $A$ and under $B$ is at most $\delta^2 T'$, $\delta = \eps \DC - K \eps + \DR$. When
+  $\delta^2 T' \le 1$, Bretagnolle--Huber (Lemma~\ref{lem:bretagnolle_huber}) at each round gives
+  $\E_A[\#\{t < T' : x_t = e_2\}] + \E_B[\#\{t < T' : x_t = e_1\}] \ge \frac{T'}{6}$; in the game where
+  the bad action is played at least $\frac{T'}{12}$ times in expectation,
+  $\PSMR_T \ge T'(\frac1{12}(\DR - K\eps) - \frac{11}{12} \eps \DC)$ (the rounds after $T'$
+  contribute nonnegatively). Two cases: if $\frac{1}{\DR \DC} < 13 \sqrt T$, $K = 1$,
+  $\eps = \DR - 12 \DR \DC$, $T' = \lfloor (13 \DR \DC)^{-2}\rfloor$, which gives
+  $\PSMR_T \ge c' / (\DR \DC)$; otherwise $T' = T$, $\eps = \min\{1, \frac{1}{13 \DC \sqrt T}\}
+  \ge \DR$, $K = (\DR - \frac{12}{13 \sqrt T})/\eps$, which gives $\PSMR_T \ge \frac{\sqrt T}{156}$.
+  The game chosen depends on the learner.
+\end{proof}

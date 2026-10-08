@@ -1,0 +1,102 @@
+\chapter{Bilinear games (Section 6, Appendices E and F)}
+\label{chap:bilinear}
+
+\section{Uninformed learning with Tsallis-FTRL-SPM}
+
+\begin{theorem}[Theorem 5]
+  \label{thm:tsallis_bilinear}
+  \lean{Ito2026Adversarial.forall_exists_psmr_tsallisSPMPaper_le}
+  \leanok
+  \uses{def:tsallis_spm, lem:tsallis_spm_regret, lem:regret_relations, lem:sqrt_func,
+    lem:self_bound}
+  For every $c > 0$ there is $C$ such that for every bilinear game with $m_x \ge 2$, every exploration
+  distribution $p_0$ with variance ratio $c$, every adaptive adversary and every reward noise with
+  conditional mean $u$ and rewards in $[-1, 1]$, Tsallis-FTRL-SPM with the parameters of the
+  theorem has $\PSMR_T \le C(\sqrt{T d_x \log m_x} + m_x \log m_x)$; if $(x^\star, y^\star)$ is a
+  strict PSNE, $\PSMR_T \le C(d_x \log m_x (1 + \log T)(1 + \frac{1}{\DCmin})/\DRmin + m_x \log m_x)$;
+  and if $\Dmix > 0$, $\PSMR_T \le C(\frac{d_x \log m_x}{\Dmix} + m_x \log m_x)$.
+\end{theorem}
+
+\begin{proof}
+  \uses{lem:tsallis_spm_regret, lem:regret_relations, lem:sqrt_func, lem:self_bound}
+  As for Theorem~\ref{thm:tsallis}, with the regret bound of Tsallis-FTRL-SPM
+  (Lemma~\ref{lem:tsallis_spm_regret}) in place of those of Tsallis-INF, and
+  $\ER_T(x^\star) \ge \E[\sum_t \langle p_t, \DR\rangle] - 2C$ for bilinear games (features and
+  $A$ of norm at most $1$). With $\alpha = 1 - \frac{1}{4 \log m_x}$,
+  $\frac{m_x^{1 - \alpha}}{\alpha(1 - \alpha)} = O(\log m_x)$.
+\end{proof}
+
+\begin{remark}
+  \label{rem:tsallis_bilinear_statement}
+  As in Theorem~\ref{thm:tsallis}: the paper's strict-PSNE bound
+  $O(\frac{d_x \log m_x}{\DRmin \DCmin} \log T + m_x \log m_x)$ follows from the stated form when
+  $m_y \ge 2$, $T \ge 2$, and is false in Lean for $m_y = 1$; the no-PSNE bound is stated under
+  $\Dmix > 0$ (Remark~\ref{rem:no_psne_gap}). The paper's ``suitable choice of $p_0$'' is any
+  exploration distribution with variance ratio $c$, whose design matrix is positive definite
+  (implicit in the paper).
+\end{remark}
+
+\section{Informed learning with Maximin-LinUCB}
+
+\begin{lemma}[Confidence ellipsoid, Lemma 13]
+  \label{lem:conf_ellipsoid}
+  \lean{Ito2026Adversarial.probReal_forall_sqrt_mahalanobisSq_le_ge}
+  \leanok
+  \uses{def:maximin_linucb, lem:self_normalized, lem:log_det_le}
+  In a run of any informed player in a bilinear game, against any adaptive adversary, with reward
+  noise of conditional mean $u$ and rewards in $[-1, 1]$, for $\lambda > 0$ and $\delta \in (0, 1)$,
+  with probability at least $1 - \delta$, for all $t$, $\norm{\vect(A) - V_t^{-1} b_t}_{V_t} \le
+  \beta_t$.
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:self_normalized, lem:log_det_le, lem:bounded_noise_subgaussian}
+  $b_t = (V_t - \lambda I)\vect(A) + S_t$ with $S_t = \sum_{s \le t} \eps_s a_s$, so
+  $\vect(A) - V_t^{-1} b_t = V_t^{-1}(\lambda \vect(A) - S_t)$ and
+  $\norm{\cdot}_{V_t} \le \norm{S_t}_{V_t^{-1}} + \sqrt\lambda \norm{\vect(A)}$. The noise is
+  conditionally $1$-sub-Gaussian (Lemma~\ref{lem:bounded_noise_subgaussian}); Lemma~\ref{lem:self_normalized}
+  bounds $\norm{S_t}_{V_t^{-1}}^2 \le 2 \log(1/\delta) + \log(\det V_t/\lambda^d)$, and
+  Lemma~\ref{lem:log_det_le} bounds the last term by $d \log(1 + \frac{t}{d\lambda})$ ($\norm{a_s}
+  = \norm{x_s}\norm{y_s} \le 1$). Finally $\norm{\vect(A)} = \norm{A}_F \le \sqrt{d}$ since
+  $\norm{A}_2 \le 1$ and $A$ has rank at most $\min(d_x, d_y)$.
+\end{proof}
+
+\begin{theorem}[Theorem 12]
+  \label{thm:purelinucb}
+  \lean{Ito2026Adversarial.exists_psmr_maximinLinUCB_le}
+  \leanok
+  \uses{def:maximin_linucb, lem:conf_ellipsoid, lem:elliptical_potential, def:regrets}
+  There is a universal constant $C$ such that for every bilinear game, every $T \ge 2$, every
+  adaptive adversary and every reward noise with conditional mean $u$ and rewards in $[-1, 1]$,
+  Maximin-LinUCB with $\lambda = 1$ and the radii $\beta_t$ of $\delta = 1/T$ has
+  $\PSMR_T \le C d_x d_y \sqrt T \log T$ and $\PSMR_T \le C \frac{d_x^2 d_y^2 \log^2 T}{\Dlin}$ for
+  every gap threshold $\Dlin > 0$.
+\end{theorem}
+
+\begin{proof}
+  \uses{lem:conf_ellipsoid, lem:elliptical_potential}
+  On the event of Lemma~\ref{lem:conf_ellipsoid}, $\abs{u(x, y) - \langle x, \hat A_t y\rangle} \le
+  \beta_{t-1} \norm{\vect(x y^\top)}_{V_{t-1}^{-1}}$ (Cauchy--Schwarz for the $V_{t-1}$ inner
+  product) and $\beta_{t-1} \le \beta_t$, so $u \le U_t$ and, as for Theorem~\ref{thm:pureucb},
+  $\vstar \le U_t(x_t, y_t)$, whence $\vstar - u(x_t, y_t) \le 2 \beta_T \norm{a_t}_{V_{t-1}^{-1}}$.
+  Lemma~\ref{lem:elliptical_potential} bounds $\sum_t \norm{a_t}^2_{V_{t-1}^{-1}}$ by
+  $2 d \log(1 + T/d)$; the worst-case bound follows by Cauchy--Schwarz, the instance-dependent one
+  from $\vstar - u \le (\vstar - u)^2/\Dlin$ (as $\vstar - u \notin (0, \Dlin)$). The failure event,
+  of probability at most $1/T$, contributes at most $2$.
+\end{proof}
+
+\begin{theorem}[Theorem 6]
+  \label{thm:purelinucb_informal}
+  \lean{Ito2026Adversarial.exists_forall_exists_psmr_maximinLinUCB_le}
+  \leanok
+  \uses{thm:purelinucb}
+  There is a universal constant $C$ such that for every bilinear game and every $T \ge 2$ there are
+  parameters $(\lambda, \beta)$ of Maximin-LinUCB with $\PSMR_T \le C d_x d_y \sqrt T \log T$ and
+  $\PSMR_T \le C \frac{d_x^2 d_y^2 \log^2 T}{\Dlin}$, against every adaptive adversary and reward
+  noise.
+\end{theorem}
+
+\begin{proof}
+  \uses{thm:purelinucb}
+  Theorem~\ref{thm:purelinucb}.
+\end{proof}

@@ -1,0 +1,117 @@
+\chapter{Elementary facts on games and regrets (Appendix A)}
+\label{chap:games}
+
+\begin{lemma}[Lemma 7]
+  \label{lem:sqrt_func}
+  \lean{Ito2026Adversarial.sqrt_mul_sub_mul_le}
+  \leanok
+  For $a, b > 0$ and $x \ge 0$, $\sqrt{a x} - b x \le \frac{a}{4b}$, with equality at
+  $x = \frac{a}{4b^2}$.
+\end{lemma}
+
+\begin{proof}
+  $\frac{a}{4b} - \sqrt{ax} + bx = \bigl(\sqrt{bx} - \frac{\sqrt a}{2\sqrt b}\bigr)^2 \ge 0$, which
+  vanishes at $x = a/(4b^2)$.
+\end{proof}
+
+\begin{lemma}[Self-bounding, Lemma 8]
+  \label{lem:self_bound}
+  \lean{Ito2026Adversarial.le_add_sqrt_add_of_le_sqrt_add}
+  \leanok
+  If $x, a, b, c \ge 0$ and $x \le \sqrt{a x + b} + c$, then $x \le a + \sqrt b + 2c$.
+\end{lemma}
+
+\begin{proof}
+  If $x \le c$ this is clear. Otherwise $(x - c)^2 \le a x + b$, so $x$ is at most the larger root
+  $\frac a2 + c + \sqrt{\frac{a^2}{4} + b + ac}$ of the quadratic, and
+  $\frac{a^2}{4} + b + ac \le (\frac a2 + \sqrt b + c)^2$.
+\end{proof}
+
+\begin{lemma}[Maximin mixed strategies]
+  \label{lem:maximin_attained}
+  \uses{def:values}
+  For a game with nonempty finite action sets, there is a distribution $p^\star$ with
+  $u(p^\star, y) \ge \vnash$ for every $y \in \Y$, and $\vstar \le \vnash$.
+\end{lemma}
+
+\begin{proof}
+  $p \mapsto \min_y u(p, y) = \inf_q u(p, q)$ is continuous on the compact simplex, so the
+  supremum defining $\vnash$ is attained. The second claim is in the library
+  (\texttt{pureMaximin\_le\_nashValue}).
+\end{proof}
+
+\begin{lemma}[Relations between regrets]
+  \label{lem:regret_relations}
+  \uses{def:regrets, lem:maximin_attained}
+  For every run of a learner against an adversary:
+  \begin{enumerate}
+    \item $\NR_T = \PSMR_T + \Dmix T$ and $\NR_T \le \ER_T$;
+    \item if $(x^\star, y^\star)$ is a strict PSNE and $C = \E[\#\{t < T : y_t \ne y^\star\}]$, then
+      $\ER_T(x^\star) - \PSMR_T = \E[\sum_{t < T} \indic\{y_t \ne y^\star\} \DC_{y_t}] \ge C \DCmin$;
+    \item if moreover $x_t$ has conditional law $p_t$ given the past and is conditionally
+      independent of $y_t$, and the utilities lie in $[-1, 1]$, then
+      $\E[\sum_{t < T} \langle \DR, p_t \rangle] - \ER_T(x^\star) \le 4 C$.
+  \end{enumerate}
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:maximin_attained}
+  (1) The first identity is linearity; for the second, with $p^\star$ of
+  Lemma~\ref{lem:maximin_attained},
+  $\vnash - u(x_t, y_t) \le u(p^\star, y_t) - u(x_t, y_t) = \sum_x p^\star_x (u(x, y_t) - u(x_t, y_t))$,
+  so $\NR_T \le \sum_x p^\star_x \ER_T(x) \le \ER_T$. (2) $\vstar = u(x^\star, y^\star)$ for a
+  PSNE, so $u(x^\star, y_t) - \vstar = \indic\{y_t \ne y^\star\} \DC_{y_t}$. (3) The summand
+  $\DR_{x_t} - (u(x^\star, y_t) - u(x_t, y_t)) = u(x^\star, y^\star) - u(x^\star, y_t) + u(x_t, y_t) -
+  u(x_t, y^\star)$ vanishes when $y_t = y^\star$ and is at most $4$; and
+  $\E[\DR_{x_t}] = \E[\langle \DR, p_t\rangle]$.
+\end{proof}
+
+\begin{remark}
+  \label{rem:no_psne_gap}
+  The paper asserts that a game without PSNE has $\Dmix > 0$. This fails in general: the game with
+  rows $(0, 0)$, $(1, -1)$, $(-1, 1)$ has no PSNE and $\vstar = \vnash = 0$ (row $1$ guarantees $0$,
+  and a mixed strategy $p$ gets $\min(p_2 - p_3, p_3 - p_2) \le 0$). For $2 \times 2$ games it holds
+  (Lemma~\ref{lem:delta_comparison}). The no-PSNE bounds of Theorems~\ref{thm:tsallis}
+  and~\ref{thm:tsallis_bilinear} are therefore stated under $\Dmix > 0$, which is all their proofs
+  use.
+\end{remark}
+
+\begin{lemma}[$2 \times 2$ games without PSNE]
+  \label{lem:two_by_two_value}
+  \uses{def:values, lem:maximin_attained}
+  Let $u = \begin{pmatrix} a & b \\ c & d \end{pmatrix}$ have no PSNE. Up to swapping the rows
+  and/or the columns (which preserves $\vstar$, $\vnash$, $\DM$ and the absence of PSNE),
+  $a > b$, $d > b$, $d > c$, $a > c$ and $b \ge c$; then $\vstar = b$ and
+  $\vnash = \frac{ad - bc}{a - b - c + d}$.
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:maximin_attained}
+  The absence of PSNE forces the cyclic order of the best responses. With
+  $p^\star = \frac{(d - c, a - b)}{a - b - c + d}$, $u(p^\star, y)$ equals
+  $\frac{ad - bc}{a - b - c + d}$ for both columns, so $\vnash \ge$ this value; with
+  $q^\star = \frac{(d - b, a - c)}{a - b - c + d}$, $u(x, q^\star)$ equals it for both rows, so
+  $u(p, q^\star)$ is this value for every $p$ and $\vnash \le$ it.
+\end{proof}
+
+\begin{lemma}[Lemma 10]
+  \label{lem:delta_comparison}
+  \lean{Ito2026Adversarial.sq_entryGap_div_four_le_mixGap}
+  \leanok
+  \uses{lem:two_by_two_value}
+  Let $u$ be a $2 \times 2$ game with entries in $[-1, 1]$ and without PSNE. Then
+  $\Dmix \ge \DM^2/4$.
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:two_by_two_value}
+  By Lemma~\ref{lem:two_by_two_value}, $\Dmix = \frac{(a - b)(d - b)}{a - b - c + d}$ with
+  $a - b \ge \DM$, $d - b \ge \DM$ and $a - b - c + d \le 4$.
+\end{proof}
+
+\begin{remark}
+  \label{rem:delta_comparison_statement}
+  The paper assumes a unique mixed-strategy Nash equilibrium. The lemma is false for a unique
+  \emph{pure} equilibrium, where $\Dmix = 0$, and the proof uses the absence of PSNE; a $2 \times 2$
+  game without PSNE has a unique MSNE, so uniqueness is not assumed here.
+\end{remark}

@@ -1,0 +1,17 @@
+\subsection{Related Work}
+
+\paragraph{Adversarial Bandits.}
+The problem of making repeated decisions against a potentially adaptive adversary has been extensively studied in the Multi-Armed Bandit (MAB) framework. Optimal regret bounds of order $\order(\sqrt{T})$ in the worst case are well-established for the adversarial setting, achieved by algorithms like Exp3 and its variants \citep{auer2002nonstochastic,bubeck2012regret}.
+A recent focus has been on ``best-of-both-worlds'' algorithms, such as Tsallis-INF by \citet{zimmert2021tsallisinf}, which achieve optimal performance in both stochastic and adversarial bandit settings without knowing the regime. %
+Our work builds upon these algorithms, extending them to the game-theoretic setting.
+
+\paragraph{Learning in Games.}
+In the context of game theory, significant progress has been made in learning to play games. Starting from \citet{daskalakis2011near,rakhlin2013optimization}, a large body of research analyzes the self-play setting with full gradient feedback, and a series of work improved the regret to a near-optimal $\order(\log T)$ bound; see e.g.,~\citet{syrgkanis2015fast, daskalakis2021near,farina2022near, soleymani2025cautious}. In the special case of two-player zero-sum games, an optimal $\order(1)$ regret bound (focusing on the $T$ dependence only) is achievable~\citep{rakhlin2013optimization, syrgkanis2015fast}. %
+
+Learning in games with bandit feedback is significantly less researched. While standard bandit algorithms can be applied, they often fail to exploit the game-theoretic properties of the setting. When two players collaborate, the sample complexity of identifying a Nash equilibrium with bandit feedback is investigated by \citet{maiti2023instancedependent, maiti2024nearoptimal}. In the self-play setting, a recent work by \citet{ito2025instancedependent} demonstrates that instance-dependent $\order(\log T)$ external regret is achievable. 
+An earlier work by~\citet{wei2018more} also studied the self-play setting and obtained $o(\sqrt{T})$ regret, albeit under a stronger feedback model.
+When playing against an adversary,
+variants of UCB and K-learning were shown to enjoy $\order(\sqrt T)$ worst-case Nash-value regret by \citet{odonoghue2021matrix},
+while \citet{maiti2025limitations} proposed an algorithm that achieves instance-dependent $\order(\log T)$ Nash-value regret under the assumption that the game is $2\times 2$ and has a unique Nash equilibrium. We defer more discussion on the feedback models to~\Cref{h1a:uninformed-informed}.
+
+

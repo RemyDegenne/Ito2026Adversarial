@@ -1,0 +1,21 @@
+{
+    "challenge_module": "Challenge_exists_psmr_maximinUCB_le",
+    "solution_module": "Solution",
+    "theorem_names": [
+        "Ito2026Adversarial.exists_psmr_maximinUCB_le",
+        "exists_argmax",
+        "Learning.Algorithm.deterministic._proof_1",
+        "Learning.Algorithm.index._proof_1",
+        "Ito2026Adversarial.ucbIndex._proof_1",
+        "Ito2026Adversarial.maximinUCB._proof_1",
+        "Learning.RepeatedGame.gameEnv._proof_1",
+        "Learning.RepeatedGame.gameEnv._proof_2",
+        "Learning.RepeatedGame.gameEnv._proof_3",
+        "Learning.RepeatedGame.gameEnv._proof_4"
+    ],
+    "permitted_axioms": [
+        "propext",
+        "Quot.sound",
+        "Classical.choice"
+    ]
+}

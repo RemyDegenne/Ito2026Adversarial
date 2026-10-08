@@ -1,0 +1,12 @@
+{
+    "challenge_module": "Challenge_le_add_sqrt_add_of_le_sqrt_add",
+    "solution_module": "Solution",
+    "theorem_names": [
+        "Ito2026Adversarial.le_add_sqrt_add_of_le_sqrt_add"
+    ],
+    "permitted_axioms": [
+        "propext",
+        "Quot.sound",
+        "Classical.choice"
+    ]
+}

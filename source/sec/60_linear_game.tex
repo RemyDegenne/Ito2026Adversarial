@@ -1,0 +1,81 @@
+\section{Extension to General Bilinear Games}\label{h1:linear-games}
+
+In this section, we return to the general bilinear setting, where the action sets $\calX \subset \dR^{d_x}, \calY \subset \dR^{d_y}$ are arbitrary finite sets with large cardinalities $m_x$ and $m_y$.
+We assume without loss of generality that $\calX$ and $\calY$ span $\dR^{d_x}$ and $\dR^{d_y}$, respectively. We further assume that $\normm{x}_2\leq 1$, $\normm{y}_2\leq 1$ for any $x\in \calX$ and $y\in \calY$, and $\normm{A}_2 \leq 1$; this implies $u(x,y)=\inner{x}{Ay}\in [-1, 1]$.
+This framework generalizes the stochastic linear bandit problem \citep{abbasi-yadkori2011improved}, which is recovered when $\calY$ is a singleton ($|\calY|=1$).
+Similar to the motivation behind linear bandits, we investigate this setting to derive
+regret bounds with dominant terms that scale polynomially with dimensions $d_x, d_y$, but only logarithmically with the action set sizes $m_x,m_y$.
+
+\subsection{Uninformed Learning in Bilinear Games with \TsallisSPM{}}\label{h2:tsallis-spm}
+
+As Tsallis-INF is shown to be successful in normal-form games (\Cref{h2:tsallis-inf}), it is more than natural to extend it to bilinear games.
+Indeed, for adversarial linear bandits, \citet{ito2024adaptive} have generalized Tsallis-INF and proposed an algorithm, which we will refer to as \TsallisSPM, to achieve similar best-of-both-worlds results.
+We consider using the same algorithm for uninformed learning in general bilinear games, shown in \Cref{alg:tsallis-spm}.
+It is again based on the FTRL framework,
+but uses a variant of the Tsallis entropy regularizer (\Cref{line:FTRL}),
+a reward estimator tailored to the linear structure (\Cref{line:estimator}), and a more sophisticated exploration and learning rate schedule (\Cref{line:explore} and \Cref{line:learning_rate}).
+
+\begin{algorithm}[t]
+\caption{\TsallisSPMLong}\label{alg:tsallis-spm}
+\begin{algorithmic}[1]
+\Require A Tsallis entropy parameter $\alpha\in (0, 1)$ (\textit{c.f.} \eqref{eq:tsallis}), learning rate parameters $\beta_1>0$, $\bar{\beta}\geq 0$, a fixed exploration distribution $\pzero$ with a variance ratio $c>0$.
+\For{$t=1,2,\dots$}
+  \State Let $\phat!t = \argmax_{p\hspace{0.08em}\in \simplex^{m_x}} \cbrm[\big]{\inner{p}{\sum_{s<t} g!s} + \beta_t \varphi_\alpha(p)+\bar{\beta} \varphi_{1-\alpha}(p)}.$
+  \State Set $z_t=\frac{d_x\rbr{\min\{\normm{\phat!t}_\infty,1-\normm{\phat!t}_\infty\}}^{1-\alpha}}{1-\alpha}$.\label{line:FTRL}
+  \State Set the exploration coefficient $\gamma_t=\frac{4c z_t}{\beta_t}$.
+  \State Compute the distribution $p!t = (1-\gamma_t) \phat!t + \gamma_t \pzero$. \label{line:explore}
+  \State Sample $x!t\in \calX$ from the distribution specified by $p!t$ and play it.
+  \State Observe the reward $r_t$.
+  \State Define reward estimator $g!t\in \dR^\calX$, where
+      $g!t_x = r_t \inner{x!t}{S(p!t)^{-1}x}$
+      and $S(p)\defeq \EE_{x\sim p}[xx^\trans]$. \label{line:estimator}
+  \State Set the learning rate of the next round $\beta_{t+1}=\beta_t+\frac{z_t}{\beta_t h_t}$ where $h_t=\varphi_a(\phat!t)$. \label{line:learning_rate}
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+While the algorithm is from prior work, we again provide a novel analysis for the game setting, using the same instance-dependent parameters $\DRmin$, $\DCmin$, $\DeltaMix$ defined in \Cref{h2:tsallis-inf} (note that in these definitions, $\calX$ and $\calY$ are now general sets instead of the standard basis sets.). %
+
+\begin{theorem}\label{thm:tsallis-bilinear}
+    With $\alpha=1-\frac{1}{4\log m_x}$, $\beta_1= \frac{8 c d_x}{1-\alpha}$, $\bar{\beta}= \frac{32d_x}{(1-\alpha)^2 \beta_1}$, and a suitable choice of $\pzero$, in any bilinear game, against any adaptive adversary, \TsallisSPM{} achieves a worst-case regret bound of $\psmr_T=\order\rbrm[\big]{\sqrt{T d_x \log m_x} + m_x \log m_x}$.
+    Additionally,
+    \begin{itemize}[noitemsep,topsep=0pt]
+        \item If the game has a strict PSNE, we further have $\psmr_T=\order\rbrm[\big]{\frac{d_x \log m_x}{\DRmin\DCmin}\log T + m_x \log m_x}$.
+        \item If the game has no PSNEs, we further have $\psmr_T = \order\rbrm[\big]{\frac{d_x \log m_x}{\DeltaMix} + m_x \log m_x}$.
+    \end{itemize}
+\end{theorem}
+
+
+The proof is similar to \Cref{thm:tsallis} and is deferred to \Cref{h1a:proof-tsallis-bilinear}.
+Importantly, all $T$-dependent terms have only logarithmic dependence on $m_x$.
+The additive $m_x\log m_x$ term is not ideal but was present in~\citet{ito2024adaptive} already.
+On the other hand, if one were to ignore the linear structure, treat this as a normal game with $m_x$ actions (for the learner), and apply Tsallis-INF, then the bound would have a polynomial dependency, as either $\sqrt{m_x T}$ (worst-case) or $\frac{1}{\DCmin}m_x\log T$ (instance-dependent).
+
+%
+
+\subsection{Informed Learning in Bilinear Games with \PureLinUCB{}}\label{h2:linucb}
+
+Finally, we turn to the informed feedback setting for general bilinear games.
+Analogous to our approach in \Cref{h1:pure-ucb}, we extend the classical LinUCB algorithm \citep{abbasi-yadkori2011improved} to the game-theoretic setting.
+
+
+
+
+
+The algorithm is based on the observation that the reward of a bilinear game is linear in its matrix $A$: $u(x,y)=\inner{x}{Ay}=\inner{A}{x y^\trans}$. The feedback $r_t$ in each round is therefore a noisy linear projection of $A$. 
+The algorithm can thus maintain an estimate for $A$, utilize a LinUCB-style confidence ellipsoid to determine an optimistic reward estimate for each action pair, and play the pure maximin action based on the upper confidence bounds, analogous to \PureUCB.
+The formal description of this algorithm, which we name \PureLinUCB{}, is deferred to \Cref{h1a:proof-purelinucb}.
+
+
+To analyze this algorithm, we let $\DeltaLin>0$ be such that $\vStar - u(x,y)\in (-\infty,0]\cup [\DeltaLin, +\infty)$. This parameter always exists since $\calX$ and $\calY$ are finite. In the special case of normal-form games, the parameter $\DeltaLin$ would be equal to $\min_{x,y} \cbr{\Delta_{xy}\mid \Delta_{xy}>0}$. 
+
+We show that \PureLinUCB{} effectively exploits the low-dimensional nature of the bilinear game.
+The full analysis is deferred to \Cref{h1a:proof-purelinucb}, with
+the main result summarized below.
+
+\begin{theorem}\label{thm:purelinucb-informal}
+    For any bilinear game, against any adaptive adversary, \PureLinUCB{} achieves a worst-case regret of $\psmr_T=\order\rbrm[\big]{d_x d_y \sqrt{T} \log T}$ and an instance-dependent regret of $\psmr_T=\order\rbrm[\big]{\frac{1}{\DeltaLin}d_x^2 d_y^2 \log^2 T}$ simultaneously.
+\end{theorem}
+
+Note that the bounds scale polynomially with the feature dimensions $d_x$ and $d_y$, but have no dependence on $m_x$ and $m_y$ at all (unlike \Cref{thm:tsallis-bilinear}).
+Once again, if one were to treat this as a normal-form game and apply \PureUCB{}, then its bound suffers a polynomial dependency on $m_x$ and $m_y$.

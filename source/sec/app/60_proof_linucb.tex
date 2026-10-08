@@ -1,0 +1,143 @@
+\section{Informed Learning in Bilinear Games}\label{h1a:proof-purelinucb}
+
+In this section, we detail our technical results in informed feedback learning in bilinear games, briefly mentioned in \Cref{h2:linucb}. We extend \PureUCB{} and propose \PureLinUCB{}, extending the classical LinUCB algorithm~\citep{abbasi-yadkori2011improved}; see \Cref{alg:pure-lin-ucb}.
+
+\begin{algorithm}[h]
+\caption{\PureLinUCB}\label{alg:pure-lin-ucb}
+\begin{algorithmic}[1]
+\Require A regularization coefficient $\lambda\in \dR_+$. A sequence of confidence radius multipliers $\beta_1, \beta_2, \dots\in \dR^+$.
+\State Initialize $V!0=\lambda I_{d_x d_y}\in \dR^{(d_x d_y)\times (d_x d_y)}$, $b!0=\mathbf{0}\in \dR^{d_x d_y}$. \label{code:ridge-init}
+\For{$t=1,2,\dots$}
+  \State Compute $\Ahat!t=\mat_{d_x\times d_y}(\rbrm{V!{t-1}}^{-1} b!{t-1})$. \label{line:ridge}
+  \State Define the UCB for any pair $(x,y)$ as\\
+  \centerline{$U!t(x,y)=\anglem[\big]{x,\Ahat!t y}+\beta_t \norm{\vect (x y^\trans)}_{\rbrm{V!{t-1}}^{-1}}.$}\label{code:U-def}
+  \State Let  $x!t = \argmax_{x\in \calX} \min_{y\in \calY} U!t(x,y)$ with ties broken arbitrarily.
+  \label{line:pure_maximin}
+  \State Play $x!t$. Observe the adversarial action $y!t$ and the reward $r_t$.
+  \State Let $a!t = \vect(x!t \rbrm{y!t}^\trans)$.
+  \State Update the covariance matrix and bias vector for ridge regression: $V!t=V!{t-1}+a!t \rbrm{a!t}^\trans$, $b!t=b!{t-1}+r_t a!t$. \label{code:ridge-update}
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+
+In the definition of this algorithm, we distinguish between $\dR^{d_x\times d_y}$, the set of $d_x\times d_y$ matrices, and $\dR^{d_x d_y}$, vectors of length $d_x d_y$. Let $\vect(\cdot)$ be the ``flatten'' map that turns matrices to vectors of length $d_x d_y$, and let $\mat_{d_x\times d_y}(\cdot)$ be its inverse, turning vectors into $d_x\times d_y$ matrices. 
+
+
+The algorithm is based on the observation that the reward of a bilinear game is linear in its matrix $A$: $u(x,y)=\inner{x}{Ay}=\inner{\vect(A)}{\vect(x y^\trans)}$. The feedback $r_t$ in each round is thus a noisy linear projection of $\vect(A)$. 
+The algorithm thus maintains a ridge regression estimate for $\vect(A)$ (\Cref{line:ridge} and \Cref{code:ridge-update}) and utilizes a LinUCB-style confidence bound to determine an optimistic reward estimate for each action pair (\Cref{code:U-def}). 
+Finally, the algorithm again plays the pure maximin action based on the upper confidence bounds (\Cref{line:pure_maximin}), analogous to \PureUCB.
+
+Recall that we define the instance-dependent parameter $\DeltaLin>0$ be such that $\vStar - u(x,y)\in (-\infty,0]\cup [\DeltaLin, +\infty)$.
+We present the formal version of \Cref{thm:purelinucb-informal}:
+
+\begin{theorem}\label{thm:purelinucb}
+    \PureLinUCB{} achieves a worst-case regret of $\psmr_T=\order\rbrm[\big]{d_x d_y \sqrt{T} \log T}$ and an instance-dependent regret of $\psmr_T=\order\rbrm[\big]{\frac{1}{\DeltaLin}d_x^2 d_y^2 \log^2 T}$ simultaneously, against any adaptive adversary, by letting $\beta_t=\sqrt{\lambda d_x d_y}+\sqrt{2\log \delta^{-1}+d_x d_y \log \rbrm[\big]{1+\frac{t}{d_x d_y\lambda}}}$, $\delta=\frac{1}{T}$, and $\lambda=1$.
+\end{theorem}
+
+
+\begin{proof}
+Let $x^*=\argmax_{x\in \calX} \min_{y\in \calY} u(x,y)$ and $y^* = \argmin_{y\in \calY} u(x^*,y)$ with ties broken arbitrarily. Define $a^*=\vect(x^* (y^*)^\trans)$. We also know that $\vStar=u(x^*,y^*)=\inner{\vect(A)}{a^*}$.
+
+In each round, we know that $r_t$ is a noisy linear observation on $\vect(A)$, or formally, $r_t=\inner{\vect(A)}{a!t}+\eps_t$. \Cref{code:ridge-init,code:ridge-update} of \Cref{alg:pure-lin-ucb} uses these observations to build a ridge regression on $\vect(A)$, where $\Ahat!t$ is the regularized least-square estimator for $A$. The usual analysis of LinUCB, e.g. Theorem 2 of \cite{abbasi-yadkori2011improved}, is applicable here and states that $A$ is within a confidence ellipsoid centered at $\Ahat!t$ with high probability, captured by the following lemma.
+
+\begin{lemma}[Confidence ellipsoid]\label{lem:conf-ellipsoid}
+    For any fixed parameters $\lambda>0$ and $\delta\in (0, 1)$, we have for probability at least $1-\delta$, $A\in \confset_t$ for all $t=1,2,\dots$, where
+    \begin{equation}
+        \confset_t=\cbr{A'\in \dR^{d_x\times d_y}\mid \normm[\big]{\vect(A')-\vect(\Ahat!t)}_{V!t}\leq \beta_t},
+    \end{equation}
+    in which $V!t=\lambda I + \sum_{s=1}^t a!s \rbrm[\big]{a!s}^\trans$ is symmetric and positive definite, $b!t=\sum_{s=1}^t r_s a!s$, $\Ahat!t=\mat\rbrm[\big]{(V!t)^{-1}b!t}$, and $\beta_t=\sqrt{\lambda d_x d_y} +\sqrt{2\log\rbrm[\big]{\frac{1}{\delta}}+d_x d_y \log \rbrm[\big]{1+\frac{t}{d_x d_y\lambda}}}$.
+\end{lemma}
+
+Note that the sequence $\{\beta_t\}$ is monotonically increasing. Our form of the lemma differs slightly from the standard form in \cite{lattimore2020bandit}, as our $\vect(A)$ has a dimension of $d_x d_y$ and its norm is upper-bounded as $\norm{\vect(A)}_2=\norm{A}_F\leq \sqrt{d_x d_y}$, but it is a direct implication of the standard result.
+
+We first assume that the high-probability event in \Cref{lem:conf-ellipsoid} holds. When $A\in \confset_t$, $u(x,y)$ for an arbitrary action pair is upper bounded by
+\begin{align*}
+    u(x,y) &\leq \max_{A'\in \confset_t} \inner{x}{A'y} \\
+    & = \max_{\norm{A'-\Ahat!t}_{V!t}\leq \beta_t} \inner{\vect(x y^\trans)}{\vect(A')} \\
+    & = \max_{\norm{\theta'}_2\leq \beta_t} \inner{\vect(x y^\trans)}{\vect(\Ahat!t)+(V!t)^{\sfrac {-1}2}\theta'} \\
+    & = \anglem[\big]{x,\Ahat!t y} + \max_{\norm{\theta'}_2\leq \beta_t} \inner{(V!t)^{\sfrac {-1}2}\vect(x y^\trans)}{\theta'} \yestag\label{eq:conf-symmetry}\\
+    & = \anglem[\big]{x,\Ahat!t y} + \beta_t \norm{\vect(x y^\trans)}_{(V!t)^{-1}} \yestag\label{eq:max-inner-norm} \\
+    & = U!{t+1}(x,y).
+\end{align*}
+In the derivation above, $\theta'$ is defined to be $\sqrt{V!t}\rbrm[\big]{\vect(A')-\vect(\Ahat!t)}$, \eqref{eq:conf-symmetry} is due to $V!t$ being symmetric, \eqref{eq:max-inner-norm} uses $\max_{\norm{a}_2\leq C} \inner{a}{b}=C \norm{b}_2$, and the last step is the definition of $U!{t+1}$ in \Cref{code:U-def} of the algorithm.
+
+With a similar argument, we can also prove that $u(x,y)\geq \anglem[\big]{x,\Ahat!t y} - \beta_t \norm{\vect(x y^\trans)}_{(V!t)^{-1}}$.
+This shows that $\beta_t \norm{\vect(x y^\trans)}_{(V!t)^{-1}}$ is a confidence radius of $u(x,y)$.
+Together with the definition of $U!{t+1}$, we can imply that $u(x,y)\geq U!{t+1}(x,y)-2\beta_t \norm{\vect(x y^\trans)}_{(V!t)^{-1}}$.
+
+Using the same logic as \eqref{eq:played-ucb-geq-vstar} in our proof of \Cref{thm:pureucb}, we know that $\vStar\leq U!t(x!t,y!t)$ for every round $t$.
+The per-round regret can be bounded as
+\begin{align*}
+    \vStar-u(x!t,y!t)
+    & \leq U!t(x!t,y!t)-u(x!t,y!t) \\
+    & \leq 2\beta_t \normm[\big]{a!t}_{(V!{t-1})^{-1}} \leq 2 \beta_T \normm[\big]{a!t}_{(V!{t-1})^{-1}}. \yestag\label{eq:linucb-per-round}
+\end{align*}
+The last step is due to $\{\beta_t\}$ being monotonic. Therefore, to prove a bound on the total PSMR, we only need to upper-bound the sum of the RHS.
+
+The rest of the proof is purely algebraic and mostly identical to that of LinUCB.
+
+We focus on the worst-case regret first. First, use Cauchy-Schwarz to obtain
+\[
+    \sum_{t=1}^T \normm[\big]{a!t}_{(V!{t-1})^{-1}}\leq \sqrt{T \sum_{t=1}^T \normm[\big]{a!t}^2_{(V!{t-1})^{-1}}}.
+\]
+The summand in the RHS is similar to $\normm[\big]{a!t}^2_{(V!{t})^{-1}}$, which can be bounded as
+\[
+    \normm[\big]{a!t}^2_{(V!{t})^{-1}} 
+    = \anglem[\big]{(V!{t})^{-1},a!t (a!t)^\trans} 
+    = \anglem[\big]{(V!{t})^{-1},V!t - V!{t-1}}
+    \leq \ln \det V!t - \ln \det V!{t-1},
+\]
+where the last step uses the concavity of the matrix function $M\mapsto \ln\det(M)$, the gradient of which is exactly $M^{-1}$.
+
+By a telescoping argument, $\sum_{t=1}^T \normm[\big]{a!t}^2_{(V!{t})^{-1}}\leq \ln\det V!T-\ln\det V!0$. The initial value is known as $\ln\det V!0=d_x d_y \ln\lambda$. The final value can be bounded with the AM-GM inequality over its eigenvalues,
+\begin{align*}
+    \det V!T
+    & \leq \rbrm[\bigg]{\frac{\trace(V!T)}{d_x d_y}}^{d_x d_y}
+    = \rbrm[\bigg]{\frac{\lambda d_x d_y + \sum_{t=1}^{T} \trace\rbrm[\big]{a!t (a!t)^\trans}}{d_x d_y}}^{d_x d_y} \\
+    & = \rbrm[\bigg]{\lambda + \frac{\sum_{t=1}^{T} (a!t)^\trans a!t}{d_x d_y}}^{d_x d_y}
+    \leq \rbrm[\bigg]{\lambda + \frac{T}{d_x d_y}}^{d_x d_y},
+\end{align*}
+where the last step is due to $\normm[\big]{a!t}_2=\normm[\big]{x!t (y!t)^\trans}_F=\normm[\big]{x!t}_2\normm[\big]{y!t}_2\leq 1$. Subtracting the initial and final $\ln\det$ values, we have $\sum_{t=1}^T \normm[\big]{a!t}^2_{(V!{t})^{-1}}\leq d_x d_y \ln \rbrm[\big]{1+\frac{T}{\lambda d_x d_y}}$.
+
+The formula we hope to bound, $\sum_{t=1}^T \normm[\big]{a!t}^2_{(V!{t-1})^{-1}}$, is very close to this value:
+\begin{align*}
+    \sum_{t=1}^T \normm[\big]{a!t}^2_{(V!{t-1})^{-1}}-\sum_{t=1}^T \normm[\big]{a!t}^2_{(V!{t})^{-1}}
+    & = \sum_{t=1}^T \anglem[\big]{(V!{t-1})^{-1}-(V!t)^{-1},a!t (a!t)^\trans} \\
+    & \leq \sum_{t=1}^T \anglem[\big]{(V!{t-1})^{-1}-(V!t)^{-1},I} \\
+    & = \anglem[\big]{(V!{0})^{-1}-(V!T)^{-1},I} \\
+    & \leq \anglem[\big]{(V!{0})^{-1},I}=\frac{d_x d_y}{\lambda},
+\end{align*}
+where we used the facts that matrices $(V!{t-1})^{-1}-(V!t)^{-1}$ and $V!T$ are positive semidefinite, and that $\normm[\big]{a!t}_2\leq 1$.
+
+Combining all these results proves
+\begin{align}
+    \psmr_T
+    \leq 2\beta_T \sqrt{T \rbrm[\Big]{d_x d_y \ln \rbrm[\big]{1+\frac{T}{\lambda d_x d_y}}+\frac{d_x d_y}{\lambda}}}.\label{eq:linucb-psmr-worst-case}
+\end{align}
+
+For the instance-dependent regret, notice that the gap parameter guarantees that $\vStar-u(x!t,y!t)\not\in (0,\DeltaLin)$, thus
+\begin{align*}
+    \vStar-u(x!t,y!t)
+    \leq \frac{1}{\DeltaLin}\rbrm[\big]{\vStar-u(x!t,y!t)}^2
+    \leq \frac{4}{\DeltaLin} \beta_T^2 \normm[\big]{a!t}_{(V!{t-1})^{-1}}^2.
+\end{align*}
+We have already proved that
+\begin{align*}
+    \sum_{t=1}^T \normm[\big]{a!t}_{(V!{t-1})^{-1}}^2
+    \leq
+    d_x d_y \ln \rbrm[\big]{1+\frac{T}{\lambda d_x d_y}}+\frac{d_x d_y}{\lambda}.
+\end{align*}
+Combining it with previous results, and we can prove that
+\begin{equation}
+    \psmr_T
+    \leq \frac{4}{\DeltaLin}\beta_T^2 \rbrm[\Big]{d_x d_y \ln \rbrm[\big]{1+\frac{T}{\lambda d_x d_y}}+\frac{d_x d_y}{\lambda}}.\label{eq:linucb-psmr-instance-dep}
+\end{equation}
+
+However, \eqref{eq:linucb-psmr-worst-case} and \eqref{eq:linucb-psmr-instance-dep} hold only when the high-probability event of \Cref{lem:conf-ellipsoid} happens. By setting $\delta=\frac{1}{T}$ and trivially bounding the regret by $T$ when the high-probability event does not hold, the expected PSMR increases by at most 1. By letting $\lambda=1$, assuming $T\geq 3$ and $d_x d_y\geq 2$, and simplifying with $\log \rbrm[\big]{1+\frac{T}{d_x d_y\lambda}}\leq \log T$, we arrive at our final bounds,
+\begin{align*}
+    \psmr_T & \leq 17 d_x d_y \sqrt{T} \ln{T}, \\
+    \psmr_T & \leq \frac{49}{\DeltaLin}d_x^2 d_y^2 \ln^2 T. \mqed
+\end{align*}
+\let\jmlrQED\relax
+\end{proof}

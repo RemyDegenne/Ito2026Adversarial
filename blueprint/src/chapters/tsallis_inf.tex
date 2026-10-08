@@ -1,0 +1,56 @@
+\chapter{Uninformed learning with Tsallis-INF (Section 4.1)}
+\label{chap:tsallis_inf}
+
+\begin{lemma}[Runs of an uninformed learner]
+  \label{lem:uninformed_run}
+  \uses{def:repeated_game, def:tsallis_inf}
+  In a run of Tsallis-INF against an adversary, $x_t$ has conditional law $p_t$ given the past
+  rounds, $y_t$ and $x_t$ are conditionally independent given the past, and the estimate $g_t(x)$
+  has conditional expectation $u(x, y_t)$ given the past and $y_t$.
+\end{lemma}
+
+\begin{proof}
+  The policy of Tsallis-INF draws $x_t$ from $p_t$, a function of the past rewards; the adversary
+  draws $y_t$ from its policy on the past rounds (simultaneous moves). The reward has conditional
+  mean $u(x_t, y_t)$, so $\E[g_t(x) \mid \text{past}, y_t] = 1 - p_t(x) (1 - u(x, y_t))/p_t(x)$.
+\end{proof}
+
+\begin{theorem}[Theorem 1]
+  \label{thm:tsallis}
+  \lean{Ito2026Adversarial.exists_psmr_tsallisINFHalf_le}
+  \leanok
+  \uses{def:tsallis_inf, def:regrets, lem:tsallis_inf_worst, lem:tsallis_inf_self_bound,
+    lem:regret_relations, lem:sqrt_func, lem:self_bound, lem:uninformed_run}
+  There is a universal constant $C$ such that for every game $u$ with utilities in $[-1, 1]$, every
+  adaptive adversary and every reward noise with conditional mean $u$ and rewards in $[-1, 1]$,
+  Tsallis-INF with $\alpha = 1/2$ and $\eta_t = \frac{1}{2\sqrt t}$ has
+  $\PSMR_T \le C \sqrt{m_x T}$; if $(x^\star, y^\star)$ is a strict PSNE,
+  $\PSMR_T \le C (1 + \frac{1}{\DCmin}) \sum_{x \ne x^\star} \frac{1 + \log T}{\DR_x}$; and if
+  $\Dmix > 0$, $\PSMR_T \le C \frac{m_x}{\Dmix}$.
+\end{theorem}
+
+\begin{proof}
+  \uses{lem:tsallis_inf_worst, lem:tsallis_inf_self_bound, lem:regret_relations, lem:sqrt_func,
+    lem:self_bound, lem:uninformed_run}
+  Worst case: $\PSMR_T \le \NR_T \le \ER_T \le 8\sqrt{m_x T} + 2$
+  (Lemmas~\ref{lem:regret_relations} and~\ref{lem:tsallis_inf_worst}), and $2 \le 2\sqrt{m_x T}$ for
+  $T \ge 1$. If $\Dmix > 0$: $\PSMR_T = \NR_T - \Dmix T \le 2 + 8 \sqrt{m_x T} - \Dmix T \le 2 +
+  \frac{16 m_x}{\Dmix}$ (Lemma~\ref{lem:sqrt_func}), and $2 \le \frac{4 m_x}{\Dmix}$ as $\Dmix \le 2$.
+  Strict PSNE: by Lemma~\ref{lem:tsallis_inf_self_bound} and the Cauchy--Schwarz inequality,
+  $\ER_T(x^\star) \le C_0 \E[\sqrt{H_T \sum_{x \ne x^\star} \frac{1}{\DR_x} \sum_t \langle \DR,
+  p_t\rangle}]$ with $H_T = \sum_{t \le T} \frac1t \le 1 + \log T$; Jensen's inequality and
+  Lemma~\ref{lem:regret_relations} (3) bound it by
+  $C_0 \sqrt{H_T \sum_{x \ne x^\star} \frac{1}{\DR_x} (\ER_T(x^\star) + 4C)}$, and
+  Lemma~\ref{lem:self_bound} gives $\ER_T(x^\star) \le C_0^2 S + 2 C_0 \sqrt{C S}$ with
+  $S = H_T \sum_{x \ne x^\star} \frac1{\DR_x}$. Then Lemma~\ref{lem:regret_relations} (2) and
+  Lemma~\ref{lem:sqrt_func} in $C$ give $\PSMR_T \le C_0^2 S + \frac{C_0^2 S}{\DCmin}$.
+\end{proof}
+
+\begin{remark}
+  \label{rem:tsallis_statement}
+  The paper states the strict-PSNE bound as $O(\frac{1}{\DCmin}\sum_{x \ne x^\star}
+  \frac{\log T}{\DR_x})$, which follows from the form above when $m_y \ge 2$ and $T \ge 2$ (then
+  $\DCmin \le 2$). For $m_y = 1$ it is false in Lean, where $\DCmin$ is an infimum over no action,
+  equal to $0$, and $C/0 = 0$. The paper states the third bound for games without PSNE, which need
+  not have $\Dmix > 0$ (Remark~\ref{rem:no_psne_gap}).
+\end{remark}

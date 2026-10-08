@@ -1,0 +1,13 @@
+{
+    "challenge_module": "Challenge_sq_entryGap_div_four_le_mixGap",
+    "solution_module": "Solution",
+    "theorem_names": [
+        "Ito2026Adversarial.sq_entryGap_div_four_le_mixGap",
+        "Ito2026Adversarial.entryGap._proof_1"
+    ],
+    "permitted_axioms": [
+        "propext",
+        "Quot.sound",
+        "Classical.choice"
+    ]
+}

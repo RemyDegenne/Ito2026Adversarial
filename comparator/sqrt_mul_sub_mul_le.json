@@ -1,0 +1,12 @@
+{
+    "challenge_module": "Challenge_sqrt_mul_sub_mul_le",
+    "solution_module": "Solution",
+    "theorem_names": [
+        "Ito2026Adversarial.sqrt_mul_sub_mul_le"
+    ],
+    "permitted_axioms": [
+        "propext",
+        "Quot.sound",
+        "Classical.choice"
+    ]
+}

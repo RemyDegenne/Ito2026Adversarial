@@ -1,0 +1,26 @@
+\chapter{Information-theoretic tools}
+\label{chap:prereq_information}
+
+These lemmas are in \texttt{LMLPapers} and are to be copied.
+
+\begin{lemma}[Bretagnolle--Huber inequality]
+  \label{lem:bretagnolle_huber}
+  For probability measures $\mu$, $\nu$ and a measurable set $E$,
+  $\mu(E) + \nu(E^c) \ge \frac12 \exp(-\KL(\mu \,\|\, \nu))$.
+\end{lemma}
+
+\begin{proof}
+  In LMLPapers (\texttt{ForMathlib/InformationTheory/KullbackLeibler/BretagnolleHuber.lean}).
+\end{proof}
+
+\begin{lemma}[Divergence decomposition for non-stationary bandits]
+  \label{lem:divergence_decomposition_nonstationary}
+  For runs of one algorithm against the non-stationary bandits $\nu$ and $\nu'$, the divergence
+  between the laws of the histories of the first $T$ rounds is
+  $\sum_{t < T} \E_\nu[\KL(\nu_t(x_t) \,\|\, \nu'_t(x_t))]$.
+\end{lemma}
+
+\begin{proof}
+  In LMLPapers (\texttt{SequentialLearning/DivergenceDecomposition.lean},
+  \texttt{IsAlgEnvSeq.klDiv\_map\_history\_banditSeq}), from LML's chain rule.
+\end{proof}

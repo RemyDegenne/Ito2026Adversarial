@@ -1,0 +1,37 @@
+\section{Technical Lemmas}
+
+\begin{lemma}\label{lem:sqrt-func}
+    For $a,b>0$, the function $f(x)=\sqrt{ax}-bx$ has a maximum value of $\frac{a}{4b}$ when $x=\frac{a}{4b^2}$.
+\end{lemma}
+\begin{proof}
+    The function has a critical point when the derivative $f'(x)=\frac{\sqrt{a}}{2\sqrt{x}}-b$ is zero. Solving $f'(x^*)=0$ yields $x^*=\frac{a}{4b^2}$, and plugging it back in gives $f(x^*)=\frac{a}{4b}$. We can indeed validate that $f'(x)>0$ when $x<x^*$ and $f'(x)<0$ when $x>x^*$.
+\end{proof}
+
+\begin{lemma}\label{lem:self-bound}
+    If $x,a,b,c\geq0$, and $x\leq \sqrt{a x + b} + c$, then $x\leq a+\sqrt{b}+2c$.
+\end{lemma}
+\begin{proof}
+    In $x-c\leq \sqrt{ax+b}$, if $x\leq c$, then the result holds trivially. We assume $x>c$; squaring both sides yields $(x-c)^2\leq ax+b$. Replacing the inequality sign with an equality solves into $x=\frac a2+c\pm\sqrt{\frac{a^2}{4}+b+ac}$; the larger root is the upper bound for $x$.
+    
+    We now only need to prove that $\sqrt{\frac{a^2}{4}+b+ac}\leq \frac a2+\sqrt{b}+c$. Since $\rbrm[\big]{\frac a2+\sqrt{b}+c}^2-\rbrm[\big]{\frac{a^2}{4}+b+ac}=a\sqrt{b}+2c\sqrt{b}+c^2\geq 0$, this inequality holds.
+\end{proof}
+
+\begin{lemma}\label{lem:kl-bernoulli}
+    Let $\Twopoint(x)$ be the two-point distribution on $\{\pm 1\}$ with expectation $x$, which puts probability $\frac{1+x}{2}$ on $+1$ and $\frac{1-x}{2}$ on $-1$. When $|a|, |b|\leq \frac12$, we have $\KL\rbrm[\big]{\Twopoint(a)\,\|\,\Twopoint(b)}\leq (a-b)^2$, where $\KL$ is the KL divergence.
+\end{lemma}
+\begin{proof}
+    Expand the KL divergence formula:
+    \begin{equation*}
+        \KL\rbrm[\big]{\Twopoint(a)\,\|\,\Twopoint(b)}=\frac{1+a}{2}\ln\frac{1+a}{1+b}+\frac{1-a}{2}\ln\frac{1-a}{1-b}.
+    \end{equation*}
+    Define
+    \begin{equation*}
+        f_a(b)=\frac{1+a}{2}\ln\frac{1+a}{1+b}+\frac{1-a}{2}\ln\frac{1-a}{1-b} - (a-b)^2.
+    \end{equation*}
+    We need to prove that $f_a(b)\leq 0$. It is clear that $f_a(a)=0$. Taking a derivative of $f_a$,
+    \begin{equation*}
+        f'_a(b)=-\frac{1+a}{2(1+b)}+\frac{1-a}{2(1-b)}-2(b-a)=(b-a)\rbrm[\Big]{\frac{1}{1-b^2}-2}.
+    \end{equation*}
+
+    Since $\abs{b}\leq \frac12$, we know that the second term $\frac{1}{1-b^2}-2$ is negative. Therefore, $f'_a(b)<0$ when $b>a$ and $f'_a(b)>0$ when $b<a$, and thus $f'_a$ is maximized at $b=a$ with a maximum value of 0.
+\end{proof}

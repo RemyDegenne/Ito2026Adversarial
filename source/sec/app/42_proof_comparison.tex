@@ -1,0 +1,20 @@
+
+
+
+
+\begin{lemma}\label{lem:delta-comparison}
+    Let $A=\rbrm[\Big]{\begin{matrix}a & b \\ c & d\end{matrix}}$ be the utility matrix for a $2\times 2$ zero-sum matrix game with all entries in $[-1, 1]$. Assume it has a unique mixed-strategy Nash equilibrium $(p^*,q^*)$ of value $\vMix$.
+    Let $\DeltaEntry=\min\{|a-b|,|a-c|,|b-d|,|c-d|\}$ be the minimum entry gap. Then, $\DeltaMix \geq \DeltaEntry^2/4$.
+\end{lemma}
+\begin{proof}
+    Since $A$ does not have pure-strategy Nash equilibriums, we have $\DeltaEntry>0$. Up to permutations of rows and columns, we assume $a>b$, $d>b$, $d>c$, $a>c$, and $b\geq c$. The pure-strategy maximin value is $\vStar=\max\{\min\{a,b\},\min\{c,d\}\}=b$.
+
+    Using the indifference condition of a mixed NE, we can solve the NE
+    \begin{align*}
+        p^* &= \rbrm[\Big]{\frac{d-c}{a-b-c+d},\frac{a-b}{a-b-c+d}},\\
+        q^* &= \rbrm[\Big]{\frac{d-b}{a-b-c+d},\frac{a-c}{a-b-c+d}}.
+    \end{align*}
+    Therefore, the Nash value is $\vMix=\anglem[\big]{p^*,a q^*}=\frac{ad-bc}{a-b-c+d}$, and the gap parameter $\DeltaMix=\vMix-\vStar=\frac{ad-bc}{a-b-c+d}-b=\frac{(a-b)(d-b)}{a-b-c+d}$.
+
+    By the definition of $\DeltaEntry$, we know that $a-b\geq \DeltaEntry$, $d-b\geq \DeltaEntry$. Together with the fact that $a-b-c+d=(a-b)+(d-c)\leq 2+2=4$, the claim of the lemma is proved.
+\end{proof}

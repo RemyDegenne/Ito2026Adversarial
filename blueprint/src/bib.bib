@@ -1,0 +1,139 @@
+@inproceedings{ito2026adversarial,
+  title={Adversarial Learning in Games with Bandit Feedback: Logarithmic Pure-Strategy Maximin Regret},
+  author={Ito, Shinji and Luo, Haipeng and Maiti, Arnab and Tsuchiya, Taira and Wu, Yue},
+  booktitle={Conference on Learning Theory (COLT)},
+  year={2026},
+  note={arXiv:2602.06348}
+}
+
+@article{zimmert2021tsallisinf,
+  title = {Tsallis-{{INF}}: An Optimal Algorithm for Stochastic and Adversarial Bandits},
+  shorttitle = {Tsallis-{{INF}}},
+  author = {Zimmert, Julian and Seldin, Yevgeny},
+  year = 2021,
+  journal = {Journal of Machine Learning Research},
+  volume = {22},
+  number = {28},
+  pages = {1--49},
+  issn = {1533-7928},
+  abstract = {We derive an algorithm that achieves the optimal (within constants) pseudo-regret in both adversarial and stochastic multi-armed bandits without prior knowledge of the regime and time horizon. The algorithm is based on online mirror descent (OMD) with Tsallis entropy regularization with power  {$\alpha$}=1/2 {$\alpha$}=1/2  and reduced-variance loss estimators. More generally, we define an adversarial regime with a self-bounding constraint, which includes stochastic regime, stochastically constrained adversarial regime, and stochastic regime with adversarial corruptions as special cases, and show that the algorithm achieves logarithmic regret guarantee in this regime and all of its special cases simultaneously with the optimal regret guarantee in the adversarial regime. The algorithm also achieves adversarial and stochastic optimality in the utility-based dueling bandit setting. We provide empirical evaluation of the algorithm demonstrating that it significantly outperforms UCB1 and EXP3 in stochastic environments. We also provide examples of adversarial environments, where UCB1 and Thompson Sampling exhibit almost linear regret, whereas our algorithm suffers only logarithmic regret. To the best of our knowledge, this is the first example demonstrating vulnerability of Thompson Sampling in adversarial environments. Last but not least, we present a general stochastic analysis and a general adversarial analysis of OMD algorithms with Tsallis entropy regularization for  {$\alpha\in$}[0,1] {$\alpha\in$}[0,1]  and explain the reason why  {$\alpha$}=1/2 {$\alpha$}=1/2  works best.}
+}
+
+@inproceedings{ito2025instancedependent,
+  title = {Instance-Dependent Regret Bounds for Learning Two-Player Zero-Sum Games with Bandit Feedback},
+  booktitle = {Proceedings of {{Thirty Eighth Conference}} on {{Learning Theory}}},
+  author = {Ito, Shinji and Luo, Haipeng and Tsuchiya, Taira and Wu, Yue},
+  year = 2025,
+  month = jul,
+  pages = {2858--2892},
+  publisher = {PMLR},
+  issn = {2640-3498},
+  abstract = {No-regret self-play learning dynamics have become one of the premier ways to solve large-scale games in practice. Accelerating their convergence via improving the regret of the players over the naive O(T--\textsurd )O(T)O(\textbackslash sqrt\textbraceleft T\textbraceright ) bound after TTT rounds has been extensively studied in recent years, but almost all studies assume access to exact gradient feedback. We address the question of whether acceleration is possible under bandit feedback only and provide an affirmative answer for two-player zero-sum normal-form games. Specifically, we show that if both players apply the Tsallis-INF algorithm of Zimmert and Seldin (2021), then their regret is at most O(c1logT+c2T---\textsurd )O(c1log⁡T+c2T)O(c\_1 \textbackslash log T +  \textbackslash sqrt\textbraceleft c\_2 T\textbraceright ), where c1c1c\_1 and c2c2c\_2 are game-dependent constants that characterize the difficulty of learning  c1c1c\_1 resembles the complexity of learning a stochastic multi-armed bandit instance and depends inversely on some gap measures, while c2c2c\_2 can be much smaller than the number of actions when the Nash equilibria have a small support or are close to the boundary. In particular, for the case when a pure strategy Nash equilibrium exists, c2c2c\_2 becomes zero, leading to an optimal instance-dependent regret bound as we show. We additionally prove that in this case our algorithm also enjoys last-iterate convergence and can identify the pure strategy Nash equilibrium with near-optimal sample complexity.},
+  langid = {english}
+}
+
+@inproceedings{ito2024adaptive,
+  title = {Adaptive Learning Rate for Follow-the-Regularized-Leader: {{Competitive}} Analysis and Best-of-Both-Worlds},
+  shorttitle = {Adaptive Learning Rate for Follow-the-Regularized-Leader},
+  booktitle = {Proceedings of {{Thirty Seventh Conference}} on {{Learning Theory}}},
+  author = {Ito, Shinji and Tsuchiya, Taira and Honda, Junya},
+  year = 2024,
+  month = jun,
+  pages = {2522--2563},
+  publisher = {PMLR},
+  issn = {2640-3498},
+  abstract = {Follow-The-Regularized-Leader (FTRL) is known as an effective and versatile approach in online learning, where appropriate choice of the learning rate is crucial for smaller regret. To this end, we formulate the problem of adjusting FTRL's learning rate as a sequential decision-making problem and introduce the framework of competitive analysis. We establish a lower bound for the competitive ratio and propose update rules for the learning rate that achieves an upper bound within a constant factor of this lower bound. Specifically, we illustrate that the optimal competitive ratio is characterized by the (approximate) monotonicity of components of the penalty term, showing that a constant competitive ratio is achievable if the components of the penalty term form a monotone non-increasing sequence, and derive a tight competitive ratio when penalty terms are {$\xi\xi\backslash$}xi-approximately monotone non-increasing. Our proposed update rule, referred to as \textbackslash textit\textbraceleft stability-penalty matching\textbraceright, also facilitates the construction of Best-Of-Both-Worlds (BOBW) algorithms for stochastic and adversarial environments. In these environments our results contribute to achieving tighter regret bound and broaden the applicability of algorithms for various settings such as multi-armed bandits, graph bandits, linear bandits, and contextual bandits.},
+  langid = {english}
+}
+
+@inproceedings{abbasi-yadkori2011improved,
+  title = {Improved Algorithms for Linear Stochastic Bandits},
+  booktitle = {Advances in {{Neural Information Processing Systems}}},
+  author = {Abbasi-Yadkori, Yasin and P{\'a}l, D{\'a}vid and Szepesv{\'a}ri, Csaba},
+  year = 2011,
+  volume = {24},
+  publisher = {Curran Associates, Inc.}
+}
+
+@book{lattimore2020bandit,
+  title = {Bandit Algorithms},
+  author = {Lattimore, Tor},
+  year = 2020,
+  publisher = {Cambridge University Press},
+  address = {Cambridge, NY},
+  abstract = {"Decision-making in the face of uncertainty is a significant challenge in machine learning, and the multi-armed bandit model is a commonly used framework to address it. This comprehensive and rigorous introduction to the multi-armed bandit problem examines all the major settings, including stochastic, adversarial, and Bayesian frameworks. A focus on both mathematical intuition and carefully worked proofs makes this an excellent reference for established researchers and a helpful resource for graduate students in computer science, engineering, statistics, applied mathematics and economics. Linear bandits receive special attention as one of the most useful models in applications, while other chapters are dedicated to combinatorial bandits, ranking, non-stationary problems, Thompson sampling and pure exploration. The book ends with a peek into the world beyond bandits with an introduction to partial monitoring and learning in Markov decision processes"--},
+  isbn = {978-1-108-57140-1},
+  lccn = {QA402.5},
+  keywords = {Algorithms,Decision making,Mathematical models,Mathematical optimization,Probabilities,Resource allocation}
+}
+
+@article{bretagnolle1979estimation,
+  title = {{Estimation des densit\'es: risque minimax [Estimation of densities: minimax risk]}},
+  shorttitle = {{Estimation des densit\'es}},
+  author = {Bretagnolle, Jean and Huber, Catherine},
+  year = 1979,
+  month = jan,
+  journal = {Zeitschrift f\"ur Wahrscheinlichkeitstheorie und Verwandte Gebiete},
+  volume = {47},
+  number = {2},
+  pages = {119--137},
+  issn = {1432-2064},
+  doi = {10.1007/BF00535278},
+  langid = {french},
+  note={Original document in French}
+}
+
+@article{auer2002using,
+  title={Using confidence bounds for exploitation-exploration trade-offs},
+  author={Auer, Peter},
+  journal={Journal of machine learning research},
+  volume={3},
+  number={Nov},
+  pages={397--422},
+  year={2002}
+}
+
+@article{kiefer1960equivalence,
+  title = {The Equivalence of Two Extremum Problems},
+  author = {Kiefer, Jack and Wolfowitz, Jacob},
+  year = 1960,
+  month = jan,
+  journal = {Canadian Journal of Mathematics},
+  volume = {12},
+  pages = {363--366},
+  issn = {0008-414X, 1496-4279},
+  doi = {10.4153/CJM-1960-030-4},
+  abstract = {Let f1 , \dots, fk  be linearly independent real functions on a space X, such that the range R of (f1, \dots, fk) is a compact set in k dimensional Euclidean space. (This will happen, for example, if the fi  are continuous and X is a compact topological space.) Let S be any Borel field of subsets of X which includes X and all sets which consist of a finite number of points, and let C = \textbraceleft{$\varepsilon$}\textbraceright{} be any class of probability measures on S which includes all probability measures with finite support (that is, which assign probability one to a set consisting of a finite number of points), and which are such that   is defined. In all that follows we consider only probability measures {$\varepsilon$} which are in C.},
+  langid = {english}
+}
+
+@inproceedings{maiti2025limitations,
+  title = {On the~Limitations and~Possibilities of~{{Nash}} Regret Minimization in~Zero-Sum Matrix Games under Noisy Feedback},
+  booktitle = {Algorithmic {{Game Theory}}},
+  author = {Maiti, Arnab and Jamieson, Kevin and Ratliff, Lillian J.},
+  editor = {Lavi, Ron and Zhang, Jie},
+  year = 2025,
+  month = sep,
+  pages = {3--20},
+  publisher = {Springer Nature Switzerland},
+  address = {Cham},
+  doi = {10.1007/978-3-032-03639-1_1},
+  abstract = {This paper studies a variant of two-player zero-sum matrix games, where, at each timestep, the row player selects row i, the column player selects column j, and the row player receives a noisy reward with expected value \$\$A\_\textbraceleft i,j\textbraceright\$\$Ai,j, along with noisy feedback on the input matrix A . The row player's goal is to maximize their total reward against an adversarial column player. Nash regret, defined as the difference between the player's total reward and the game's Nash equilibrium value scaled by the time horizon T, is often used to evaluate algorithmic performance in zero-sum games .},
+  isbn = {978-3-032-03639-1},
+  langid = {english},
+  keywords = {Adversarial Learning,Instance-Dependent Regret,Nash Regret,Noisy Feedback,Zero-Sum Matrix Games}
+}
+
+@inproceedings{odonoghue2021matrix,
+  title = {Matrix Games with Bandit Feedback},
+  booktitle = {Proceedings of the {{Thirty-Seventh Conference}} on {{Uncertainty}} in {{Artificial Intelligence}}},
+  author = {O'Donoghue, Brendan and Lattimore, Tor and Osband, Ian},
+  year = 2021,
+  month = dec,
+  pages = {279--289},
+  publisher = {PMLR},
+  issn = {2640-3498},
+  urldate = {2026-01-31},
+  abstract = {We study a version of the classical zero-sum matrix game with unknown payoff matrix and bandit feedback, where the players only observe each others actions and a noisy payoff. This generalizes the usual matrix game, where the payoff matrix is known to the players. Despite numerous applications, this problem has received relatively little attention. Although adversarial bandit algorithms achieve low regret, they do not exploit the matrix structure and perform poorly relative to the new algorithms. The main contributions are regret analyses of variants of UCB and K-learning that hold for any opponent, e.g., even when the opponent adversarially plays the best-response to the learner's mixed strategy. Along the way, we show that Thompson fails catastrophically in this setting and provide empirical comparison to existing algorithms.},
+  langid = {english}
+}

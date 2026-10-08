@@ -1,0 +1,23 @@
+{
+    "challenge_module": "Challenge_exists_forall_exists_psmr_maximinLinUCB_le",
+    "solution_module": "Solution",
+    "theorem_names": [
+        "Ito2026Adversarial.exists_forall_exists_psmr_maximinLinUCB_le",
+        "exists_argmax",
+        "Learning.Algorithm.deterministic._proof_1",
+        "Learning.Algorithm.detStateful._proof_1",
+        "Learning.Algorithm.statefulIndex._proof_1",
+        "Ito2026Adversarial.maximinLinUCB._proof_1",
+        "Bandits.Linear.ucbIndex._proof_1",
+        "Ito2026Adversarial.maximinLinUCB._proof_2",
+        "Learning.RepeatedGame.gameEnv._proof_1",
+        "Learning.RepeatedGame.gameEnv._proof_2",
+        "Learning.RepeatedGame.gameEnv._proof_3",
+        "Learning.RepeatedGame.gameEnv._proof_4"
+    ],
+    "permitted_axioms": [
+        "propext",
+        "Quot.sound",
+        "Classical.choice"
+    ]
+}

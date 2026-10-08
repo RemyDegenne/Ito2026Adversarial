@@ -1,0 +1,89 @@
+\chapter{Follow-the-regularized-leader on the simplex}
+\label{chap:prereq_ftrl}
+
+The paper cites the regret bounds of Tsallis-INF (\cite{zimmert2021tsallisinf},
+\cite{ito2025instancedependent}) and of Tsallis-FTRL-SPM (\cite{ito2024adaptive}); this chapter
+plans their proofs, for rewards in $[-1, 1]$ and an adaptive adversary, in the setting of
+Lemma~\ref{lem:uninformed_run} (the estimates are conditionally unbiased given the past and the
+adversary's action of the round). Constants are not tracked: the statements of the paper only use
+universal constants.
+
+\begin{lemma}[FTRL decomposition]
+  \label{lem:ftrl_decomposition}
+  \uses{def:tsallis_inf}
+  Let $\Phi_t(G) = \max_{p \in \simplex} \langle p, G\rangle + \varphi(p)/\eta_t$ (the FTRL value
+  function, \texttt{ftrlValue}), $p_t = \nabla \Phi_t(G_t)$, with nonincreasing $\eta_t$ and a
+  concave regularizer $\varphi \ge 0$ vanishing at the vertices. For every $x$ and every sequence of
+  estimates $g_t$,
+  $\sum_{t < T} \langle e_x - p_t, g_t\rangle \le \sum_{t < T}(\frac{1}{\eta_t} -
+  \frac{1}{\eta_{t-1}}) (\varphi(p_t) - \varphi(e_x)) + \sum_{t < T} (\Phi_t(G_{t+1}) - \Phi_t(G_t)
+  - \langle p_t, g_t\rangle)$ (penalty and stability terms, $1/\eta_{-1} = 0$).
+\end{lemma}
+
+\begin{proof}
+  Telescoping of $\Phi_t(G_t)$, the Fenchel--Young inequality at $e_x$ and the monotonicity of the
+  value function in the learning rate.
+\end{proof}
+
+\begin{lemma}[Stability of the Tsallis-$\frac12$ regularizer]
+  \label{lem:tsallis_stability}
+  \uses{lem:ftrl_decomposition}
+  For $\varphi = \varphi_{1/2}$ and the estimate $g_t(x) = 1 - (1 - r_t)\indic\{x_t = x\}/p_t(x)$ with
+  $r_t \in [-1, 1]$, the conditional expectation of the stability term of round $t$ is at most
+  $C \eta_t \sum_{x \ne x'} \sqrt{p_t(x)}$ for every $x'$ (shifting the estimates by a constant
+  does not change $p_t$, which allows to exclude any one arm).
+\end{lemma}
+
+\begin{proof}
+  Local norm bound of the stability term through the Hessian of the conjugate of the Tsallis
+  entropy, $\nabla^2 \le$ diag$(p^{3/2})$ up to constants, for nonpositive increments of the
+  shifted estimates, and $\E[(1 - r_t)^2 \indic\{x_t = x\}/p_t(x)^2 \mid \cdots] \le 4/p_t(x)$.
+\end{proof}
+
+\begin{lemma}[Tsallis-INF, worst case]
+  \label{lem:tsallis_inf_worst}
+  \uses{lem:ftrl_decomposition, lem:tsallis_stability, lem:uninformed_run}
+  In the setting of Theorem~\ref{thm:tsallis}, $\ER_T \le 8 \sqrt{m_x T} + 2$ (any bound of the form
+  $C_1 \sqrt{m_x T} + C_2$ suffices).
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:ftrl_decomposition, lem:tsallis_stability, lem:uninformed_run}
+  Lemmas~\ref{lem:ftrl_decomposition} and~\ref{lem:tsallis_stability} with
+  $\sum_x \sqrt{p(x)} \le \sqrt{m_x}$, $\varphi_{1/2} \le 2\sqrt{m_x}$, and
+  $\sum_t \eta_t \le \sqrt T$; the expectation of $\langle e_x - p_t, g_t\rangle$ is
+  $\E[u(x, y_t) - u(x_t, y_t)]$ (Lemma~\ref{lem:uninformed_run}).
+\end{proof}
+
+\begin{lemma}[Tsallis-INF, self-bounding form]
+  \label{lem:tsallis_inf_self_bound}
+  \uses{lem:ftrl_decomposition, lem:tsallis_stability, lem:uninformed_run}
+  In the setting of Theorem~\ref{thm:tsallis}, for every $x^\star$,
+  $\ER_T(x^\star) \le C_0 \E[\sum_{t < T} \frac{1}{\sqrt{t + 1}} \sum_{x \ne x^\star} \sqrt{p_t(x)}]$
+  for a universal constant $C_0$ (the paper uses $C_0 = 19$, \cite[Theorem 1]{ito2025instancedependent}).
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:ftrl_decomposition, lem:tsallis_stability, lem:uninformed_run}
+  The penalty term is at most $\sum_t (\frac{1}{\eta_t} - \frac{1}{\eta_{t-1}}) \cdot 2\sum_{x \ne
+  x^\star} \sqrt{p_t(x)}$ (as $\sum_x \sqrt{p(x)} - 1 \le \sum_{x \ne x^\star} \sqrt{p(x)}$), with
+  $\frac{1}{\eta_t} - \frac{1}{\eta_{t-1}} \le \frac{1}{\sqrt t}$; the stability term is bounded by
+  Lemma~\ref{lem:tsallis_stability} with $x' = x^\star$.
+\end{proof}
+
+\begin{lemma}[Tsallis-FTRL-SPM]
+  \label{lem:tsallis_spm_regret}
+  \uses{def:tsallis_spm, lem:ftrl_decomposition}
+  In the setting of Theorem~\ref{thm:tsallis_bilinear}, for every $x^\star$,
+  $\ER_T(x^\star) \le C\bigl(\E[\min\{\sqrt{\frac{d_x m_x^{1 - \alpha} T}{\alpha(1 - \alpha)}},
+  \sqrt{\frac{d_x m_x^{1 - \alpha}}{\alpha(1 - \alpha) \DRmin} \sum_t \langle p_t, \DR\rangle \log T}\}]
+  + m_x \log m_x\bigr)$ (Eq.~(26) of \cite{ito2024adaptive} with their parameters of Section 4.3).
+\end{lemma}
+
+\begin{proof}
+  \uses{lem:ftrl_decomposition}
+  The analysis of \cite{ito2024adaptive}: FTRL with the hybrid regularizer, the stability-penalty
+  matching learning rate $\beta_{t+1} = \beta_t + z_t/(\beta_t h_t)$, the exploration mixture
+  (variance $\langle x, S(p_t)^{-1} x\rangle \le c d_x/\gamma_t$) and the unbiased linear
+  estimates. This is a substantial formalization of its own.
+\end{proof}
