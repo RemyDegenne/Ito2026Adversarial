@@ -3,6 +3,31 @@
 
 \section{Uninformed learning with Tsallis-FTRL-SPM}
 
+\begin{lemma}[PSMR of Tsallis-FTRL-SPM]
+  \label{lem:tsallis_spm_psmr}
+  \lean{Ito2026Adversarial.psmr_tsallisSPMPaper_le_sub,
+    Ito2026Adversarial.psmr_tsallisSPMPaper_le_of_isStrictPSNE, Ito2026Adversarial.le_of_self_bound,
+    Ito2026Adversarial.isSPMParams_paper, Ito2026Adversarial.rpow_one_sub_spmAlpha_le}
+  \leanok
+  \uses{lem:tsallis_spm_regret, lem:regret_relations, lem:sqrt_func, lem:self_bound}
+  For a bilinear game with $1 \le d_x \le m_x$, $m_x \ge 2$, and the parameters of
+  Theorem~\ref{thm:tsallis_bilinear}, with $L = \log m_x$: $\PSMR_T \le 8(16 + 8c)\sqrt{T d_x L} +
+  (128c + \frac{64}{c} + \frac{16 + 8c}{c}) m_x L^2 - \Dmix T$, and for a strict PSNE $(x^\star,
+  y^\star)$, $\PSMR_T \le (32(16 + 8c))^2 \frac{d_x L (1 + \log T)(1 + 1/\DCmin)}{\DRmin} + 2(128c
+  + \frac{64}{c} + (16 + 8c)(48 + \frac1c)) m_x L^2$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  \uses{lem:tsallis_spm_regret, lem:regret_relations, lem:sqrt_func, lem:self_bound}
+  The first bound from $\PSMR_T = \mathrm{NR}_T - \Dmix T \le \ER_T - \Dmix T$ and
+  Lemma~\ref{lem:tsallis_spm_regret}. For the second, with $\Delta = \DR$ and $C =
+  \E[\#\{t : y_t \ne y^\star\}]$: $\E[\sum_t \Delta(x_t)] \le \ER_T(x^\star) + 4C$ and $\DCmin C \le
+  \ER_T(x^\star) - \PSMR_T$ (Lemma~\ref{lem:regret_relations}); if $A \le a\sqrt{Q(A + 4C)} + K$
+  then $A \le a^2 Q + \sqrt{4a^2QC} + 2K$ (Lemma~\ref{lem:self_bound}) and $\sqrt{4a^2QC} - \DCmin C
+  \le a^2 Q/\DCmin$ (Lemma~\ref{lem:sqrt_func}; $C = 0$ when $\DCmin = 0$).
+\end{proof}
+
 \begin{theorem}[Theorem 5]
   \label{thm:tsallis_bilinear}
   \lean{Ito2026Adversarial.forall_exists_psmr_tsallisSPMPaper_le}
@@ -12,18 +37,21 @@
   For every $c > 0$ there is $C$ such that for every bilinear game with $m_x \ge 2$, every exploration
   distribution $p_0$ with variance ratio $c$, every adaptive adversary and every reward noise with
   conditional mean $u$ and rewards in $[-1, 1]$, Tsallis-FTRL-SPM with the parameters of the
-  theorem has $\PSMR_T \le C(\sqrt{T d_x \log m_x} + m_x \log m_x)$; if $(x^\star, y^\star)$ is a
-  strict PSNE, $\PSMR_T \le C(d_x \log m_x (1 + \log T)(1 + \frac{1}{\DCmin})/\DRmin + m_x \log m_x)$;
-  and if $\Dmix > 0$, $\PSMR_T \le C(\frac{d_x \log m_x}{\Dmix} + m_x \log m_x)$.
+  theorem has $\PSMR_T \le C(\sqrt{T d_x \log m_x} + m_x \log^2 m_x)$; if $(x^\star, y^\star)$ is a
+  strict PSNE, $\PSMR_T \le C(d_x \log m_x (1 + \log T)(1 + \frac{1}{\DCmin})/\DRmin + m_x \log^2 m_x)$;
+  and if $\Dmix > 0$, $\PSMR_T \le C(\frac{d_x \log m_x}{\Dmix} + m_x \log^2 m_x)$.
 \end{theorem}
 
 \begin{proof}
-  \uses{lem:tsallis_spm_regret, lem:regret_relations, lem:sqrt_func, lem:self_bound}
+  \leanok
+  \uses{lem:tsallis_spm_regret, lem:regret_relations, lem:sqrt_func, lem:self_bound,
+    lem:tsallis_spm_psmr}
   As for Theorem~\ref{thm:tsallis}, with the regret bound of Tsallis-FTRL-SPM
   (Lemma~\ref{lem:tsallis_spm_regret}) in place of those of Tsallis-INF, and
   $\ER_T(x^\star) \ge \E[\sum_t \langle p_t, \DR\rangle] - 2C$ for bilinear games (features and
   $A$ of norm at most $1$). With $\alpha = 1 - \frac{1}{4 \log m_x}$,
-  $\frac{m_x^{1 - \alpha}}{\alpha(1 - \alpha)} = O(\log m_x)$.
+  $\frac{m_x^{1 - \alpha}}{\alpha(1 - \alpha)} = O(\log m_x)$, and the additive term of
+  Lemma~\ref{lem:tsallis_spm_regret} is $O(m_x \log^2 m_x)$ (the constant depends on $c$).
 \end{proof}
 
 \begin{remark}
@@ -34,6 +62,17 @@
   $\Dmix > 0$ (Remark~\ref{rem:no_psne_gap}). The paper's ``suitable choice of $p_0$'' is any
   exploration distribution with variance ratio $c$, whose design matrix is positive definite
   (implicit in the paper).
+
+  The paper's additive term $m_x \log m_x$ is false for the parameters of the theorem: the
+  penalty term $\bar\beta h_0$ of \cite[Eq.~(24)]{ito2024adaptive}, with $h_0 = -\bar\psi(q_1) \le
+  \frac{m_x^\alpha}{1 - \alpha}$, is $\bar\beta h_0 \le \frac{64 m_x^\alpha \log^2 m_x}{c}$, and
+  this order is attained. For $d_x = 1$, $\phi(x^\star) = 1$, $\phi(x) = -1$ for the other
+  $m_x - 1$ actions, $A = 1$, a single column, deterministic rewards and $p_0$ uniform, $S(p) = 1$
+  for every $p$, so $g_t = \phi$ and the run is deterministic. The barrier $\bar\beta
+  \varphi_{1 - \alpha}$ keeps $\hat p_t(x) \ge e^{-1} \bar\beta / (4t + O(\log m_x))$ on each bad
+  action while $\beta_t = O(t)$, so that $\PSMR_{m_x^2}$ is of order $m_x \log^2 m_x$ (simulation:
+  the ratio to $\sqrt{T \log m_x} + m_x \log m_x$ at $T = m_x^2$ is $19$ for $m_x = 100$ and $37$
+  for $m_x = 1000$). The bounds are stated with $m_x \log^2 m_x$.
 \end{remark}
 
 \section{Informed learning with Maximin-LinUCB}
@@ -50,22 +89,85 @@
 \end{lemma}
 
 \begin{proof}
-  \uses{lem:self_normalized, lem:log_det_le, lem:bounded_noise_subgaussian}
-  $b_t = (V_t - \lambda I)\vect(A) + S_t$ with $S_t = \sum_{s \le t} \eps_s a_s$, so
+  \leanok
+  \uses{lem:self_normalized, lem:log_det_le, lem:bounded_noise_subgaussian, lem:ridge_error}
+  $b_t = (V_t - \lambda I)\vect(A) + S_t$ with $S_t = \sum_{s < t} \eps_s a_s$, so
   $\vect(A) - V_t^{-1} b_t = V_t^{-1}(\lambda \vect(A) - S_t)$ and
-  $\norm{\cdot}_{V_t} \le \norm{S_t}_{V_t^{-1}} + \sqrt\lambda \norm{\vect(A)}$. The noise is
-  conditionally $1$-sub-Gaussian (Lemma~\ref{lem:bounded_noise_subgaussian}); Lemma~\ref{lem:self_normalized}
-  bounds $\norm{S_t}_{V_t^{-1}}^2 \le 2 \log(1/\delta) + \log(\det V_t/\lambda^d)$, and
+  $\norm{\cdot}_{V_t} \le \norm{S_t}_{V_t^{-1}} + \sqrt\lambda \norm{\vect(A)}$
+  (Lemma~\ref{lem:ridge_error}, with $u(x, y) = \langle \vect(x y^\top), \vect(A)\rangle$). The
+  noise is conditionally $1$-sub-Gaussian (Lemma~\ref{lem:bounded_noise_subgaussian});
+  Lemma~\ref{lem:self_normalized} bounds
+  $\norm{S_t}_{V_t^{-1}}^2 \le 2 \log(1/\delta) + \log(\det V_t/\lambda^d)$, and
   Lemma~\ref{lem:log_det_le} bounds the last term by $d \log(1 + \frac{t}{d\lambda})$ ($\norm{a_s}
-  = \norm{x_s}\norm{y_s} \le 1$). Finally $\norm{\vect(A)} = \norm{A}_F \le \sqrt{d}$ since
-  $\norm{A}_2 \le 1$ and $A$ has rank at most $\min(d_x, d_y)$.
+  = \norm{x_s}\norm{y_s} \le 1$). Finally $\norm{\vect(A)}^2 = \norm{A}_F^2 \le d_y \le d$: the
+  columns $A e_j$ have norm at most $\norm{A}_2 \le 1$.
+\end{proof}
+
+\begin{lemma}[Optimism of the linear UCB index]
+  \label{lem:linucb_optimism}
+  \lean{Bandits.Linear.abs_inner_sub_inner_ridgeEstimate_le, Bandits.Linear.inner_le_ucbIndex,
+    Bandits.Linear.ucbIndex_le_inner_add}
+  \leanok
+  If $V$ is positive definite, $\hat\theta = V^{-1} b$ and $\norm{\theta - \hat\theta}_V \le \beta \le
+  \beta'$, then for every $a$, $\abs{\langle a, \theta\rangle - \langle a, \hat\theta\rangle} \le \beta
+  \norm{a}_{V^{-1}}$, so that the index $U = \langle a, \hat\theta\rangle + \beta' \norm{a}_{V^{-1}}$
+  satisfies $\langle a, \theta\rangle \le U \le \langle a, \theta\rangle + 2 \beta' \norm{a}_{V^{-1}}$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  Cauchy--Schwarz for the inner product of $V$:
+  $\langle a, \theta - \hat\theta\rangle^2 \le \norm{a}^2_{V^{-1}} \norm{\theta - \hat\theta}^2_V$.
+\end{proof}
+
+\begin{lemma}[One round of Maximin-LinUCB]
+  \label{lem:purelinucb_round}
+  \lean{Ito2026Adversarial.pureMaximin_sub_le_of_mem_linGoodEvent}
+  \leanok
+  \uses{def:maximin_linucb, lem:conf_ellipsoid, lem:linucb_optimism, lem:maximin_optimism}
+  On the event of Lemma~\ref{lem:conf_ellipsoid} ($\lambda = 1$, $\delta = 1/T$), in the run of
+  Maximin-LinUCB with $\lambda = 1$ and the radii of $\delta = 1/T$, with $d = d_x d_y \ge 1$, for
+  every round $t < T$ (counted from $0$, played with the state $V_t$ of the first $t$ rounds and the
+  radius $\beta_{t+1}$), $\vstar - u(x_t, y_t) \le 2 \beta_T \sqrt{\min(1, \norm{a_t}^2_{V_t^{-1}})}$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  \uses{lem:linucb_optimism, lem:maximin_optimism}
+  $u(x, y) = \langle \vect(x y^\top), \vect(A)\rangle$, $\norm{\vect(A) - \hat\theta_t}_{V_t} \le
+  \beta_t \le \beta_{t+1}$ ($\beta$ is nondecreasing), so by Lemma~\ref{lem:linucb_optimism} $u \le
+  U_t$ and Lemma~\ref{lem:maximin_optimism} gives $\vstar \le U_t(x_t, y_t) \le u(x_t, y_t) + 2
+  \beta_{t+1} \norm{a_t}_{V_t^{-1}}$, with $\beta_{t+1} \le \beta_T$. Moreover $\vstar - u \le 2 \le
+  2 \beta_T$ ($\beta_T \ge \sqrt d \ge 1$), whence the minimum with $1$.
+\end{proof}
+
+\begin{lemma}[Pathwise regret of Maximin-LinUCB]
+  \label{lem:purelinucb_pathwise}
+  \lean{Ito2026Adversarial.sum_pureMaximin_sub_le_of_mem_linGoodEvent,
+    Ito2026Adversarial.sum_pureMaximin_sub_le_div_of_mem_linGoodEvent}
+  \leanok
+  \uses{lem:purelinucb_round, lem:elliptical_potential}
+  On the same event, for $T \ge 2$, $d = d_x d_y \ge 1$:
+  $\sum_{t < T} (\vstar - u(x_t, y_t)) \le 2 \beta_T \sqrt{T} \sqrt{4 d \log T}$ and, for every gap
+  threshold $\Dlin > 0$, $\sum_{t < T} (\vstar - u(x_t, y_t)) \le 4 \beta_T^2 \cdot 4 d \log T /
+  \Dlin$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  \uses{lem:purelinucb_round, lem:elliptical_potential}
+  Lemma~\ref{lem:elliptical_potential} ($\lambda = 1$, $\norm{a_t} = \norm{x_t} \norm{y_t} \le 1$)
+  bounds $\sum_{t < T} \min(1, \norm{a_t}^2_{V_t^{-1}})$ by $2 d \log(1 + T/d) \le 4 d \log T$.
+  The worst-case bound follows from Lemma~\ref{lem:purelinucb_round} by Cauchy--Schwarz, the
+  instance-dependent one from $\vstar - u \le (\vstar - u)^2/\Dlin$ (as $\vstar - u \notin (0,
+  \Dlin)$).
 \end{proof}
 
 \begin{theorem}[Theorem 12]
   \label{thm:purelinucb}
   \lean{Ito2026Adversarial.exists_psmr_maximinLinUCB_le}
   \leanok
-  \uses{def:maximin_linucb, lem:conf_ellipsoid, lem:elliptical_potential, def:regrets}
+  \uses{def:maximin_linucb, lem:conf_ellipsoid, lem:purelinucb_pathwise, def:regrets}
   There is a universal constant $C$ such that for every bilinear game, every $T \ge 2$, every
   adaptive adversary and every reward noise with conditional mean $u$ and rewards in $[-1, 1]$,
   Maximin-LinUCB with $\lambda = 1$ and the radii $\beta_t$ of $\delta = 1/T$ has
@@ -74,15 +176,14 @@
 \end{theorem}
 
 \begin{proof}
-  \uses{lem:conf_ellipsoid, lem:elliptical_potential}
-  On the event of Lemma~\ref{lem:conf_ellipsoid}, $\abs{u(x, y) - \langle x, \hat A_t y\rangle} \le
-  \beta_{t-1} \norm{\vect(x y^\top)}_{V_{t-1}^{-1}}$ (Cauchy--Schwarz for the $V_{t-1}$ inner
-  product) and $\beta_{t-1} \le \beta_t$, so $u \le U_t$ and, as for Theorem~\ref{thm:pureucb},
-  $\vstar \le U_t(x_t, y_t)$, whence $\vstar - u(x_t, y_t) \le 2 \beta_T \norm{a_t}_{V_{t-1}^{-1}}$.
-  Lemma~\ref{lem:elliptical_potential} bounds $\sum_t \norm{a_t}^2_{V_{t-1}^{-1}}$ by
-  $2 d \log(1 + T/d)$; the worst-case bound follows by Cauchy--Schwarz, the instance-dependent one
-  from $\vstar - u \le (\vstar - u)^2/\Dlin$ (as $\vstar - u \notin (0, \Dlin)$). The failure event,
-  of probability at most $1/T$, contributes at most $2$.
+  \leanok
+  \uses{lem:conf_ellipsoid, lem:purelinucb_pathwise}
+  If $d = d_x d_y = 0$ the game is zero and $\PSMR_T = 0$. Otherwise, with $L = \log T \ge 1/2$,
+  $\beta_T^2 \le 12 d L$, and Lemma~\ref{lem:purelinucb_pathwise} bounds the regret on the event of
+  Lemma~\ref{lem:conf_ellipsoid} by $14 d \sqrt T L$ and $192 d^2 L^2/\Dlin$. The failure event, of
+  probability at most $1/T$, contributes at most $2$ (the regret is at most $2T$), respectively
+  $4/\Dlin$ (the regret is at most $4T/\Dlin$, since $\vstar - u \le (\vstar - u)^2/\Dlin \le
+  4/\Dlin$). This gives $C = 256$.
 \end{proof}
 
 \begin{theorem}[Theorem 6]
@@ -97,6 +198,7 @@
 \end{theorem}
 
 \begin{proof}
+  \leanok
   \uses{thm:purelinucb}
-  Theorem~\ref{thm:purelinucb}.
+  Theorem~\ref{thm:purelinucb}, with $\lambda = 1$ and the radii of Theorem~\ref{thm:purelinucb}.
 \end{proof}

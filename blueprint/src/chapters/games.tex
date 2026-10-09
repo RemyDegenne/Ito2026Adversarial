@@ -10,6 +10,7 @@
 \end{lemma}
 
 \begin{proof}
+  \leanok
   $\frac{a}{4b} - \sqrt{ax} + bx = \bigl(\sqrt{bx} - \frac{\sqrt a}{2\sqrt b}\bigr)^2 \ge 0$, which
   vanishes at $x = a/(4b^2)$.
 \end{proof}
@@ -22,6 +23,7 @@
 \end{lemma}
 
 \begin{proof}
+  \leanok
   If $x \le c$ this is clear. Otherwise $(x - c)^2 \le a x + b$, so $x$ is at most the larger root
   $\frac a2 + c + \sqrt{\frac{a^2}{4} + b + ac}$ of the quadratic, and
   $\frac{a^2}{4} + b + ac \le (\frac a2 + \sqrt b + c)^2$.
@@ -29,19 +31,30 @@
 
 \begin{lemma}[Maximin mixed strategies]
   \label{lem:maximin_attained}
+  \lean{Learning.ZeroSumGame.exists_forall_nashValue_le,
+    Learning.ZeroSumGame.pureMaximin_le_nashValue}
+  \leanok
   \uses{def:values}
   For a game with nonempty finite action sets, there is a distribution $p^\star$ with
   $u(p^\star, y) \ge \vnash$ for every $y \in \Y$, and $\vstar \le \vnash$.
 \end{lemma}
 
 \begin{proof}
-  $p \mapsto \min_y u(p, y) = \inf_q u(p, q)$ is continuous on the compact simplex, so the
-  supremum defining $\vnash$ is attained. The second claim is in the library
+  \leanok
+  $g(p) = \min_y u(p, y)$ is continuous and attains its maximum on the compact simplex at some
+  $p^\star$; since $\inf_q u(p, q) \le g(p) \le g(p^\star)$ for every $p$, $\vnash \le g(p^\star)
+  \le u(p^\star, y)$ for every $y$. The second claim is in the library
   (\texttt{pureMaximin\_le\_nashValue}).
 \end{proof}
 
 \begin{lemma}[Relations between regrets]
   \label{lem:regret_relations}
+  \lean{Learning.RepeatedGame.nashRegret_eq_psmr_add,
+    Learning.RepeatedGame.nashRegret_le_externalRegret,
+    Learning.RepeatedGame.IsStrictPSNE.colGapMin_mul_le,
+    Learning.RepeatedGame.IsPSNE.integral_sum_rowGap_sub_le,
+    Learning.RepeatedGame.IsPSNE.colGapMin_mul_le, Learning.RepeatedGame.integral_sum_rowGap_sub_le}
+  \leanok
   \uses{def:regrets, lem:maximin_attained}
   For every run of a learner against an adversary:
   \begin{enumerate}
@@ -55,6 +68,7 @@
 \end{lemma}
 
 \begin{proof}
+  \leanok
   \uses{lem:maximin_attained}
   (1) The first identity is linearity; for the second, with $p^\star$ of
   Lemma~\ref{lem:maximin_attained},
@@ -76,22 +90,47 @@
   use.
 \end{remark}
 
-\begin{lemma}[$2 \times 2$ games without PSNE]
-  \label{lem:two_by_two_value}
-  \uses{def:values, lem:maximin_attained}
-  Let $u = \begin{pmatrix} a & b \\ c & d \end{pmatrix}$ have no PSNE. Up to swapping the rows
-  and/or the columns (which preserves $\vstar$, $\vnash$, $\DM$ and the absence of PSNE),
-  $a > b$, $d > b$, $d > c$, $a > c$ and $b \ge c$; then $\vstar = b$ and
-  $\vnash = \frac{ad - bc}{a - b - c + d}$.
+\begin{lemma}[Value from equalizing strategies]
+  \label{lem:value_equalizing}
+  \lean{Learning.ZeroSumGame.le_nashValue_of_forall_le,
+    Learning.ZeroSumGame.nashValue_le_of_forall_le,
+    Learning.ZeroSumGame.nashValue_eq_of_forall_eq}
+  \leanok
+  \uses{def:values}
+  If a distribution $p$ on $\X$ satisfies $u(p, y) \ge v$ for every $y$, then $\vnash \ge v$; if a
+  distribution $q$ on $\Y$ satisfies $u(x, q) \le v$ for every $x$, then $\vnash \le v$. In
+  particular, if $u(p, y) = v$ for every $y$ and $u(x, q) = v$ for every $x$, then $\vnash = v$.
 \end{lemma}
 
 \begin{proof}
-  \uses{lem:maximin_attained}
-  The absence of PSNE forces the cyclic order of the best responses. With
-  $p^\star = \frac{(d - c, a - b)}{a - b - c + d}$, $u(p^\star, y)$ equals
-  $\frac{ad - bc}{a - b - c + d}$ for both columns, so $\vnash \ge$ this value; with
-  $q^\star = \frac{(d - b, a - c)}{a - b - c + d}$, $u(x, q^\star)$ equals it for both rows, so
-  $u(p, q^\star)$ is this value for every $p$ and $\vnash \le$ it.
+  \leanok
+  $u(p, q') = \sum_y q'_y u(p, y) \ge v$ for every distribution $q'$, so $\inf_{q'} u(p, q') \ge v$;
+  and $\inf_{q'} u(p', q') \le u(p', q) = \sum_x p'_x u(x, q) \le v$ for every distribution $p'$.
+\end{proof}
+
+\begin{lemma}[$2 \times 2$ games without PSNE]
+  \label{lem:two_by_two_value}
+  \lean{Learning.ZeroSumGame.lt_and_lt_or_lt_and_lt_of_not_hasPSNE,
+    Learning.ZeroSumGame.nashValue_eq_of_not_hasPSNE, Learning.ZeroSumGame.pureMaximin_fin_two}
+  \leanok
+  \uses{def:values, def:game, lem:value_equalizing}
+  Let $u = \begin{pmatrix} a & b \\ c & d \end{pmatrix}$ have no PSNE. Then either both diagonal
+  entries are larger than both off-diagonal entries ($a, d > b, c$), or the reverse
+  ($b, c > a, d$); in both cases $a - b - c + d \ne 0$ and
+  $\vnash = \frac{ad - bc}{a - b - c + d}$. For every $2 \times 2$ game,
+  $\vstar = \max(\min(a, b), \min(c, d))$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  \uses{lem:value_equalizing}
+  If $a > c$, the absence of PSNE at $(1, 1)$, $(1, 2)$ and $(2, 2)$ gives in turn $b < a$,
+  $b < d$ and $c < d$; if $a \le c$, the absence of PSNE at $(2, 1)$, $(2, 2)$, $(1, 2)$ and
+  $(1, 1)$ gives in turn $d < c$, $d < b$, $a < b$ and $a < c$. In both cases the numerators and
+  the denominator of $p^\star = \frac{(d - c, a - b)}{a - b - c + d}$ and
+  $q^\star = \frac{(d - b, a - c)}{a - b - c + d}$ have the same sign, so these are distributions;
+  $u(p^\star, y) = \frac{ad - bc}{a - b - c + d}$ for both columns and $u(x, q^\star)$ is the same
+  value for both rows, and Lemma~\ref{lem:value_equalizing} concludes.
 \end{proof}
 
 \begin{lemma}[Lemma 10]
@@ -104,9 +143,15 @@
 \end{lemma}
 
 \begin{proof}
+  \leanok
   \uses{lem:two_by_two_value}
-  By Lemma~\ref{lem:two_by_two_value}, $\Dmix = \frac{(a - b)(d - b)}{a - b - c + d}$ with
-  $a - b \ge \DM$, $d - b \ge \DM$ and $a - b - c + d \le 4$.
+  Let $D = a - b - c + d$ and $V = \vnash = \frac{ad - bc}{D}$ (Lemma~\ref{lem:two_by_two_value}).
+  If $a, d > b, c$, then $0 < D \le 4$, $\vstar = \max(b, c)$, and
+  $V - b = \frac{(a - b)(d - b)}{D} \ge \frac{\DM^2}{4}$ and
+  $V - c = \frac{(a - c)(d - c)}{D} \ge \frac{\DM^2}{4}$, each factor being the absolute value of
+  an entry gap. If $b, c > a, d$, then $0 < -D \le 4$, $\vstar = \max(a, d)$,
+  $V - a = \frac{(b - a)(c - a)}{-D}$ and $V - d = \frac{(b - d)(c - d)}{-D}$, and the same bound
+  holds.
 \end{proof}
 
 \begin{remark}

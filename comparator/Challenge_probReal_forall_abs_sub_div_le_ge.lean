@@ -28,28 +28,33 @@ public import Mathlib.Analysis.Normed.Lp.MeasurableSpace
 public import Mathlib.Geometry.Convex.ConvexSpace.CompactSpaceStdSimplex
 public import Mathlib.Data.Matrix.Mul
 public import Mathlib.Order.ConditionallyCompleteLattice.Finset
-public import Mathlib.Analysis.SpecialFunctions.Log.Basic
-public import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
-public import Mathlib.CategoryTheory.Countable
-public import Mathlib.MeasureTheory.Constructions.Polish.Basic
-public import Mathlib.Order.CompletePartialOrder
-public import Mathlib.Probability.Distributions.Bernoulli
-public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.Probability.Moments.SubGaussian
 public import Mathlib.Analysis.Matrix.MeasurableSpace
-public import Mathlib.Analysis.RCLike.Lemmas
-public import Mathlib.MeasureTheory.Constructions.BorelSpace.Real
-public import Mathlib.MeasureTheory.Constructions.BorelSpace.Complex
-public import Mathlib.MeasureTheory.Group.Arithmetic
-public import Mathlib.Topology.Instances.Matrix
+public import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
+public import Mathlib.MeasureTheory.Integral.Lebesgue.Add
+public import Mathlib.Probability.Process.Filtration
+public import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
+public import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
 public import Mathlib.LinearAlgebra.Matrix.PosDef
 public import Mathlib.Analysis.Matrix.Order
 public import Mathlib.Analysis.CStarAlgebra.Matrix
 public import Mathlib.Analysis.InnerProductSpace.Adjoint
+public import Mathlib.Topology.Instances.Matrix
+public import Mathlib.Analysis.RCLike.Lemmas
+public import Mathlib.MeasureTheory.Constructions.BorelSpace.Real
+public import Mathlib.MeasureTheory.Constructions.BorelSpace.Complex
+public import Mathlib.MeasureTheory.Group.Arithmetic
 public import Mathlib.Analysis.Convex.Hull
 public import Mathlib.LinearAlgebra.Matrix.SchurComplement
 public import Mathlib.Analysis.Convex.Caratheodory
 public import Mathlib.LinearAlgebra.AffineSpace.FiniteDimensional
 public import Mathlib.Topology.Algebra.Ring.Real
+public import Mathlib.Analysis.SpecialFunctions.Log.Basic
+public import Mathlib.CategoryTheory.Countable
+public import Mathlib.MeasureTheory.Constructions.Polish.Basic
+public import Mathlib.Order.CompletePartialOrder
+public import Mathlib.Probability.Distributions.Bernoulli
+public import Mathlib.MeasureTheory.Integral.Bochner.Basic
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 public import Mathlib.MeasureTheory.Constructions.BorelSpace.ContinuousLinearMap
 public import Mathlib.MeasureTheory.Function.SpecialFunctions.Basic
@@ -272,6 +277,7 @@ open MeasureTheory ProbabilityTheory Finset Real Learning Learning.ZeroSumGame
 universe u
 namespace Ito2026Adversarial
 
+set_option linter.unusedVariables false in
 /-- **Lemma 11** (Ito, Luo, Maiti, Tsuchiya, Wu 2026). In a run of any informed player against
 any adaptive adversary, with reward noise of conditional mean `u` and rewards in `[-1, 1]`, for
 every action pair `(x, y)` and `δ ∈ (0, 1)`, with probability at least `1 - δ`, for all `t` with
@@ -279,6 +285,7 @@ every action pair `(x, y)` and `δ ∈ (0, 1)`, with probability at least `1 - �
 `|u x y - R_t(x, y) / N_t(x, y)| ≤ √((4 log(1/δ) + 2 log(1 + N_t(x, y))) / N_t(x, y))`, where
 `N_t(x, y)` and `R_t(x, y)` are the number of rounds among the first `t` in which `(x, y)` was
 played and the sum of their rewards. -/
+@[nolint unusedArguments]
 theorem probReal_forall_abs_sub_div_le_ge {mx my : ℕ} [NeZero mx] [NeZero my]
     (u : Fin mx → Fin my → ℝ) (hu : ∀ x y, u x y ∈ Set.Icc (-1) 1)
     (opp : Player (Fin my) (Fin mx)) (R : RewardKernel (Fin mx) (Fin my))

@@ -63,6 +63,12 @@ public import Mathlib.MeasureTheory.Measure.GiryMonad
 public import Mathlib.MeasureTheory.Measure.Dirac.Basic
 public import Mathlib.MeasureTheory.Measure.Dirac.Def
 public import Mathlib.MeasureTheory.Constructions.BorelSpace.Order
+public import Mathlib.Probability.Moments.SubGaussian
+public import Mathlib.MeasureTheory.Integral.Lebesgue.Add
+public import Mathlib.Probability.Process.Filtration
+public import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
+public import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
+public import Mathlib.Analysis.Matrix.PosDef
 
 /-! # Standalone extraction for `Ito2026Adversarial.probReal_forall_sqrt_mahalanobisSq_le_ge`
 Definitions are copied verbatim; theorem proofs are replaced by `sorry`.
@@ -403,6 +409,7 @@ end
 @[expose] public section
 open MeasureTheory ProbabilityTheory Finset Real Learning Learning.ZeroSumGame
   Learning.RepeatedGame Matrix
+open scoped RealInnerProductSpace
 universe u
 namespace Ito2026Adversarial
 
@@ -411,6 +418,7 @@ informed player in a bilinear game, against any adaptive adversary and with rewa
 conditional mean `u` and rewards in `[-1, 1]`, for `λ > 0` and `δ ∈ (0, 1)`, with probability at
 least `1 - δ`, for all `t`, `‖vec(A) - V_t⁻¹ b_t‖_{V_t} ≤ β_t`, where `(V_t, b_t)` is the ridge
 regression state after `t` rounds and `β_t = linRadius (d_x d_y) λ δ t`. -/
+@[nolint unusedArguments]
 theorem probReal_forall_sqrt_mahalanobisSq_le_ge {dx dy : ℕ}
     {mx my : ℕ} [NeZero mx] [NeZero my] (φ : Fin mx → EuclideanSpace ℝ (Fin dx))
     (ψ : Fin my → EuclideanSpace ℝ (Fin dy)) (A : Matrix (Fin dx) (Fin dy) ℝ)

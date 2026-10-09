@@ -4,8 +4,12 @@ Machine-checkable verification, with [leanprover/comparator](https://github.com/
 that this repository proves the headline results claimed in [`formalization.yaml`](../formalization.yaml)
 without having to read or trust the Lean development in `Ito2026Adversarial/`.
 
-**Status.** Phase 1 (2026-10-08): the 12 headline statements are stated with `sorry`; the
-challenges compile (`lake build Comparator`).
+**Status.** Phase 2 complete (2026-10-09): the project proves the 12 headline theorems with no
+`sorry` and the standard axioms only; the challenges, regenerated after phase 2, compile
+(`lake build Comparator`). The statement of Theorem 5 was corrected in phase 2 (its additive term
+is `m_x log² m_x`, with a counterexample to the paper's `m_x log m_x`, see
+`notes/blueprint-outline.md`, section 3). The full comparator run (`scripts/comparator-verify.sh`)
+remains to be done.
 
 Each challenge is one self-contained file whose transitive imports resolve to Mathlib and Lean
 core only, the shape the [Palomar registry](https://palomar-registry.org/) enforces: no LML, no

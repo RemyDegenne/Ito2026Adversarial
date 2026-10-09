@@ -63,6 +63,22 @@ public import Mathlib.Analysis.SpecialFunctions.Log.Basic
 public import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
 public import Mathlib.Probability.Distributions.Bernoulli
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
+public import Mathlib.Analysis.Matrix.PosDef
+public import Mathlib.Probability.Moments.SubGaussian
+public import Mathlib.MeasureTheory.Integral.Lebesgue.Add
+public import Mathlib.Probability.Process.Filtration
+public import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
+public import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
+public import Mathlib.Analysis.Complex.ExponentialBounds
+public import Mathlib.Analysis.SpecialFunctions.Log.Base
+public import Mathlib.Analysis.Convex.Integral
+public import Mathlib.Analysis.Convex.SpecificFunctions.Pow
+public import Mathlib.NumberTheory.Harmonic.Bounds
+public import Mathlib.Analysis.MeanInequalities
+public import Mathlib.Analysis.MeanInequalitiesPow
+public import Mathlib.Analysis.Convex.SpecificFunctions.Basic
+public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
+public import Mathlib.Analysis.Calculus.MeanValue
 
 /-! # Standalone extraction for `Ito2026Adversarial.forall_exists_psmr_tsallisSPMPaper_le`
 Definitions are copied verbatim; theorem proofs are replaced by `sorry`.
@@ -742,15 +758,16 @@ a constant `C` such that for every bilinear game (`IsBilinearGame`) with `m_x �
 learner, every exploration distribution `p₀` of variance ratio `c`, every adaptive adversary and
 every reward noise with conditional mean `u` and rewards in `[-1, 1]`, the run of
 Tsallis-FTRL-SPM with the parameters of the theorem satisfies
-`PSMR_T ≤ C (√(T d_x log m_x) + m_x log m_x)`; moreover
-`PSMR_T ≤ C (d_x log m_x (1 + log T) (1 + 1 / Δᶜ_min) / Δʳ_min + m_x log m_x)` if `(x*, y*)` is a
-strict PSNE and `PSMR_T ≤ C (d_x log m_x / Δ^mix + m_x log m_x)` if `Δ^mix > 0`.
+`PSMR_T ≤ C (√(T d_x log m_x) + m_x log² m_x)`; moreover
+`PSMR_T ≤ C (d_x log m_x (1 + log T) (1 + 1 / Δᶜ_min) / Δʳ_min + m_x log² m_x)` if `(x*, y*)` is a
+strict PSNE and `PSMR_T ≤ C (d_x log m_x / Δ^mix + m_x log² m_x)` if `Δ^mix > 0`.
 
 As for Theorem 1, the second bound is the form given by the proof (the paper's
-`O(d_x log m_x log T / (Δʳ_min Δᶜ_min) + m_x log m_x)` follows for `m_y ≥ 2` and `T ≥ 2`, and is
+`O(d_x log m_x log T / (Δʳ_min Δᶜ_min) + m_x log² m_x)` follows for `m_y ≥ 2` and `T ≥ 2`, and is
 false in Lean for `m_y = 1`), and the third is stated for `Δ^mix > 0`, which the paper deduces
 from the absence of PSNE (not true in general) and which is all its proof uses. The variance ratio
-`HasVarianceRatio` includes the invertibility of `S(p₀)`. -/
+`HasVarianceRatio` includes the invertibility of `S(p₀)`. The additive term is `m_x log² m_x`, not
+the paper's `m_x log m_x` (see the module docstring). -/
 theorem forall_exists_psmr_tsallisSPMPaper_le :
     ∀ c : ℝ, 0 < c → ∃ C : ℝ, 0 < C ∧
       ∀ {mx my dx dy : ℕ} [NeZero mx] [NeZero my] (φ : Fin mx → EuclideanSpace ℝ (Fin dx))
@@ -766,14 +783,14 @@ theorem forall_exists_psmr_tsallisSPMPaper_le :
         (Player.ofUninformed (tsallisSPMPaper φ c p₀)) (gameEnv opp R) P →
       ∀ T : ℕ,
         psmr (bilinearGame φ ψ A) X Y P T ≤
-          C * (√(T * dx * log mx) + mx * log mx) ∧
+          C * (√(T * dx * log mx) + mx * log mx ^ 2) ∧
         (∀ x₀ y₀, IsStrictPSNE (bilinearGame φ ψ A) x₀ y₀ →
           psmr (bilinearGame φ ψ A) X Y P T ≤
             C * (dx * log mx * (1 + log T) * (1 + 1 / colGapMin (bilinearGame φ ψ A) x₀ y₀)
-              / rowGapMin (bilinearGame φ ψ A) x₀ y₀ + mx * log mx)) ∧
+              / rowGapMin (bilinearGame φ ψ A) x₀ y₀ + mx * log mx ^ 2)) ∧
         (0 < mixGap (bilinearGame φ ψ A) →
           psmr (bilinearGame φ ψ A) X Y P T ≤
-            C * (dx * log mx / mixGap (bilinearGame φ ψ A) + mx * log mx)) := sorry
+            C * (dx * log mx / mixGap (bilinearGame φ ψ A) + mx * log mx ^ 2)) := sorry
 
 end Ito2026Adversarial
 end

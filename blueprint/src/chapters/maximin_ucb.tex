@@ -14,21 +14,99 @@
 \end{lemma}
 
 \begin{proof}
-  \uses{lem:bounded_noise_subgaussian, lem:mixture_supermartingale, lem:ville}
+  \leanok
+  \uses{lem:bounded_noise_subgaussian, lem:mixture_supermartingale, lem:ville, lem:self_normalized}
   $M_t = R_t(x, y) - N_t(x, y) u(x, y)$ is a sum of noises over the rounds where $(x, y)$ is played,
   each conditionally $1$-sub-Gaussian (Lemma~\ref{lem:bounded_noise_subgaussian}), and the
-  indicator of playing $(x, y)$ is predictable. By Lemma~\ref{lem:mixture_supermartingale},
+  indicator of playing $(x, y)$ is predictable. By Lemma~\ref{lem:mixture_supermartingale}
+  (dimension one, $\lambda = 1$, $a_s$ the indicator of playing $(x, y)$),
   $\bar Z_t = (1 + N_t)^{-1/2} \exp(\frac{M_t^2}{2(1 + N_t)})$ is a nonnegative supermartingale with
   $\bar Z_0 = 1$; by Ville's inequality (Lemma~\ref{lem:ville}), with probability at least
-  $1 - \delta$, $\frac{M_t^2}{2(1 + N_t)} \le \log\frac1\delta + \frac12 \log(1 + N_t)$ for all $t$,
-  and $\frac{1 + N_t}{N_t} \le 2$ when $N_t > 0$.
+  $1 - \delta$, $\frac{M_t^2}{2(1 + N_t)} \le \log\frac1\delta + \frac12 \log(1 + N_t)$ for all $t$
+  (this is Lemma~\ref{lem:self_normalized} in dimension one), and $\frac{1 + N_t}{N_t} \le 2$ when
+  $N_t > 0$. The hypothesis $u \in [-1, 1]$ is not used (it follows from the others).
+\end{proof}
+
+\begin{lemma}[Optimism of the pure maximin action of upper bounds]
+  \label{lem:maximin_optimism}
+  \lean{Learning.ZeroSumGame.pureMaximin_le_of_le}
+  \leanok
+  \uses{def:values}
+  If $u \le U$ pointwise and $x_0$ maximizes $x \mapsto \min_y U(x, y)$, then
+  $\vstar \le \min_y U(x_0, y) \le U(x_0, y)$ for every $y$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  With $x^\star$ a pure maximin action,
+  $\vstar = \min_y u(x^\star, y) \le \min_y U(x^\star, y) \le \min_y U(x_0, y)$.
+\end{proof}
+
+\begin{lemma}[Good event of Maximin-UCB]
+  \label{lem:pureucb_good_event}
+  \lean{Ito2026Adversarial.measureReal_compl_ucbGoodEvent_le}
+  \leanok
+  \uses{lem:ucb_ucb}
+  In a run of any informed player, the event $G$ on which the bounds of
+  Lemma~\ref{lem:ucb_ucb} hold for all pairs and all times has probability at least
+  $1 - m_x m_y \delta$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  \uses{lem:ucb_ucb}
+  Union bound over the $m_x m_y$ pairs.
+\end{proof}
+
+\begin{lemma}[Number of plays of a pair with a positive gap]
+  \label{lem:pureucb_count}
+  \lean{Ito2026Adversarial.pairCount_mul_sq_le_of_mem_ucbGoodEvent}
+  \leanok
+  \uses{def:maximin_ucb, lem:maximin_optimism, lem:pureucb_good_event}
+  On the event $G$ of Lemma~\ref{lem:pureucb_good_event}, in a run of Maximin-UCB with
+  $\delta = 1/T$, $T \ge 2$, every pair with $\Delta_{xy} > 0$ satisfies
+  $N_T(x, y) \Delta_{xy}^2 \le \Delta_{xy}^2 + 24 \log T$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  \uses{lem:maximin_optimism}
+  On $G$, $u \le U_t$ everywhere ($U_t = 1$ for a pair never played), so $\vstar \le U_t(x_t, y_t)$
+  by Lemma~\ref{lem:maximin_optimism}, $x_t$ maximizing $x \mapsto \min_y U_t(x, y)$. At a round
+  $t < T$ in which $(x, y)$ is played with $N = N_t(x, y) > 0$, the empirical mean is at most
+  $u(x, y) + r$ with $r = \sqrt{(4 \log T + 2 \log(1 + N))/N}$, so
+  $u(x, y) + \Delta_{xy} = \vstar \le U_t(x, y) \le u(x, y) + 2 r$ and
+  $N \Delta_{xy}^2 \le 4 N r^2 = 16 \log T + 8 \log(1 + N) \le 24 \log T$ ($1 + N \le T$). By
+  induction on $t \le T$, $N_t(x, y) \Delta_{xy}^2 \le \Delta_{xy}^2 + 24 \log T$.
+\end{proof}
+
+\begin{lemma}[Pathwise regret of Maximin-UCB]
+  \label{lem:pureucb_pathwise}
+  \lean{Ito2026Adversarial.sum_pureMaximin_sub_le_of_mem_ucbGoodEvent,
+    Ito2026Adversarial.sum_pureMaximin_sub_le_sqrt_of_mem_ucbGoodEvent}
+  \leanok
+  \uses{lem:pureucb_count}
+  On the event $G$, in a run of Maximin-UCB with $\delta = 1/T$, $T \ge 2$,
+  $\sum_{t < T} (\vstar - u(x_t, y_t)) \le \sum_{(x, y) : \Delta_{xy} > 0} (\Delta_{xy} +
+  \frac{24 \log T}{\Delta_{xy}})$ and
+  $\sum_{t < T} (\vstar - u(x_t, y_t)) \le 2 m_x m_y + \sqrt{24 m_x m_y T \log T}$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  \uses{lem:pureucb_count}
+  $\sum_{t < T} (\vstar - u(x_t, y_t)) = \sum_{x, y} N_T(x, y) \Delta_{xy}$. For $\Delta_{xy} > 0$,
+  Lemma~\ref{lem:pureucb_count} gives $N_T(x, y) \Delta_{xy} \le \Delta_{xy} + 24 \log T / \Delta_{xy}$
+  and, as $((N_T - 1) \Delta_{xy})^2 \le 24 N_T \log T$ and $\Delta_{xy} \le 2$,
+  $N_T(x, y) \Delta_{xy} \le 2 + \sqrt{24 \log T \, N_T(x, y)}$; finally
+  $\sum_{x, y} \sqrt{N_T(x, y)} \le \sqrt{m_x m_y T}$ (Cauchy--Schwarz).
 \end{proof}
 
 \begin{theorem}[Theorem 4]
   \label{thm:pureucb}
   \lean{Ito2026Adversarial.exists_psmr_maximinUCB_le}
   \leanok
-  \uses{def:maximin_ucb, lem:ucb_ucb, def:regrets}
+  \uses{def:maximin_ucb, lem:ucb_ucb, def:regrets, lem:pureucb_good_event, lem:pureucb_pathwise}
   There is a universal constant $C$ such that for every game $u$ with utilities in $[-1, 1]$, every
   adaptive adversary, every reward noise with conditional mean $u$ and rewards in $[-1, 1]$ and every
   $T \ge 2$, Maximin-UCB with $\delta = 1/T$ has
@@ -37,18 +115,14 @@
 \end{theorem}
 
 \begin{proof}
-  \uses{lem:ucb_ucb}
-  On the event $G$ where the bounds of Lemma~\ref{lem:ucb_ucb} hold for all pairs (probability at
-  least $1 - m_x m_y/T$), $u \le U_t$ everywhere, so with $x^\star$ a pure maximin action,
-  $\vstar = \min_y u(x^\star, y) \le \min_y U_t(x^\star, y) \le \min_y U_t(x_t, y) \le U_t(x_t, y_t)$.
-  At the last round in which a pair with $\Delta_{xy} > 0$ is played,
-  $\sqrt{(4 \log T + 2 \log(1 + N))/N} \ge \Delta_{xy}$ with $N = N_{t-1}(x, y)$, so
-  $N_T(x, y) \le 1 + \frac{6 \log T}{\Delta_{xy}^2}$ (using $N \le T$). On $G$,
-  $\sum_t (\vstar - u(x_t, y_t)) \le \sum_{\Delta_{xy} > 0} N_T(x, y) \Delta_{xy}$; on $G^c$ it is at
-  most $2T$, which contributes at most $2 m_x m_y$. This gives the first bound. For the second, split
-  the pairs at the threshold $\Delta = \sqrt{6 m_x m_y \log T/T}$: the pairs below contribute at most
-  $\Delta T$ on $G$, those above at most $2 + \frac{6 \log T}{\Delta}$ each; and
-  $3 m_x m_y \le C \sqrt{m_x m_y T \log T}$ when $m_x m_y \le T$, while $\PSMR_T \le 2T$ always.
+  \leanok
+  \uses{lem:pureucb_good_event, lem:pureucb_pathwise}
+  On the event $G$ (probability at least $1 - m_x m_y/T$, Lemma~\ref{lem:pureucb_good_event}) the
+  regret is bounded by Lemma~\ref{lem:pureucb_pathwise}; on $G^c$ it is at most $2T$, which
+  contributes at most $2 m_x m_y$. This gives the first bound with $C = 24$. For the second,
+  $\PSMR_T \le 4 m_x m_y + \sqrt{24 m_x m_y T \log T}$, and $4 m_x m_y \le 6 \sqrt{m_x m_y T \log T}$
+  when $m_x m_y \le T$ ($\log T \ge 1/2$), while $\PSMR_T \le 2T \le 3 \sqrt{m_x m_y T \log T}$ when
+  $m_x m_y > T$.
 \end{proof}
 
 \begin{remark}
@@ -56,5 +130,8 @@
   The paper states the first bound without the term $m_x m_y$, which its proof obtains from the
   failure event and claims to be absorbed by the big-$O$; this is not the case when few action pairs
   have a positive gap. In the paper's last display, $2 \sqrt{6 m_x m_y \log T}$ should read
-  $2 \sqrt{6 m_x m_y T \log T}$.
+  $2 \sqrt{6 m_x m_y T \log T}$. The paper's proof also claims $\sqrt{(4 \log T + 2 \log(1 + N))/N}
+  \ge \Delta_{xy}$ at the last round in which a pair is played; the confidence bounds only give
+  twice the radius at least $\Delta_{xy}$ (the empirical mean is within the radius of $u(x, y)$, not
+  below it), which changes the constant $6$ into $24$ (Lemma~\ref{lem:pureucb_count}).
 \end{remark}

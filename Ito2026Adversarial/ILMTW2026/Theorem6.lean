@@ -5,7 +5,7 @@ Authors: Rémy Degenne
 -/
 module
 
-public import Ito2026Adversarial.ILMTW2026.Setting
+public import Ito2026Adversarial.ILMTW2026.Theorem12
 
 /-!
 # Theorem 6: PSMR of Maximin-LinUCB in bilinear games (informal version)
@@ -45,6 +45,8 @@ theorem exists_forall_exists_psmr_maximinLinUCB_le :
         psmr (bilinearGame φ ψ A) X Y P T ≤ C * (dx * dy * √T * log T) ∧
         ∀ Δ : ℝ, 0 < Δ → IsGapThreshold (bilinearGame φ ψ A) Δ →
           psmr (bilinearGame φ ψ A) X Y P T ≤ C * (dx ^ 2 * dy ^ 2 * log T ^ 2 / Δ) := by
-  sorry
+  obtain ⟨C, hC, h⟩ := exists_psmr_maximinLinUCB_le.{u}
+  exact ⟨C, hC, fun φ ψ A hA T hT ↦ ⟨1, fun n ↦ linRadius (_ * _) 1 (1 / T) (n + 1),
+    fun opp R _ hR hR' _ _ P _ X Y Rw hseq ↦ h φ ψ A hA T hT opp R hR hR' P X Y Rw hseq⟩⟩
 
 end Ito2026Adversarial

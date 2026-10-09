@@ -63,6 +63,9 @@ public import Mathlib.LinearAlgebra.Matrix.SchurComplement
 public import Mathlib.Analysis.Convex.Caratheodory
 public import Mathlib.LinearAlgebra.AffineSpace.FiniteDimensional
 public import Mathlib.Topology.Algebra.Ring.Real
+public import Mathlib.Analysis.Convex.Integral
+public import Mathlib.Analysis.Convex.SpecificFunctions.Pow
+public import Mathlib.NumberTheory.Harmonic.Bounds
 
 /-! # Standalone extraction for `Ito2026Adversarial.exists_psmr_tsallisINFHalf_le`
 Definitions are copied verbatim; theorem proofs are replaced by `sorry`.

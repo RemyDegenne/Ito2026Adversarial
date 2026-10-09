@@ -10,80 +10,367 @@ universal constants.
 
 \begin{lemma}[FTRL decomposition]
   \label{lem:ftrl_decomposition}
+  \lean{Learning.sum_inner_sub_le_ftrl, Learning.sum_inner_sub_le_ftrl_smul,
+    Learning.ftrlValue_le_sum, Learning.ftrlValue_eq_of_isMaxOn, Learning.le_ftrlValue_of_isMaxOn}
+  \leanok
   \uses{def:tsallis_inf}
-  Let $\Phi_t(G) = \max_{p \in \simplex} \langle p, G\rangle + \varphi(p)/\eta_t$ (the FTRL value
-  function, \texttt{ftrlValue}), $p_t = \nabla \Phi_t(G_t)$, with nonincreasing $\eta_t$ and a
-  concave regularizer $\varphi \ge 0$ vanishing at the vertices. For every $x$ and every sequence of
-  estimates $g_t$,
-  $\sum_{t < T} \langle e_x - p_t, g_t\rangle \le \sum_{t < T}(\frac{1}{\eta_t} -
-  \frac{1}{\eta_{t-1}}) (\varphi(p_t) - \varphi(e_x)) + \sum_{t < T} (\Phi_t(G_{t+1}) - \Phi_t(G_t)
-  - \langle p_t, g_t\rangle)$ (penalty and stability terms, $1/\eta_{-1} = 0$).
+  Let $\psi_t$ be regularizers, $G_t = \sum_{s < t} g_s$, $p_t$ a maximizer of $p \mapsto \langle
+  p, G_t\rangle + \psi_t(p)$ over the simplex and $\Phi_t(G) = \max_{p \in \simplex} \langle p,
+  G\rangle + \psi_t(p)$ (the FTRL value function, \texttt{ftrlValue}). For every $q$ in the
+  simplex,
+  $\sum_{t \le T} \langle q - p_t, g_t\rangle \le \psi_0(p_0) - \psi_0(q) + \sum_{t < T}
+  \bigl((\psi_{t+1} - \psi_t)(p_{t+1}) - (\psi_{t+1} - \psi_t)(q)\bigr) + \sum_{t \le T}
+  (\Phi_t(G_{t+1}) - \Phi_t(G_t) - \langle p_t, g_t\rangle)$ (penalty and stability terms). For
+  $\psi_t = \varphi/\eta_t$ the penalty term is $\sum_{t \le T}(\frac{1}{\eta_t} -
+  \frac{1}{\eta_{t-1}}) (\varphi(p_t) - \varphi(q))$, $1/\eta_{-1} = 0$.
 \end{lemma}
 
 \begin{proof}
-  Telescoping of $\Phi_t(G_t)$, the Fenchel--Young inequality at $e_x$ and the monotonicity of the
-  value function in the learning rate.
+  \leanok
+  Telescoping of $\Phi_t(G_t) = \langle p_t, G_t\rangle + \psi_t(p_t)$, with $\Phi_t(G_{t+1}) \ge
+  \langle p_{t+1}, G_{t+1}\rangle + \psi_t(p_{t+1})$ and $\Phi_T(G_{T+1}) \ge \langle q,
+  G_{T+1}\rangle + \psi_T(q)$ (Fenchel--Young inequality; the value function is finite as soon as
+  the objective has a maximizer at one point).
+\end{proof}
+
+\begin{lemma}[The FTRL distribution as a gradient]
+  \label{lem:ftrl_gradient}
+  \lean{Learning.abs_ftrlValue_sub_sub_le, Learning.hasGradientAt_ftrlValue,
+    Learning.ftrlSimplex_eq}
+  \leanok
+  If for every $\theta$ the objective $\langle \cdot, \theta\rangle + \varphi$ has a maximizer
+  $P(\theta)$ on the simplex with quadratic growth, $\langle q, \theta\rangle + \varphi(q) + \mu
+  \|q - P(\theta)\|^2 \le \langle P(\theta), \theta\rangle + \varphi(P(\theta))$ with $\mu > 0$,
+  then $\nabla \Phi(\theta) = P(\theta)$, so that the FTRL distribution \texttt{ftrlSimplex},
+  defined as this gradient, is the maximizer.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  Adding the growth inequalities at $\theta$ and $\theta'$ shows that $P$ is
+  $\frac{1}{2\mu}$-Lipschitz, and $0 \le \Phi(\theta') - \Phi(\theta) - \langle P(\theta),
+  \theta' - \theta\rangle \le \langle P(\theta') - P(\theta), \theta' - \theta\rangle \le
+  \|\theta' - \theta\|^2/(2\mu)$.
+\end{proof}
+
+\begin{lemma}[The Tsallis-$\frac12$ maximizer]
+  \label{lem:tsallis_argmax}
+  \lean{Learning.exists_tsallisHalf_normalizer, Learning.tsallisHalf_objective_eq,
+    Learning.exists_tsallisHalf_objective_eq, Learning.ftrlSimplex_tsallisEntropy_half,
+    Learning.isMaxOn_ftrlSimplex_tsallisEntropy_half}
+  \leanok
+  \uses{lem:ftrl_gradient}
+  Let $\varphi = \varphi_{1/2}$, $\varphi(p) = 2\sum_x (\sqrt{p(x)} - p(x))$. For every $\theta$, the
+  point $p(x) = (\nu - \theta(x))^{-2}$, where $\nu > \max_x \theta(x)$ and $\sum_x (\nu -
+  \theta(x))^{-2} = 1$, has positive coordinates and, for every $q$ in the simplex,
+  $\langle q, \theta\rangle + \varphi(q) = \langle p, \theta\rangle + \varphi(p) - \sum_x
+  (\sqrt{q(x)} - \sqrt{p(x)})^2/\sqrt{p(x)}$. It is the FTRL distribution \texttt{ftrlSimplex}.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  \uses{lem:ftrl_gradient}
+  The normalization $\nu$ exists by the intermediate value theorem on $[\max\theta + 1, \max\theta
+  + \sqrt{m}]$; the identity is a computation with $\theta(x) = \nu - 1/\sqrt{p(x)}$ and $\sum_x
+  q(x) = \sum_x p(x)$. The gap is at least $\|q - p\|^2/4$, and Lemma~\ref{lem:ftrl_gradient}
+  applies.
 \end{proof}
 
 \begin{lemma}[Stability of the Tsallis-$\frac12$ regularizer]
   \label{lem:tsallis_stability}
-  \uses{lem:ftrl_decomposition}
-  For $\varphi = \varphi_{1/2}$ and the estimate $g_t(x) = 1 - (1 - r_t)\indic\{x_t = x\}/p_t(x)$ with
-  $r_t \in [-1, 1]$, the conditional expectation of the stability term of round $t$ is at most
-  $C \eta_t \sum_{x \ne x'} \sqrt{p_t(x)}$ for every $x'$ (shifting the estimates by a constant
-  does not change $p_t$, which allows to exclude any one arm).
+  \lean{Learning.ftrlValue_add_sub_tsallisHalf, Learning.sq_sub_sq_mul_sub_le,
+    Learning.inner_sub_sub_le_tsallisHalf, Bandits.TsallisINF.inner_sub_estimate_sub_le,
+    Bandits.TsallisINF.inner_sub_estimate_sub_le', Bandits.TsallisINF.sum_mul_stabilityWeight,
+    Bandits.TsallisINF.sum_sqrt_mul_one_sub_le}
+  \leanok
+  \uses{lem:ftrl_decomposition, lem:tsallis_argmax}
+  For $\varphi = \varphi_{1/2}$, a learning rate $\eta$ and the estimate $g(x) = 1 - (1 -
+  r)\indic\{j = x\}/p(x)$ of a round in which $j$ is played with the distribution $p$ and $r \in
+  [-1, 1]$, the stability term $\frac1\eta(\Phi(\eta(G + g)) - \Phi(\eta G)) - \langle p, g\rangle$
+  is at most $2$, and at most $8 \eta\, w(p, j)$ if $\eta \le 1/4$, where $w(p, j) = \sum_x
+  p(x)^{3/2}(\indic\{x = j\}(1/p(j) - 1)^2 + \indic\{x \ne j\})$. Moreover $\sum_j p(j) w(p, j) =
+  \sum_x \sqrt{p(x)}(1 - p(x)) \le 2\sum_{x \ne x'}\sqrt{p(x)}$ for every $x'$.
 \end{lemma}
 
 \begin{proof}
-  Local norm bound of the stability term through the Hessian of the conjugate of the Tsallis
-  entropy, $\nabla^2 \le$ diag$(p^{3/2})$ up to constants, for nonpositive increments of the
-  shifted estimates, and $\E[(1 - r_t)^2 \indic\{x_t = x\}/p_t(x)^2 \mid \cdots] \le 4/p_t(x)$.
+  \leanok
+  \uses{lem:tsallis_argmax}
+  By Lemma~\ref{lem:tsallis_argmax}, the stability term is $\langle p' - p, g\rangle - \frac1\eta
+  \sum_x (\sqrt{p'(x)} - \sqrt{p(x)})^2/\sqrt{p(x)}$, with $p'$ the next distribution. For any
+  shift $c$, $\langle p' - p, g\rangle = \langle p - p', \ell\rangle$ with $\ell = c - g$ (shifting
+  the estimates by a constant does not change the distributions, which allows to exclude the
+  played arm), and if $\eta\sqrt{p(x)}\ell(x) \ge -1/2$ each coordinate contributes at most $2\eta
+  p(x)^{3/2}\ell(x)^2$, by $(a^2 - s^2)\ell - (s - a)^2/(\eta a) \le 2\eta a^3\ell^2$. The shift $c
+  = r$ gives $\ell(x) = (1 - r)(\indic\{x = j\}(1/p(j) - 1) - \indic\{x \ne j\})$, for which the
+  condition holds when $\eta \le 1/4$. Without condition, the stability term is at most $\langle p
+  - p', 1 - g\rangle \le \langle p, 1 - g\rangle = 1 - r \le 2$.
+\end{proof}
+
+\begin{lemma}[Pathwise regret of Tsallis-INF]
+  \label{lem:tsallis_pathwise}
+  \lean{Ito2026Adversarial.sum_inner_halfEstimate_le,
+    Ito2026Adversarial.stability_halfEstimate_le, Ito2026Adversarial.inv_halfRate_sub_mul_le}
+  \leanok
+  \uses{lem:ftrl_decomposition, lem:tsallis_stability}
+  Along any sequence of rounds with rewards in $[-1, 1]$, the distributions $p_t$ and estimates
+  $g_t$ of Tsallis-INF with $\alpha = 1/2$ and $\eta_t = 1/(2\sqrt{t + 1})$ (rounds counted from
+  $0$) satisfy, for every $x$,
+  $\sum_{t < T}\langle e_x - p_t, g_t\rangle \le \sum_{t < T}\bigl(\frac{4}{\sqrt{t + 1}}\sum_{x'
+  \ne x}\sqrt{p_t(x')} + B_t\bigr)$, with $B_t = 2$ for $t < 3$ and $B_t = \frac{4}{\sqrt{t +
+  1}}\, w(p_t, x_t)$ for $t \ge 3$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  \uses{lem:ftrl_decomposition, lem:tsallis_stability}
+  Lemma~\ref{lem:ftrl_decomposition} with $\psi_t = \varphi_{1/2}/\eta_t$ and $q = e_x$
+  ($\varphi(e_x) = 0$): for the penalty, $0 \le \frac{1}{\eta_t} - \frac{1}{\eta_{t-1}} \le
+  \frac{2}{\sqrt{t + 1}}$ and $0 \le \varphi(p) \le 2\sum_{x' \ne x}\sqrt{p(x')}$; for the
+  stability, Lemma~\ref{lem:tsallis_stability} ($\eta_t \le 1/4$ for $t \ge 3$).
 \end{proof}
 
 \begin{lemma}[Tsallis-INF, worst case]
   \label{lem:tsallis_inf_worst}
-  \uses{lem:ftrl_decomposition, lem:tsallis_stability, lem:uninformed_run}
-  In the setting of Theorem~\ref{thm:tsallis}, $\ER_T \le 8 \sqrt{m_x T} + 2$ (any bound of the form
-  $C_1 \sqrt{m_x T} + C_2$ suffices).
+  \lean{Ito2026Adversarial.externalRegret_tsallisINFHalf_le}
+  \leanok
+  \uses{lem:tsallis_inf_self_bound}
+  In the setting of Theorem~\ref{thm:tsallis}, $\ER_T \le 24\sqrt{m_x T} + 6$ (any bound of the
+  form $C_1\sqrt{m_x T} + C_2$ suffices).
 \end{lemma}
 
 \begin{proof}
-  \uses{lem:ftrl_decomposition, lem:tsallis_stability, lem:uninformed_run}
-  Lemmas~\ref{lem:ftrl_decomposition} and~\ref{lem:tsallis_stability} with
-  $\sum_x \sqrt{p(x)} \le \sqrt{m_x}$, $\varphi_{1/2} \le 2\sqrt{m_x}$, and
-  $\sum_t \eta_t \le \sqrt T$; the expectation of $\langle e_x - p_t, g_t\rangle$ is
-  $\E[u(x, y_t) - u(x_t, y_t)]$ (Lemma~\ref{lem:uninformed_run}).
+  \leanok
+  \uses{lem:tsallis_inf_self_bound}
+  Lemma~\ref{lem:tsallis_inf_self_bound} for every $x^\star$, with $\sum_{x \ne x^\star}
+  \sqrt{p_t(x)} \le \sqrt{m_x}$ (Cauchy--Schwarz) and $\sum_{t < T}\frac{1}{\sqrt{t + 1}} \le
+  2\sqrt T$.
 \end{proof}
 
 \begin{lemma}[Tsallis-INF, self-bounding form]
   \label{lem:tsallis_inf_self_bound}
-  \uses{lem:ftrl_decomposition, lem:tsallis_stability, lem:uninformed_run}
+  \lean{Ito2026Adversarial.externalRegretAgainst_tsallisINFHalf_le}
+  \leanok
+  \uses{lem:tsallis_pathwise, lem:uninformed_run}
   In the setting of Theorem~\ref{thm:tsallis}, for every $x^\star$,
-  $\ER_T(x^\star) \le C_0 \E[\sum_{t < T} \frac{1}{\sqrt{t + 1}} \sum_{x \ne x^\star} \sqrt{p_t(x)}]$
-  for a universal constant $C_0$ (the paper uses $C_0 = 19$, \cite[Theorem 1]{ito2025instancedependent}).
+  $\ER_T(x^\star) \le 12\,\E[\sum_{t < T}\frac{1}{\sqrt{t + 1}}\sum_{x \ne x^\star}\sqrt{p_t(x)}] +
+  6$. The paper uses $C_0 = 19$ and no additive constant
+  (\cite[Theorem 1]{ito2025instancedependent}); the additive constant, which comes from the first
+  three rounds (where $\eta_t > 1/4$), is absorbed in Theorem~\ref{thm:tsallis}.
 \end{lemma}
 
 \begin{proof}
-  \uses{lem:ftrl_decomposition, lem:tsallis_stability, lem:uninformed_run}
-  The penalty term is at most $\sum_t (\frac{1}{\eta_t} - \frac{1}{\eta_{t-1}}) \cdot 2\sum_{x \ne
-  x^\star} \sqrt{p_t(x)}$ (as $\sum_x \sqrt{p(x)} - 1 \le \sum_{x \ne x^\star} \sqrt{p(x)}$), with
-  $\frac{1}{\eta_t} - \frac{1}{\eta_{t-1}} \le \frac{1}{\sqrt t}$; the stability term is bounded by
-  Lemma~\ref{lem:tsallis_stability} with $x' = x^\star$.
+  \leanok
+  \uses{lem:tsallis_pathwise, lem:uninformed_run}
+  Take expectations in Lemma~\ref{lem:tsallis_pathwise} with $x = x^\star$, using
+  Lemma~\ref{lem:uninformed_run}: $\E\langle e_x - p_t, g_t\rangle = \E[u(x, y_t) - u(x_t, y_t)]$
+  and $\E[w(p_t, x_t)] = \E[\sum_x\sqrt{p_t(x)}(1 - p_t(x))] \le 2\E[\sum_{x \ne
+  x^\star}\sqrt{p_t(x)}]$; the terms $B_t$, $t < 3$, contribute at most $6$.
+\end{proof}
+
+\begin{lemma}[FTRL with the hybrid Tsallis regularizer]
+  \label{lem:hybrid_ftrl}
+  \lean{Learning.hybridTsallis, Learning.hybridObjective, Learning.exists_forall_hybridObjective_le,
+    Learning.pos_of_forall_hybridObjective_le, Learning.exists_kkt_of_forall_hybridObjective_le,
+    Learning.hybridObjective_eq_sub_bregman, Learning.hybridObjective_le_sub_sq,
+    Learning.eq_of_forall_hybridObjective_le, Learning.hasFDerivAt_ftrlValueParam_hybrid,
+    Learning.ftrlSimplexParam_hybrid_eq, Learning.forall_hybridObjective_le_ftrlSimplexParam,
+    Real.rpow_le_rpow_add_mul_sub, Real.sq_le_rpow_bregman}
+  \leanok
+  \uses{lem:ftrl_decomposition, lem:ftrl_gradient}
+  Let $0 < \alpha < 1$, $\beta > 0$, $\bar\beta \ge 0$ and $f(p) = \langle p, G\rangle + \beta
+  \varphi_\alpha(p) + \bar\beta \varphi_{1-\alpha}(p)$. The function $f$ has a maximizer $p$ on the
+  simplex; every maximizer has positive coordinates and satisfies the first-order conditions $G(x)
+  + \beta p(x)^{\alpha - 1} + \bar\beta p(x)^{-\alpha} = \lambda$ for all $x$; for every $r$ in
+  the simplex, $f(r) = f(p) - \frac{\beta}{\alpha}\sum_x d_\alpha(r(x), p(x)) -
+  \frac{\bar\beta}{1 - \alpha}\sum_x d_{1-\alpha}(r(x), p(x))$, with $d_a(y, x) = x^a + a
+  x^{a-1}(y - x) - y^a \ge \frac{a(1-a)}{2}(y - x)^2$ on $[0, 1]$, so that $f(r) \le f(p) -
+  \frac{\beta(1-\alpha)}{2}\|r - p\|^2$. The joint value function $(\beta, G) \mapsto \max f$ is
+  differentiable at every $(\beta, G)$ with $\beta > 0$, with partial gradient $p$ in $G$, so that
+  the FTRL distribution \texttt{ftrlSimplexParam} (defined as this partial gradient, as
+  \texttt{spmHat}) is the maximizer.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  Existence by compactness. If $p(j) = 0$, moving a mass $t$ from a positive coordinate $k$ to $j$
+  increases $f$ by at least $\frac{\beta}{\alpha} t^\alpha - Ct$, positive for small $t$; at an
+  interior maximizer, $t \mapsto f(p + t(e_i - e_j))$ has a local maximum at $0$, which gives the
+  first-order conditions. The identity is then a computation, and the quadratic lower bound on
+  $d_a$ follows from the mean value theorem ($x^{a-1}$ has derivative at most $-(1-a)$ on
+  $(0, 1]$). For the value function $V$: with $p'$ a maximizer at $z' = (\beta', G')$,
+  $0 \le V(z') - V(z) - (\beta' - \beta)\varphi_\alpha(p) - \langle p, G' - G\rangle \le
+  (\beta' - \beta)(\varphi_\alpha(p') - \varphi_\alpha(p)) + \langle p' - p, G' - G\rangle$, and
+  the quadratic growth at $z$ bounds $\|p' - p\|^2$ by $O(\|z' - z\|)$ (Danskin).
+\end{proof}
+
+\begin{lemma}[Stability of the hybrid regularizer]
+  \label{lem:hybrid_stability}
+  \lean{Learning.mul_sub_sub_powBregman_le, Learning.inner_sub_sub_bregman_le,
+    Learning.ftrlValue_hybrid_add_sub_le, Learning.qStar}
+  \leanok
+  \uses{lem:hybrid_ftrl}
+  Let $q^* = \min\{\|p\|_\infty, 1 - \|p\|_\infty\}$ for the maximizer $p$ at $(\beta, G)$. If
+  $|g(x)| \le \frac{(1 - \alpha)\beta}{4} (q^*)^{\alpha - 1}$ for all $x$, the stability term
+  satisfies $\Phi(G + g) - \Phi(G) - \langle p, g\rangle \le \frac{4}{(1 - \alpha)\beta}
+  (q^*)^{1 - \alpha}\sum_x p(x) g(x)^2$ (\cite[Lemmas 20 to 22]{ito2024adaptive}).
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  \uses{lem:hybrid_ftrl}
+  By Lemma~\ref{lem:hybrid_ftrl}, the stability term is at most $\langle r - p, g\rangle -
+  \frac{\beta}{\alpha}\sum_x d_\alpha(r(x), p(x))$, $r$ the next maximizer. In one dimension, for
+  $g \le \frac{(1 - \alpha)\beta}{2} x^{\alpha - 1}$, $g(y - x) - \frac{\beta}{\alpha} d_\alpha(y,
+  x) \le \frac{2 x^{2 - \alpha} g^2}{(1 - \alpha)\beta}$: for $y \le 2x$ by the quadratic bound on
+  $d_\alpha$ on $[0, 2x]$, and for $y > 2x$ the function is nonincreasing beyond $2x$
+  ($2^{\alpha - 1} \le 1 - \frac{1 - \alpha}{2}$). If $\|p\|_\infty \le \frac12$, all the
+  coordinates are at most $q^*$; otherwise shift $g$ by its value at the maximal coordinate, which
+  does not change $\langle r - p, g\rangle$, and use $\sum_{x \ne x^*} p(x) = q^* \le p(x^*)$.
+\end{proof}
+
+\begin{lemma}[Multiplicative stability and the Tsallis entropy]
+  \label{lem:hybrid_multiplicative}
+  \lean{Learning.le_eight_mul_of_kkt, Learning.tsallisEntropy_le_mul_of_le_mul,
+    Learning.tsallisEntropy_le_of_mem_simplex, Learning.mul_qStar_rpow_le_tsallisEntropy,
+    Learning.tsallisEntropy_le_card_rpow_mul, Learning.rpow_inv_le_of_kkt}
+  \leanok
+  \uses{lem:hybrid_ftrl}
+  Let $\frac12 \le \alpha < 1$, $p$ the maximizer at $(\beta, G)$ and $r$ the maximizer at
+  $(\beta', G + g)$ with $\beta \le \beta'$, $|g(x)| \le \frac{(1 - \alpha)\beta}{4}
+  (q^*)^{\alpha - 1}$ and $\beta' - \beta \le \frac{\bar\beta\alpha}{8} (q^*)^{1 - 2\alpha}$. Then
+  $r \le 8p$ coordinatewise, hence $\varphi_\alpha(r) \le 8\varphi_\alpha(p)$
+  (\cite[Lemmas 23 and 24]{ito2024adaptive}). On the simplex, $\frac{(1 - \alpha)(q^*)^\alpha}{2
+  \alpha} \le \varphi_\alpha(p) \le \frac{m^{1 - \alpha} - 1}{\alpha}$ and $\varphi_\alpha(p) \le
+  \frac{m^{1 - \alpha}(1 - p(x))^\alpha}{\alpha}$ for every $x$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  \uses{lem:hybrid_ftrl}
+  The first-order conditions with multipliers $\lambda$, $\lambda'$: if $\lambda' < \lambda -
+  \|g\|_\infty$, all the coordinates of $r$ would exceed those of $p$; so for $p(x) \le q^*$ and
+  $r(x) > 8p(x)$, $m_\beta(p(x)) - m_\beta(8p(x)) < 2\|g\|_\infty + (\beta' - \beta)(8p(x))^{\alpha -
+  1}$ with $m_\beta(y) = \beta y^{\alpha - 1} + \bar\beta y^{-\alpha}$, which contradicts
+  $1 - 8^{\alpha - 1} \ge \frac78(1 - \alpha)$ and $1 - 8^{-\alpha} \ge \frac78\alpha$; a coordinate
+  above $q^*$ exceeds $\frac12$. The bounds on $\varphi_\alpha$ follow from the tangent-line
+  inequality of $y \mapsto y^\alpha$ and the subadditivity of $y^\alpha$.
+\end{proof}
+
+\begin{lemma}[Stability-penalty matching learning rates]
+  \label{lem:spm_rate}
+  \lean{Learning.sum_div_sqrt_sum_le, Learning.sum_div_le_two_mul_sum_div_succ,
+    Learning.spm_sq_ge, Learning.spm_sum_le_sqrt, Learning.dyadicLevel,
+    Learning.sum_div_sqrt_sum_div_le_levels, Learning.spm_sum_le_levels}
+  \leanok
+  Let $b_0 > 0$, $z_t \in [0, z_{\max}]$, $h_t \in (0, H]$ and $b_{t+1} = b_t + \frac{z_t}{b_t h_t}$.
+  Then $\sum_{t < T}\frac{z_t}{b_t} \le 2\sqrt{2H\sum_{t < T} z_t} + \frac{2z_{\max}}{b_0}$ and,
+  for every $J$, $\sum_{t < T}\frac{z_t}{b_t} \le 4\sqrt{J\sum_{t < T} h_t z_t} +
+  2\sqrt{\frac{2H}{2^J}\sum_{t < T} z_t} + \frac{2 z_{\max}}{b_0}$ (\cite[Lemmas 9 and
+  10]{ito2024adaptive}).
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  $\frac{z_t}{b_t} \le \frac{2z_t}{b_{t+1}} + 2z_{\max}(\frac1{b_t} - \frac1{b_{t+1}})$ (the rounds
+  where $b$ doubles), $b_{t+1}^2 \ge 2\sum_{s \le t} z_s/h_s$, and
+  $\sum_t z_t/\sqrt{\sum_{s \le t} z_s} \le 2\sqrt{\sum_t z_t}$, applied on the dyadic levels
+  $h_t \in (H 2^{-k-1}, H 2^{-k}]$, $k < J$, and $h_t \le H 2^{-J}$, with Cauchy--Schwarz over the
+  levels.
+\end{proof}
+
+\begin{lemma}[The linear estimates]
+  \label{lem:spm_estimates}
+  \lean{Ito2026Adversarial.sum_mul_inner_spmEstimate, Ito2026Adversarial.sum_mul_sum_sq_spmEstimate,
+    Ito2026Adversarial.sum_mul_dotProduct_inv_le, Ito2026Adversarial.sum_mul_dotProduct_inv_mulVec_self,
+    Ito2026Adversarial.coe_spmDist, Ito2026Adversarial.posDef_designOf_spmDist,
+    Ito2026Adversarial.abs_dotProduct_inv_designOf_spmDist_le, Ito2026Adversarial.abs_spmEstimate_le}
+  \leanok
+  \uses{def:tsallis_spm}
+  For the played distribution $p = (1 - \gamma)\hat p + \gamma p_0$ ($\gamma = 4cz/\beta \le \frac12$
+  when $\beta \ge \beta_1$) and a game $u(x, y) = \langle x, w_y\rangle$: $S(p)$ is positive
+  definite, $\sum_x p(x) u(x, y) \langle x, S(p)^{-1} x'\rangle = u(x', y)$,
+  $\sum_x p(x)\langle x, S(p)^{-1} x'\rangle^2 = \langle x', S(p)^{-1} x'\rangle$,
+  $\sum_{x'} \hat p(x')\langle x', S(p)^{-1} x'\rangle \le 2 d_x$ and $|\langle x, S(p)^{-1}
+  x'\rangle| \le \frac{c d_x}{\gamma} = \frac{(1 - \alpha)\beta}{4}(q^*)^{\alpha - 1}$
+  (\cite[Eqs. (134) and (135)]{ito2024adaptive}).
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  $\gamma S(p_0) \le S(p)$ in the Loewner order, the variance ratio and the antitonicity of the
+  inverse, Cauchy--Schwarz for $S(p)^{-1}$, and the trace identity $\sum_x p(x)\langle x, S(p)^{-1}
+  x\rangle = \mathrm{tr}(S(p)^{-1}S(p)) = d_x$.
+\end{proof}
+
+\begin{lemma}[Pathwise regret of Tsallis-FTRL-SPM]
+  \label{lem:spm_pathwise}
+  \lean{Ito2026Adversarial.IsSPMParams, Ito2026Adversarial.spmState,
+    Ito2026Adversarial.sum_inner_spmEstimateAt_le, Ito2026Adversarial.spmHat_spmUpdate_le,
+    Ito2026Adversarial.zCoef_div_le, Ito2026Adversarial.stability_spm_le,
+    Ito2026Adversarial.sum_zCoef_div_le_sqrt, Ito2026Adversarial.sum_zCoef_div_le_levels,
+    Ito2026Adversarial.sum_tsallisEntropy_mul_zCoef_le, Ito2026Adversarial.spmState_le_spmBound}
+  \leanok
+  \uses{lem:ftrl_decomposition, lem:hybrid_stability, lem:hybrid_multiplicative, lem:spm_rate,
+    lem:spm_estimates}
+  For parameters with $\frac12 \le \alpha < 1$, $\beta_1 \ge \frac{8cd_x}{1 - \alpha}$, $\bar\beta \ge
+  \frac{32d_x}{(1 - \alpha)^2\beta_1}$ and any sequence of rounds with rewards in $[-1, 1]$, for
+  every action $x$,
+  $\sum_{t < T}\langle e_x - \hat p_t, g_t\rangle \le \beta_1\varphi_\alpha(\hat p_0) + \bar\beta
+  \varphi_{1-\alpha}(\hat p_0) + \sum_{t < T}\bigl(8\frac{z_t}{\beta_t} + \frac{4}{(1 -
+  \alpha)\beta_t}(q^*_t)^{1 - \alpha}\sum_x \hat p_t(x)g_t(x)^2\bigr)$; the sums
+  $\sum_t z_t/\beta_t$ satisfy the bounds of Lemma~\ref{lem:spm_rate} with $H = \frac{m_x^{1 -
+  \alpha} - 1}{\alpha}$, $z_{\max} = \frac{d_x}{1 - \alpha}$, and $h_t z_t \le \frac{2d_x m_x^{1 -
+  \alpha}}{\alpha(1 - \alpha)\Delta_{\min}}\sum_x p_t(x)\Delta(x)$ for $\Delta \ge 0$ with
+  $\Delta(x) \ge \Delta_{\min} > 0$ for $x \ne x^\star$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  \uses{lem:ftrl_decomposition, lem:hybrid_stability, lem:hybrid_multiplicative, lem:spm_rate,
+    lem:spm_estimates}
+  Lemma~\ref{lem:ftrl_decomposition} with $\psi_t = \beta_t\varphi_\alpha + \bar\beta
+  \varphi_{1-\alpha}$, $q = e_x$; the penalty of round $t + 1$ is $(\beta_{t+1} - \beta_t)h_{t+1} \le
+  8(\beta_{t+1} - \beta_t)h_t = 8\frac{z_t}{\beta_t}$ by multiplicative stability, since
+  $\beta_{t+1} - \beta_t = \frac{z_t}{\beta_t h_t} \le \frac{4\alpha d_x (q^*_t)^{1 - 2\alpha}}{(1 -
+  \alpha)^2\beta_1} \le \frac{\bar\beta\alpha}{8}(q^*_t)^{1 - 2\alpha}$; the stability term by
+  Lemma~\ref{lem:hybrid_stability} and Lemma~\ref{lem:spm_estimates}. Deterministic bounds on the
+  states (from a lower bound on the coordinates of $\hat p_t$) make all the terms integrable.
 \end{proof}
 
 \begin{lemma}[Tsallis-FTRL-SPM]
   \label{lem:tsallis_spm_regret}
-  \uses{def:tsallis_spm, lem:ftrl_decomposition}
-  In the setting of Theorem~\ref{thm:tsallis_bilinear}, for every $x^\star$,
-  $\ER_T(x^\star) \le C\bigl(\E[\min\{\sqrt{\frac{d_x m_x^{1 - \alpha} T}{\alpha(1 - \alpha)}},
-  \sqrt{\frac{d_x m_x^{1 - \alpha}}{\alpha(1 - \alpha) \DRmin} \sum_t \langle p_t, \DR\rangle \log T}\}]
-  + m_x \log m_x\bigr)$ (Eq.~(26) of \cite{ito2024adaptive} with their parameters of Section 4.3).
+  \lean{Ito2026Adversarial.externalRegretAgainst_tsallisSPM_le,
+    Ito2026Adversarial.externalRegretAgainst_tsallisSPM_le_sqrt,
+    Ito2026Adversarial.externalRegretAgainst_tsallisSPM_le_self,
+    Ito2026Adversarial.externalRegretAgainst_tsallisSPMPaper_le,
+    Ito2026Adversarial.externalRegretAgainst_tsallisSPMPaper_le_self,
+    Ito2026Adversarial.integral_inner_spmEstimateAt, Ito2026Adversarial.integral_stability_le,
+    Ito2026Adversarial.integral_comp_action_tsallisSPM,
+    Learning.IsAlgEnvSeq.integral_gameReward_mul, Learning.IsAlgEnvSeq.integral_gameAction_eq_sum}
+  \leanok
+  \uses{def:tsallis_spm, lem:ftrl_decomposition, lem:spm_pathwise, lem:uninformed_run}
+  In the setting of Theorem~\ref{thm:tsallis_bilinear} (any game $u(x, y) = \langle x,
+  w_y\rangle$ with utilities and rewards in $[-1, 1]$), for every $x^\star$,
+  $\ER_T(x^\star) \le \beta_1\varphi_\alpha(\hat p_0) + \bar\beta\varphi_{1-\alpha}(\hat p_0) + (16 +
+  8c)\E[\sum_{t < T}\frac{z_t}{\beta_t}]$. With the parameters of Theorem~\ref{thm:tsallis_bilinear}
+  and $L = \log m_x$, this gives $\ER_T(x^\star) \le 64 c d_x L + \frac{64 m_x L^2}{c} + (16 +
+  8c)(8\sqrt{T d_x L} + \frac{1}{4c})$ and, for $\Delta \ge 0$ with $\Delta(x) \ge \Delta_{\min} >
+  0$ for $x \ne x^\star$, $\ER_T(x^\star) \le 64 c d_x L + \frac{64 m_x L^2}{c} + (16 + 8c)(32
+  \sqrt{\frac{d_x L (1 + \log T)}{\Delta_{\min}}\E[\sum_{t < T}\Delta(x_t)]} + 8\sqrt{d_x L} +
+  \frac{1}{4c})$: the additive term $\bar\beta\varphi_{1-\alpha}(\hat p_0) \le \frac{64 m_x
+  L^2}{c}$ is of order $m_x\log^2 m_x$ (Eq.~(26) of \cite{ito2024adaptive} with their parameters of
+  Section 4.3).
 \end{lemma}
 
 \begin{proof}
-  \uses{lem:ftrl_decomposition}
-  The analysis of \cite{ito2024adaptive}: FTRL with the hybrid regularizer, the stability-penalty
-  matching learning rate $\beta_{t+1} = \beta_t + z_t/(\beta_t h_t)$, the exploration mixture
-  (variance $\langle x, S(p_t)^{-1} x\rangle \le c d_x/\gamma_t$) and the unbiased linear
-  estimates. This is a substantial formalization of its own.
+  \leanok
+  \uses{lem:ftrl_decomposition, lem:spm_pathwise, lem:uninformed_run}
+  $\E[u(x^\star, y_t) - u(x_t, y_t)] = \E[u(x^\star, y_t) - \sum_x p_t(x)u(x, y_t)] \le \E[\langle
+  e_{x^\star} - \hat p_t, g_t\rangle] + 2\E[\gamma_t]$, by the conditional law of $x_t$ and the
+  unbiasedness of the estimates (Lemmas~\ref{lem:uninformed_run} and~\ref{lem:spm_estimates},
+  signed version of the conditional expectations for almost surely bounded functions); the
+  expected stability term is at most $8\E[z_t/\beta_t]$ (second moment of the estimates, $r_t^2
+  \le 1$), and $2\gamma_t = 8c z_t/\beta_t$. The two bounds follow from Lemma~\ref{lem:spm_pathwise}
+  with $J = \lfloor\log_2 T\rfloor + 1$, Jensen's inequality, $m_x^{1-\alpha} = e^{1/4} \le 2$,
+  $\beta_1 = 32 c d_x L$ and $\bar\beta = \frac{16L}{c}$.
 \end{proof}

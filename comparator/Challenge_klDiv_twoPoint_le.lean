@@ -3,7 +3,6 @@ module
 public import Mathlib.MeasureTheory.Order.Lattice
 public import Mathlib.Probability.Distributions.Bernoulli
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
-public import Mathlib.InformationTheory.KullbackLeibler.DataProcessing
 public import Mathlib.Analysis.Calculus.Deriv.MeanValue
 public import Mathlib.Analysis.SpecialFunctions.BinaryEntropy
 public import Mathlib.Analysis.SpecialFunctions.Log.Deriv
@@ -12,6 +11,7 @@ public import Mathlib.MeasureTheory.Measure.Decomposition.Lebesgue
 public import Mathlib.MeasureTheory.Integral.Lebesgue.Countable
 public import Mathlib.Analysis.SpecialFunctions.Log.Basic
 public import Mathlib.Algebra.BigOperators.Intervals
+public import Mathlib.InformationTheory.KullbackLeibler.DataProcessing
 public import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
 public import Mathlib.Probability.Kernel.Basic
 public import Mathlib.Probability.Kernel.IonescuTulcea.Traj

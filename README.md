@@ -11,8 +11,11 @@ library (LML, branch `rename`). The development is blueprint-driven:
 [blueprint](https://remydegenne.github.io/Ito2026Adversarial/blueprint/),
 [dependency graph](https://remydegenne.github.io/Ito2026Adversarial/blueprint/dep_graph_document.html).
 
-**Status: phase 1 (statements).** The 12 results of the paper are stated in Lean with `sorry`.
-They are listed in [`formalization.yaml`](formalization.yaml) and are standalone challenges for
+**Status: complete.** The 12 results of the paper are stated and proved in Lean, with no
+`sorry`; they depend only on the standard axioms `propext`, `Classical.choice`, `Quot.sound`,
+and the regret analyses the paper cites (Tsallis-INF, Tsallis-FTRL with stability-penalty
+matching, the self-normalized confidence ellipsoid, the elliptical potential lemma) are proved in
+the library. They are listed in [`formalization.yaml`](formalization.yaml) and are standalone challenges for
 [comparator](https://github.com/leanprover/comparator) in [`comparator/`](comparator/).
 
 ## Layout
@@ -20,12 +23,15 @@ They are listed in [`formalization.yaml`](formalization.yaml) and are standalone
 * `Ito2026Adversarial/ILMTW2026/`: the paper, one file per result (`Theorem1.lean`, …,
   `Lemma13.lean`), namespace `Ito2026Adversarial`; the algorithms and bilinear games are in
   `Setting.lean`.
-* `Ito2026Adversarial/LeanMachineLearning/`: material for LML (from `LMLPapers`): repeated
-  zero-sum games with bandit feedback (`Game/`), Tsallis-INF and FTRL on the simplex, importance
-  weighting, the ridge regression state of linear bandits, online learners and regret.
-* `Ito2026Adversarial/Mathlib/`: material for Mathlib (from `LMLPapers`): two-point laws, the
-  Bernoulli KL divergence and Pinsker's inequality, Mahalanobis norms, the simplex, Fenchel
-  conjugates, matrices.
+* `Ito2026Adversarial/LeanMachineLearning/`: material for LML (partly from `LMLPapers`):
+  repeated zero-sum games with bandit feedback (`Game/`), Tsallis-INF and FTRL on the simplex
+  (regret decomposition, Tsallis-1/2 and hybrid regularizers, stability-penalty matching),
+  importance weighting, the ridge regression state of linear bandits, the self-normalized bound
+  and the elliptical potential lemma, online learners and regret.
+* `Ito2026Adversarial/Mathlib/`: material for Mathlib (partly from `LMLPapers`): two-point laws,
+  the Bernoulli KL divergence, Pinsker's and Bretagnolle-Huber's inequalities, Ville's inequality,
+  Gaussian integrals of quadratic forms, `log det`, Mahalanobis norms, the simplex, Fenchel
+  conjugates, matrices. Upstreaming candidates: `notes/upstreaming-candidates.md`.
 * `blueprint/src/`: the blueprint (Part I follows the paper, Part II the prerequisites, including
   the regret analyses the paper cites); `notes/blueprint-outline.md`: the outline it was written
   from (labels, corrections, proof routes); `source/`: the paper's LaTeX source.
@@ -37,8 +43,8 @@ They are listed in [`formalization.yaml`](formalization.yaml) and are standalone
 | Theorem 1 (Tsallis-INF, uninformed) | `exists_psmr_tsallisINFHalf_le` | strict-PSNE bound in the proof's form; `Δ^mix > 0` instead of "no PSNE" |
 | Theorem 2 (lower bound) | `exists_forall_psmr_ge` | |
 | Remark 3 | — | remark |
-| Theorem 4 (Maximin-UCB, informed) | `exists_psmr_maximinUCB_le` | additive `m_x m_y` in the instance-dependent bound |
-| Theorem 5 (Tsallis-FTRL-SPM, bilinear) | `forall_exists_psmr_tsallisSPMPaper_le` | as Theorem 1; variance ratio with `S(p₀) ≻ 0` |
+| Theorem 4 (Maximin-UCB, informed) | `exists_psmr_maximinUCB_le` | additive `m_x m_y` in the instance-dependent bound; constant `24` instead of `6` in the proof |
+| Theorem 5 (Tsallis-FTRL-SPM, bilinear) | `forall_exists_psmr_tsallisSPMPaper_le` | as Theorem 1; variance ratio with `S(p₀) ≻ 0`; additive term `m_x log² m_x` (the paper's `m_x log m_x` is false) |
 | Theorem 6 (Maximin-LinUCB, informal) | `exists_forall_exists_psmr_maximinLinUCB_le` | |
 | Lemma 7 | `sqrt_mul_sub_mul_le` | |
 | Lemma 8 (self-bounding) | `le_add_sqrt_add_of_le_sqrt_add` | |

@@ -70,7 +70,8 @@ classification:
 
 status:
   scope: >-
-    Phase 1 (statements), 2026-10-08. The results of the paper are stated in Lean, each as a
+    Phases 1 (statements, 2026-10-08) and 2 (proofs, 2026-10-09). The results of the paper are
+    stated in Lean, each as a
     `sorry`-ed theorem (headline results, comparator targets listed in `comparator/targets.txt`),
     over definitions written in library generality. Namespace `Ito2026Adversarial`, files
     `Ito2026Adversarial/ILMTW2026/<Result>.lean`; blueprint labels in parentheses.
@@ -100,10 +101,37 @@ status:
     bound carries the additive term `m_x m_y` of its failure event, which the paper claims to
     absorb; the variance ratio of Theorem 5 requires a positive definite design matrix; Lemma
     10 assumes no PSNE instead of a unique equilibrium (it is false for a unique pure one).
+    Found in phase 2: Theorem 5's additive term is `m_x log² m_x`, not `m_x log m_x` (the
+    penalty term `β̄ h₀` of the cited analysis has that order for the paper's parameters, and a
+    one-dimensional instance attains it).
 
     The blueprint (9 chapters) decomposes every proof into labelled lemmas; the plan is in
     `notes/blueprint-outline.md`. The 12 comparator challenges compile (`lake build Comparator`);
     the definitions in their closure avoid the numeral `2` that makes auxiliary theorems
     challenge-gen cannot reproduce (outline, section 6).
-  sorry_count: 12
+
+    Phase 2 complete on 2026-10-09 (six packages, `notes/phase2-plan.md`): every result listed
+    above is proved, with no `sorry` in the library, and the 12 headline theorems depend only on
+    `propext`, `Classical.choice`, `Quot.sound`. Every blueprint statement and proof carries
+    `\leanok`. One headline statement was corrected in phase 2, with a counterexample: the
+    additive term of Theorem 5 is `m_x log² m_x` (above); its challenge was regenerated. The other
+    11 statements and the definitions in their closure are unchanged (the regenerated challenges
+    differ only in `open` lines); the full comparator run (`scripts/comparator-verify.sh`) has
+    not been done yet. Four interface lemmas of phase 1 (`Game/RegretRelations.lean`, not
+    headline statements) were false without measurable singletons and gained
+    `MeasurableSingletonClass` hypotheses. The cited analyses are proved in the library:
+    Tsallis-INF (FTRL decomposition, exact Tsallis-1/2 identity, self-bounding), Tsallis-FTRL-SPM
+    of Ito, Tsuchiya, Honda (2024) (hybrid regularizer, joint differentiability of the value
+    function, stability-penalty matching sums), the self-normalized bound of Abbasi-Yadkori et al.
+    (2011) (Gaussian mixture over Lebesgue measure, Ville's inequality in lower-integral form),
+    the elliptical potential lemma, Bretagnolle-Huber for the lower bound. Proof routes that
+    differ from the paper: Theorem 4's count bound has constant `24` instead of `6` (the paper's
+    proof claims the radius, not twice the radius, is at least `Δ_{xy}`; outline, section 3);
+    the SPM multiplicative stability has constant `8` instead of `2` (the exploration rate only
+    gives `|ℓ̂| ≤ (1-α) β q*^{α-1} / 4`); the strict-PSNE self-bounding uses
+    `1 - p̂(x*) ≤ (2/Δʳ_min) ⟨p_t, Δʳ⟩`; Lemma 11 is the one-dimensional case of the vector
+    self-normalized bound. Unused hypotheses: Lemma 11 does not use `u ∈ [-1, 1]` (it follows
+    from the others), Lemmas 11 and 13 do not use `NeZero m_x`, `NeZero m_y`; they are kept in
+    the frozen statements. Library material to upstream: `notes/upstreaming-candidates.md`.
+  sorry_count: 0
   sorry_in_definitions: 0

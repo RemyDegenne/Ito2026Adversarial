@@ -6,6 +6,7 @@ Authors: Rémy Degenne
 module
 
 public import Ito2026Adversarial.ILMTW2026.Setting
+public import Ito2026Adversarial.ILMTW2026.TsallisINFRegret
 
 /-!
 # Theorem 1: PSMR of Tsallis-INF in normal-form games
@@ -55,6 +56,20 @@ theorem exists_psmr_tsallisINFHalf_le :
             C * (1 + 1 / colGapMin u x₀ y₀) *
               ∑ x ∈ univ.erase x₀, (1 + log T) / rowGap u x₀ y₀ x) ∧
         (0 < mixGap u → psmr u X Y P T ≤ C * mx / mixGap u) := by
-  sorry
+  refine ⟨200, by norm_num, ?_⟩
+  intro mx my _ _ u hu opp R _ hRu hR Ω _ P _ X Y Rw h T
+  refine ⟨?_, fun x₀ y₀ hxy ↦ ?_, fun hΔ ↦ ?_⟩
+  · exact (psmr_tsallisINFHalf_le_sqrt hu hRu hR h T).trans
+      (mul_le_mul_of_nonneg_right (by norm_num) (Real.sqrt_nonneg _))
+  · refine (psmr_tsallisINFHalf_le_of_isStrictPSNE hu hRu hR h hxy T).trans
+      (mul_le_mul_of_nonneg_right (mul_le_mul_of_nonneg_right (by norm_num) ?_) ?_)
+    · exact add_nonneg zero_le_one
+        (one_div_nonneg.2 (Real.iInf_nonneg fun y ↦ (hxy.colGap_pos y.2).le))
+    · exact sum_nonneg fun x hx ↦ div_nonneg
+        (add_nonneg zero_le_one (Real.log_natCast_nonneg T))
+        (hxy.rowGap_pos (ne_of_mem_erase hx)).le
+  · refine (psmr_tsallisINFHalf_le_of_mixGap_pos hu hRu hR h hΔ T).trans ?_
+    gcongr
+    norm_num
 
 end Ito2026Adversarial

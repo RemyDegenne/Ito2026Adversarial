@@ -69,7 +69,19 @@ the corrected ones (frozen by the comparator challenges).
   would be false. The proofs only use `Δ^mix > 0`, which is the hypothesis now (for `2 × 2` games
   no PSNE does imply `Δ^mix > 0`).
 * **Theorem 5, strict-PSNE bound**: same issue as Theorem 1 for `m_y = 1`; stated as
-  `C (d_x log m_x (1 + log T) (1 + 1/Δᶜ_min) / Δʳ_min + m_x log m_x)`, the form of the proof.
+  `C (d_x log m_x (1 + log T) (1 + 1/Δᶜ_min) / Δʳ_min + m_x log² m_x)`, the form of the proof.
+* **Theorem 5, additive term (found in phase 2).** The paper's `m_x log m_x` is false for its
+  parameters (`α = 1 - 1/(4 log m_x)`, `β₁ = 8 c d_x/(1-α)`, `β̄ = 32 d_x/((1-α)² β₁) = 16 log m_x / c`).
+  The additive term of ITH24 (Eq. (24)/(26)) contains `β̄ h₀` with `h₀ = -ψ̄(q₁) ≤ m_x^α/(1-α)`,
+  i.e. `64 m_x^α log² m_x / c`, which the paper evaluates as `m_x log m_x`. Counterexample:
+  `d_x = 1`, `φ(x*) = 1`, `φ = -1` on the other `m_x - 1` actions, `A = 1`, `m_y = 1`, rewards
+  deterministic, `p₀` uniform, `c = 1`. Then `S(p) = 1`, `g_t = φ`, the run is deterministic, the
+  barrier `β̄ φ_{1-α}` keeps each bad action at `p̂_t(x) ≥ e⁻¹ β̄ / (4t + O(log m_x))` while
+  `β_t = O(t)` and `γ_t ≤ 1/2`, so `PSMR_{m_x²} = Θ(m_x log² m_x)`, while the bound is
+  `O(m_x log m_x)` there (the strict-PSNE bound too: `Δʳ_min = 2`, `Δᶜ_min = 0`). Exact simulation
+  of the Lean algorithm: ratio PSMR / (`√(T log m_x) + m_x log m_x`) at `T = m_x²` is 19
+  (`m_x = 100`), 37 (`m_x = 1000`), growing like `log m_x`. All three bounds of Theorem 5 are
+  stated with `m_x log² m_x` (no change of parameters helps: ITH24 need `β̄ ≥ 32 d/((1-α)² β₁)`).
 * **Theorem 5, variance ratio.** `HasVarianceRatio φ p₀ c` now requires `S(p₀)` positive
   definite; otherwise the inequality `⟪φ x, S(p₀)⁻¹ φ x⟫ ≤ c d_x` holds trivially for a singular
   `S(p₀)` (Lean's inverse being `0`), and the exploration gives no control of the variance.
@@ -86,6 +98,11 @@ the corrected ones (frozen by the comparator challenges).
   should be `≥ Δʳ` (which is what `K ≤ Δʳ/ε ≤ 1` uses), and `T' = (13 Δʳ Δᶜ)^{-2}` must be rounded
   down to an integer (only the constant changes). Theorem 4: the last display should read
   `2 m_x m_y + 2 √(6 m_x m_y T log T)`.
+* **Theorem 4, proof (found in phase 2).** At the last round a pair with `Δ_{xy} > 0` is played,
+  the paper claims the confidence radius is at least `Δ_{xy}`; the confidence bounds only give
+  twice the radius at least `Δ_{xy}` (the empirical mean is within the radius of `u(x, y)`, not
+  below it), so the count bound is `N_T Δ_{xy}² ≤ Δ_{xy}² + 24 log T` (constant `24` instead of `6`);
+  the statement, with a universal constant, is unaffected.
 
 ## 4. Proof routes
 

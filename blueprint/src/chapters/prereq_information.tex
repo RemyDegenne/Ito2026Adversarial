@@ -1,26 +1,51 @@
 \chapter{Information-theoretic tools}
 \label{chap:prereq_information}
 
-These lemmas are in \texttt{LMLPapers} and are to be copied.
+The first two lemmas are copied from \texttt{LMLPapers}.
 
 \begin{lemma}[Bretagnolle--Huber inequality]
   \label{lem:bretagnolle_huber}
+  \lean{InformationTheory.bretagnolle_huber}
+  \leanok
   For probability measures $\mu$, $\nu$ and a measurable set $E$,
   $\mu(E) + \nu(E^c) \ge \frac12 \exp(-\KL(\mu \,\|\, \nu))$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   In LMLPapers (\texttt{ForMathlib/InformationTheory/KullbackLeibler/BretagnolleHuber.lean}).
 \end{proof}
 
 \begin{lemma}[Divergence decomposition for non-stationary bandits]
   \label{lem:divergence_decomposition_nonstationary}
+  \lean{Learning.IsAlgEnvSeq.klDiv_map_history_banditSeq,
+    Learning.IsAlgEnvSeq.klDiv_map_history_compProd_banditSeq, Learning.stepKernel_banditSeq}
+  \leanok
   For runs of one algorithm against the non-stationary bandits $\nu$ and $\nu'$, the divergence
   between the laws of the histories of the first $T$ rounds is
   $\sum_{t < T} \E_\nu[\KL(\nu_t(x_t) \,\|\, \nu'_t(x_t))]$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   In LMLPapers (\texttt{SequentialLearning/DivergenceDecomposition.lean},
   \texttt{IsAlgEnvSeq.klDiv\_map\_history\_banditSeq}), from LML's chain rule.
+\end{proof}
+
+\begin{lemma}[Bretagnolle--Huber inequality for the actions]
+  \label{lem:bretagnolle_huber_actions}
+  \lean{Learning.exp_neg_klDiv_map_history_div_two_le,
+    Learning.mul_exp_neg_klDiv_map_history_div_two_le_sum}
+  \leanok
+  \uses{lem:bretagnolle_huber}
+  For two sequences of rounds $(x_t, r_t)$ under $\Prob$ and $(x'_t, r'_t)$ under $\Prob'$ whose
+  histories of the first $T$ rounds have laws at divergence $\KL < \infty$, and a set $S$ of
+  actions, $\sum_{t < T} \Prob(x_t \in S) + \sum_{t < T} \Prob'(x'_t \notin S) \ge
+  \frac{T}{2} \exp(-\KL)$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  Lemma~\ref{lem:bretagnolle_huber} for the laws of the histories and the event that the action of
+  round $t$ is in $S$, summed over $t < T$.
 \end{proof}

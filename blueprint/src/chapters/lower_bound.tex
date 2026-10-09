@@ -3,21 +3,64 @@
 
 \begin{lemma}[Lemma 9]
   \label{lem:kl_bernoulli}
-  \lean{Ito2026Adversarial.klDiv_twoPoint_le, ProbabilityTheory.twoPoint}
+  \lean{Ito2026Adversarial.klDiv_twoPoint_le, ProbabilityTheory.twoPoint,
+    ProbabilityTheory.klDiv_twoPoint, InformationTheory.klBerReal_le_four_mul_sq}
   \leanok
   Let $\TwoPoint(x)$ be the law on $\{-1, 1\}$ with mean $x$. For $\abs a, \abs b \le \frac12$,
   $\KL(\TwoPoint(a) \,\|\, \TwoPoint(b)) \le (a - b)^2$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   $\KL = \frac{1 + a}{2} \log \frac{1 + a}{1 + b} + \frac{1 - a}{2} \log \frac{1 - a}{1 - b}$. With
   $f_a(b) = \KL - (a - b)^2$, $f_a(a) = 0$ and $f_a'(b) = (b - a)(\frac{1}{1 - b^2} - 2)$, which has
-  the sign of $a - b$ for $\abs b \le \frac12$; so $f_a \le 0$ on $[-\frac12, \frac12]$.
+  the sign of $a - b$ for $\abs b \le \frac12$; so $f_a \le 0$ on $[-\frac12, \frac12]$. (In Lean,
+  in the parameters $p = \frac{1 + a}{2}$, $q = \frac{1 + b}{2} \in [\frac14, \frac34]$ of the
+  Bernoulli laws: $\KL = p \log \frac pq + (1 - p) \log \frac{1 - p}{1 - q} \le 4 (p - q)^2$, the
+  derivative of the difference in $q$ being $(q - p)(1 - 8 q (1 - q)) / (q (1 - q))$.)
+\end{proof}
+
+\begin{lemma}[Mean and mixtures of two-point laws]
+  \label{lem:twopoint_mixture}
+  \lean{ProbabilityTheory.integral_twoPoint, ProbabilityTheory.ae_mem_Icc_twoPoint,
+    ProbabilityTheory.sum_smul_twoPoint}
+  \leanok
+  For $x \in [-1, 1]$, $\TwoPoint(x)$ has mean $x$; it is supported in $[-1, 1]$. For weights
+  $w_i \ge 0$ with $\sum_i w_i = 1$ and means $a_i \in [-1, 1]$,
+  $\sum_i w_i \TwoPoint(a_i) = \TwoPoint(\sum_i w_i a_i)$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  $\TwoPoint(x) = \frac{1 + x}{2} \delta_1 + \frac{1 - x}{2} \delta_{-1}$ is affine in $x$.
+\end{proof}
+
+\begin{lemma}[Oblivious adversaries]
+  \label{lem:oblivious_adversary}
+  \lean{Learning.RepeatedGame.Player.oblivious, Learning.IsAlgEnvSeq.hasCondDistrib_oblivious,
+    Learning.IsAlgEnvSeq.hasLaw_oblivious, Learning.IsAlgEnvSeq.integral_oblivious,
+    Learning.IsAlgEnvSeq.psmr_eq_sum_oblivious}
+  \leanok
+  \uses{def:repeated_game, def:regrets}
+  Let the adversary draw $y_t \sim q_t$ independently of the past (oblivious). In a run of any
+  learner, given the past rounds and $x_t$, $y_t \sim q_t$. Hence, for finite action sets,
+  $\PSMR_T = \sum_{t < T} \sum_x \Prob(x_t = x) \sum_y q_t(y) (\vstar - u(x, y))$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  The feedback kernel of the game draws $y_t \sim q_t$ and then the reward; its first marginal is
+  $q_t$, whatever the past and $x_t$.
 \end{proof}
 
 \begin{lemma}[Observations of an uninformed learner against an oblivious adversary]
   \label{lem:uninformed_oblivious}
-  \uses{def:repeated_game, lem:divergence_decomposition_nonstationary}
+  \lean{Learning.IsAlgEnvSeq.isAlgEnvSeq_banditSeq_oblivious, Learning.RepeatedGame.obliviousBandit,
+    Learning.RepeatedGame.twoPointNoise, Learning.RepeatedGame.obliviousBandit_twoPointNoise,
+    Learning.RepeatedGame.hasMean_stationaryReward_twoPointNoise,
+    Learning.RepeatedGame.rewardsIn_stationaryReward_twoPointNoise}
+  \leanok
+  \uses{def:repeated_game, lem:twopoint_mixture}
   Let the adversary draw $y_t \sim q_t$ independently of the past (oblivious), and the reward kernel
   be $r_t \sim \TwoPoint(u(x_t, y_t))$. In a run of an uninformed learner, the actions and rewards
   $(x_t, r_t)$ form a run of the learner against the non-stationary bandit
@@ -25,8 +68,107 @@
 \end{lemma}
 
 \begin{proof}
+  \leanok
   Given the past and $x_t$, $y_t \sim q_t$ independently, and a mixture of two-point laws is the
-  two-point law of the mixed mean. The uninformed learner reads only $(x_s, r_s)$.
+  two-point law of the mixed mean. The uninformed learner reads only $(x_s, r_s)$. (In Lean, for any
+  reward noise $\nu(x, y)$ that does not depend on the past, the reward law of the bandit at $x$ is
+  the mixture of the $\nu(x, y)$ over $y \sim q_t$; for two-point noise it is
+  $\TwoPoint(u(x, q_t))$ by Lemma~\ref{lem:twopoint_mixture}.)
+\end{proof}
+
+\begin{lemma}[The games of the lower bound]
+  \label{lem:lb_games}
+  \lean{Ito2026Adversarial.lbGame, Ito2026Adversarial.lbGame_mem_Icc,
+    Ito2026Adversarial.isStrictPSNE_lbGame, Ito2026Adversarial.pureMaximin_lbGame,
+    Ito2026Adversarial.rowGapMin_lbGame, Ito2026Adversarial.colGapMin_lbGame}
+  \leanok
+  \uses{def:game, def:values}
+  For a row $b \in \{e_1, e_2\}$, let $G_b$ be the $2 \times 2$ game whose row $b$ is
+  $(-\DR, K - \DR)$ and whose other row is $(0, \DC)$: $A = G_{e_2}$ and $B = G_{e_1}$. If
+  $\DR, \DC \in (0, 1]$ and $K - \DR \in [-1, 1]$, the utilities of $G_b$ lie in $[-1, 1]$, and the
+  other row and the first column form a strict PSNE with $\vstar = 0$, $\DRmin = \DR$ and
+  $\DCmin = \DC$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  Direct computation.
+\end{proof}
+
+\begin{lemma}[PSMR and plays of the bad row]
+  \label{lem:lb_psmr}
+  \lean{Ito2026Adversarial.psmr_lbGame_ge, Ito2026Adversarial.lbOppLaw}
+  \leanok
+  \uses{lem:lb_games, lem:oblivious_adversary}
+  Let the adversary play $y_t \sim (1 - \eps, \eps)$ for $t < T'$ and $y_t = e_1$ for $t \ge T'$,
+  $T' \le T$. In the game $G_b$, for any learner,
+  $\PSMR_T \ge (\DR - K\eps + \eps\DC) \E[N_b] - T' \eps \DC$, where
+  $N_b = \#\{t < T' : x_t = b\}$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  By Lemma~\ref{lem:oblivious_adversary}, a round $t < T'$ contributes
+  $\Prob(x_t = b)(\DR - K \eps) - \Prob(x_t \ne b) \eps \DC$ and a round $t \ge T'$ contributes
+  $\Prob(x_t = b) \DR \ge 0$.
+\end{proof}
+
+\begin{lemma}[Divergence between the two games]
+  \label{lem:lb_kl}
+  \lean{Ito2026Adversarial.lbMean, Ito2026Adversarial.obliviousBandit_lbGame,
+    Ito2026Adversarial.klDiv_obliviousBandit_lbGame_le,
+    Ito2026Adversarial.klDiv_map_history_lbGame_le}
+  \leanok
+  \uses{lem:lb_games, lem:uninformed_oblivious, lem:divergence_decomposition_nonstationary,
+    lem:kl_bernoulli}
+  With the adversary of Lemma~\ref{lem:lb_psmr}, let $\abs{\eps \DC} \le \frac12$ and
+  $\abs{K \eps - \DR} \le \frac12$. For runs of an uninformed learner against the non-stationary
+  bandits of Lemma~\ref{lem:uninformed_oblivious} for the games $A$ and $B$, the divergence between
+  the laws of the histories of the first $T'$ rounds is at most $T' \delta^2$,
+  $\delta = \eps\DC - K\eps + \DR$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  For $t < T'$, the rewards of the two bandits are two-point with means $\eps\DC$ at the good row
+  and $K\eps - \DR$ at the bad row, the rows being swapped between $A$ and $B$; by
+  Lemmas~\ref{lem:divergence_decomposition_nonstationary} and~\ref{lem:kl_bernoulli}, each round
+  contributes at most $\delta^2$.
+\end{proof}
+
+\begin{lemma}[Bretagnolle--Huber step]
+  \label{lem:lb_bh}
+  \lean{Ito2026Adversarial.div_six_le_sum_lbGame}
+  \leanok
+  \uses{lem:lb_kl, lem:bretagnolle_huber_actions}
+  If moreover $T' \delta^2 \le 1$, then
+  $\E_A[\#\{t < T' : x_t = e_2\}] + \E_B[\#\{t < T' : x_t = e_1\}] \ge \frac{T'}{6}$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  Lemma~\ref{lem:bretagnolle_huber_actions} with $\KL \le 1$ and $\frac12 \exp(-1) \ge \frac16$.
+\end{proof}
+
+\begin{lemma}[The lower bound for given parameters]
+  \label{lem:lb_params}
+  \lean{Ito2026Adversarial.exists_psmr_ge_of_le_one}
+  \leanok
+  \uses{lem:lb_games, lem:lb_psmr, lem:lb_bh, lem:uninformed_oblivious}
+  Let $\DR, \DC \in (0, 1]$, $K - \DR \in [-1, 1]$, $\eps \in [0, 1]$ with $K \eps \le \DR$,
+  $\abs{\eps \DC} \le \frac12$, $\abs{K \eps - \DR} \le \frac12$, and $T' \le T$ with
+  $T' \delta^2 \le 1$. For every uninformed learner, in one of the games $A$, $B$, with the
+  adversary of Lemma~\ref{lem:lb_psmr} and two-point rewards,
+  $\PSMR_T \ge T'(\frac1{12}(\DR - K\eps) - \frac{11}{12} \eps \DC)$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  If, in every run against $A$, the learner plays $e_2$ in at least $\frac{T'}{12}$ of the first
+  $T'$ rounds in expectation, choose $A$. Otherwise, by Lemma~\ref{lem:lb_bh} applied to a run
+  against $A$ in which it does not, the learner plays $e_1$ in more than $\frac{T'}{12}$ of the
+  first $T'$ rounds in expectation in every run against $B$: choose $B$. Conclude by
+  Lemma~\ref{lem:lb_psmr}, the coefficient $\DR - K\eps + \eps\DC$ being nonnegative.
 \end{proof}
 
 \begin{theorem}[Theorem 2]
@@ -34,7 +176,7 @@
   \lean{Ito2026Adversarial.exists_forall_psmr_ge}
   \leanok
   \uses{lem:kl_bernoulli, lem:uninformed_oblivious, lem:divergence_decomposition_nonstationary,
-    lem:bretagnolle_huber, def:regrets}
+    lem:bretagnolle_huber, lem:lb_games, def:regrets}
   There are $c > 0$, $\Delta_0 > 0$ and $T_0$ such that for all $\DR, \DC \in (0, \Delta_0)$, all
   $T \ge T_0$ and every uninformed learner, there are a $2 \times 2$ game with utilities in
   $[-1, 1]$ and a strict PSNE with $\DRmin = \DR$ and $\DCmin = \DC$, an adversary and a reward
@@ -43,8 +185,9 @@
 \end{theorem}
 
 \begin{proof}
+  \leanok
   \uses{lem:kl_bernoulli, lem:uninformed_oblivious, lem:divergence_decomposition_nonstationary,
-    lem:bretagnolle_huber}
+    lem:bretagnolle_huber, lem:lb_params}
   The paper's construction, with $\Delta_0 = \frac1{13}$, $T_0 = 169$: the games
   $A = \begin{pmatrix} 0 & \DC \\ -\DR & K - \DR \end{pmatrix}$ and $B$ ($A$ with the rows
   swapped), with strict PSNEs $(e_1, e_1)$ and $(e_2, e_1)$ and $\vstar = 0$, two-point rewards, and
@@ -60,5 +203,7 @@
   $\eps = \DR - 12 \DR \DC$, $T' = \lfloor (13 \DR \DC)^{-2}\rfloor$, which gives
   $\PSMR_T \ge c' / (\DR \DC)$; otherwise $T' = T$, $\eps = \min\{1, \frac{1}{13 \DC \sqrt T}\}
   \ge \DR$, $K = (\DR - \frac{12}{13 \sqrt T})/\eps$, which gives $\PSMR_T \ge \frac{\sqrt T}{156}$.
-  The game chosen depends on the learner.
+  The game chosen depends on the learner (Lemma~\ref{lem:lb_params}). In Lean, $c = \frac1{4056}$:
+  with $T' \ge \frac12 (13 \DR \DC)^{-2}$ after rounding down, the first case gives
+  $\PSMR_T \ge \frac{T' \DR \DC}{12} \ge \frac{1}{4056 \DR \DC}$.
 \end{proof}

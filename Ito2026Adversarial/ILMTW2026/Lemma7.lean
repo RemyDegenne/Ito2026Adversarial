@@ -28,6 +28,17 @@ for all `x ≥ 0`, with equality at `x = a / (4 b²)`. -/
 theorem sqrt_mul_sub_mul_le (a b : ℝ) (ha : 0 < a) (hb : 0 < b) :
     (∀ x : ℝ, 0 ≤ x → √(a * x) - b * x ≤ a / (4 * b)) ∧
       √(a * (a / (4 * b ^ 2))) - b * (a / (4 * b ^ 2)) = a / (4 * b) := by
-  sorry
+  refine ⟨fun x hx ↦ ?_, ?_⟩
+  · -- `a / (4 b) - √a √x + b x = (√a - 2 b √x) ^ 2 / (4 b)`
+    rw [sqrt_mul ha.le, le_div_iff₀ (by positivity)]
+    have hsa := sq_sqrt ha.le
+    have hsx := sq_sqrt hx
+    nth_rewrite 2 [← hsx]
+    conv_rhs => rw [← hsa]
+    nlinarith [sq_nonneg (√a - 2 * b * √x)]
+  · have h : a * (a / (4 * b ^ 2)) = (a / (2 * b)) ^ 2 := by field_simp; ring
+    rw [h, sqrt_sq (by positivity)]
+    field_simp
+    ring
 
 end Ito2026Adversarial

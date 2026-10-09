@@ -63,6 +63,12 @@ public import Mathlib.MeasureTheory.Measure.GiryMonad
 public import Mathlib.MeasureTheory.Measure.Dirac.Basic
 public import Mathlib.MeasureTheory.Measure.Dirac.Def
 public import Mathlib.MeasureTheory.Constructions.BorelSpace.Order
+public import Mathlib.Analysis.Matrix.PosDef
+public import Mathlib.Probability.Moments.SubGaussian
+public import Mathlib.MeasureTheory.Integral.Lebesgue.Add
+public import Mathlib.Probability.Process.Filtration
+public import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
+public import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
 
 /-! # Standalone extraction for `Ito2026Adversarial.exists_psmr_maximinLinUCB_le`
 Definitions are copied verbatim; theorem proofs are replaced by `sorry`.
