@@ -277,7 +277,6 @@ open MeasureTheory ProbabilityTheory Finset Real Learning Learning.ZeroSumGame
 universe u
 namespace Ito2026Adversarial
 
-set_option linter.unusedVariables false in
 /-- **Lemma 11** (Ito, Luo, Maiti, Tsuchiya, Wu 2026). In a run of any informed player against
 any adaptive adversary, with reward noise of conditional mean `u` and rewards in `[-1, 1]`, for
 every action pair `(x, y)` and `δ ∈ (0, 1)`, with probability at least `1 - δ`, for all `t` with
@@ -285,9 +284,7 @@ every action pair `(x, y)` and `δ ∈ (0, 1)`, with probability at least `1 - �
 `|u x y - R_t(x, y) / N_t(x, y)| ≤ √((4 log(1/δ) + 2 log(1 + N_t(x, y))) / N_t(x, y))`, where
 `N_t(x, y)` and `R_t(x, y)` are the number of rounds among the first `t` in which `(x, y)` was
 played and the sum of their rewards. -/
-@[nolint unusedArguments]
-theorem probReal_forall_abs_sub_div_le_ge {mx my : ℕ} [NeZero mx] [NeZero my]
-    (u : Fin mx → Fin my → ℝ) (hu : ∀ x y, u x y ∈ Set.Icc (-1) 1)
+theorem probReal_forall_abs_sub_div_le_ge {mx my : ℕ} (u : Fin mx → Fin my → ℝ)
     (opp : Player (Fin my) (Fin mx)) (R : RewardKernel (Fin mx) (Fin my))
     [∀ n, IsMarkovKernel (R n)] (hR : RewardKernel.HasMean R u)
     (hR' : RewardKernel.RewardsIn R (Set.Icc (-1) 1)) (alg : Player (Fin mx) (Fin my))

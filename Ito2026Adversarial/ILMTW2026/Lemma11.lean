@@ -21,9 +21,9 @@ The proof applies the self-normalized bound for the rewards of a repeated game
 feature `𝟙{(x_s, y_s) = (x, y)}` and `λ = 1`: then `V_t = 1 + N_t(x, y)` and
 `S_t = R_t(x, y) - N_t(x, y) u(x, y)`, so that with probability at least `1 - δ`, for all `t`,
 `S_t² / (1 + N_t) ≤ 2 log(1/δ) + log(1 + N_t)` (the Gaussian mixture of the paper), and
-`1 + N_t ≤ 2 N_t` when `N_t > 0`. The hypothesis `hu` (utilities in `[-1, 1]`) of the statement
-is not used: it follows from the other hypotheses, the utilities being the means of rewards in
-`[-1, 1]`. Neither are the instance arguments `[NeZero mx]`, `[NeZero my]`.
+`1 + N_t ≤ 2 N_t` when `N_t > 0`. The paper's assumption that the utilities lie in `[-1, 1]` is
+not needed: it follows from the other hypotheses, the utilities being the means of rewards in
+`[-1, 1]`.
 -/
 
 @[expose] public section
@@ -47,7 +47,6 @@ lemma mahalanobisSq_inv_unit {M : Matrix Unit Unit ℝ} (hM : M () () ≠ 0)
   simp [Matrix.mahalanobisSq, dotProduct, Matrix.mulVec, hinv]
   ring
 
-set_option linter.unusedVariables false in
 /-- **Lemma 11** (Ito, Luo, Maiti, Tsuchiya, Wu 2026). In a run of any informed player against
 any adaptive adversary, with reward noise of conditional mean `u` and rewards in `[-1, 1]`, for
 every action pair `(x, y)` and `δ ∈ (0, 1)`, with probability at least `1 - δ`, for all `t` with
@@ -55,9 +54,7 @@ every action pair `(x, y)` and `δ ∈ (0, 1)`, with probability at least `1 - �
 `|u x y - R_t(x, y) / N_t(x, y)| ≤ √((4 log(1/δ) + 2 log(1 + N_t(x, y))) / N_t(x, y))`, where
 `N_t(x, y)` and `R_t(x, y)` are the number of rounds among the first `t` in which `(x, y)` was
 played and the sum of their rewards. -/
-@[nolint unusedArguments]
-theorem probReal_forall_abs_sub_div_le_ge {mx my : ℕ} [NeZero mx] [NeZero my]
-    (u : Fin mx → Fin my → ℝ) (hu : ∀ x y, u x y ∈ Set.Icc (-1) 1)
+theorem probReal_forall_abs_sub_div_le_ge {mx my : ℕ} (u : Fin mx → Fin my → ℝ)
     (opp : Player (Fin my) (Fin mx)) (R : RewardKernel (Fin mx) (Fin my))
     [∀ n, IsMarkovKernel (R n)] (hR : RewardKernel.HasMean R u)
     (hR' : RewardKernel.RewardsIn R (Set.Icc (-1) 1)) (alg : Player (Fin mx) (Fin my))

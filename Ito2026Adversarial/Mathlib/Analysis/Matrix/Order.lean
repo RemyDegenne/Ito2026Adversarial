@@ -174,13 +174,15 @@ end Inverse
 
 /-! ### Square roots -/
 
-section Sqrt
+section SqrtClassical
 
-variable [Fintype n] [DecidableEq n] {A : Matrix n n 𝕜}
+/-! The statements below involve `DecidableEq n` only through the (propositional) continuous
+functional calculus instance behind `CFC.sqrt`, so they are elaborated with the classical
+instance and hold for any `DecidableEq n` instance by proof irrelevance. -/
 
--- The `DecidableEq n` instance enters the type through the continuous functional calculus
--- instance on matrices; the linter does not see it.
-set_option linter.unusedDecidableInType false in
+variable [Fintype n] {A : Matrix n n 𝕜}
+
+open Classical in
 /-- The square root of a positive definite matrix is positive definite. -/
 lemma PosDef.sqrt (hA : A.PosDef) : (CFC.sqrt A).PosDef := by
   have hnn : (CFC.sqrt A).PosSemidef := nonneg_iff_posSemidef.mp (CFC.sqrt_nonneg A)
@@ -188,10 +190,27 @@ lemma PosDef.sqrt (hA : A.PosDef) : (CFC.sqrt A).PosDef := by
   rw [CFC.isUnit_sqrt_iff A hA.posSemidef.nonneg]
   exact hA.isUnit
 
-set_option linter.unusedDecidableInType false in
+open Classical in
 /-- `√A * √A = A` for a positive semidefinite matrix. -/
 lemma PosSemidef.sqrt_mul_sqrt (hA : A.PosSemidef) : CFC.sqrt A * CFC.sqrt A = A :=
   CFC.sqrt_mul_sqrt_self A hA.nonneg
+
+open Classical in
+/-- The square root of a matrix is Hermitian (`CFC.sqrt A` is positive semidefinite for every
+`A`, being `0` when `A` is not positive semidefinite). -/
+lemma conjTranspose_sqrt (A : Matrix n n 𝕜) : (CFC.sqrt A)ᴴ = CFC.sqrt A :=
+  (nonneg_iff_posSemidef.1 (CFC.sqrt_nonneg A)).isHermitian.eq
+
+open Classical in
+/-- The square root of a real matrix is symmetric. -/
+lemma transpose_sqrt (A : Matrix n n ℝ) : (CFC.sqrt A)ᵀ = CFC.sqrt A := by
+  simpa using conjTranspose_sqrt A
+
+end SqrtClassical
+
+section Sqrt
+
+variable [Fintype n] [DecidableEq n] {A : Matrix n n 𝕜}
 
 /-- `√A * √(A⁻¹) = 1` for a positive definite matrix. -/
 lemma PosDef.sqrt_mul_sqrt_inv (hA : A.PosDef) : CFC.sqrt A * CFC.sqrt A⁻¹ = 1 := by
@@ -218,17 +237,6 @@ lemma PosDef.sqrt_mul_inv_mul_sqrt (hA : A.PosDef) : CFC.sqrt A * A⁻¹ * CFC.s
     _ = 1 := by
         rw [← mul_assoc, mul_assoc _ (CFC.sqrt A⁻¹), hA.sqrt_inv_mul_sqrt, mul_one,
           hA.sqrt_mul_sqrt_inv]
-
-set_option linter.unusedDecidableInType false in
-/-- The square root of a matrix is Hermitian (`CFC.sqrt A` is positive semidefinite for every
-`A`, being `0` when `A` is not positive semidefinite). -/
-lemma conjTranspose_sqrt (A : Matrix n n 𝕜) : (CFC.sqrt A)ᴴ = CFC.sqrt A :=
-  (nonneg_iff_posSemidef.1 (CFC.sqrt_nonneg A)).isHermitian.eq
-
-set_option linter.unusedDecidableInType false in
-/-- The square root of a real matrix is symmetric. -/
-lemma transpose_sqrt (A : Matrix n n ℝ) : (CFC.sqrt A)ᵀ = CFC.sqrt A := by
-  simpa using conjTranspose_sqrt A
 
 /-- `⟪√A u, √(A⁻¹) v⟫ = ⟪u, v⟫` for a positive definite matrix `A`. -/
 lemma inner_toEuclideanCLM_sqrt_sqrt_inv (hA : A.PosDef) (u v : EuclideanSpace 𝕜 n) :

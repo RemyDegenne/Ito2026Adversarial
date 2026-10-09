@@ -40,7 +40,9 @@ the headline statements were not affected.
   lemmas in your own files). If a statement you must prove looks false or unprovable, stop and
   report instead of changing it. If a hypothesis of a frozen headline statement ends up unused,
   keep it, put `@[nolint unusedArguments]` on the theorem (with
-  `set_option linter.unusedVariables false in` if needed) and report it.
+  `set_option linter.unusedVariables false in` if needed) and report it. (Superseded on
+  2026-10-09: no `set_option`, no `@[nolint]`, no `_`-renamed arguments; an unused hypothesis
+  of a frozen statement is reported, and dropped with the user's approval.)
 * **No numeral `2` in the values of new definitions** that a headline statement could depend on
   (outline, section 6): write `((2 : ℕ) : ℝ)` and `WithLp.toLp _`. In lemmas and proofs numerals
   are fine.

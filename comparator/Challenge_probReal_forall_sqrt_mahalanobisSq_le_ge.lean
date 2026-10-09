@@ -418,9 +418,8 @@ informed player in a bilinear game, against any adaptive adversary and with rewa
 conditional mean `u` and rewards in `[-1, 1]`, for `λ > 0` and `δ ∈ (0, 1)`, with probability at
 least `1 - δ`, for all `t`, `‖vec(A) - V_t⁻¹ b_t‖_{V_t} ≤ β_t`, where `(V_t, b_t)` is the ridge
 regression state after `t` rounds and `β_t = linRadius (d_x d_y) λ δ t`. -/
-@[nolint unusedArguments]
 theorem probReal_forall_sqrt_mahalanobisSq_le_ge {dx dy : ℕ}
-    {mx my : ℕ} [NeZero mx] [NeZero my] (φ : Fin mx → EuclideanSpace ℝ (Fin dx))
+    {mx my : ℕ} (φ : Fin mx → EuclideanSpace ℝ (Fin dx))
     (ψ : Fin my → EuclideanSpace ℝ (Fin dy)) (A : Matrix (Fin dx) (Fin dy) ℝ)
     (hA : IsBilinearGame φ ψ A)
     (opp : Player (Fin my) (Fin mx)) (R : RewardKernel (Fin mx) (Fin my))

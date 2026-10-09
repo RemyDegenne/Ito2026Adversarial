@@ -8,8 +8,9 @@ without having to read or trust the Lean development in `Ito2026Adversarial/`.
 `sorry` and the standard axioms only; the challenges, regenerated after phase 2, compile
 (`lake build Comparator`). The statement of Theorem 5 was corrected in phase 2 (its additive term
 is `m_x log² m_x`, with a counterexample to the paper's `m_x log m_x`, see
-`notes/blueprint-outline.md`, section 3). The full comparator run (`scripts/comparator-verify.sh`)
-remains to be done.
+`notes/blueprint-outline.md`, section 3). In the library review (2026-10-09) Lemmas 11 and 13 were
+strengthened by dropping unused hypotheses, and their challenges were regenerated. The full
+comparator run (`scripts/comparator-verify.sh`) remains to be done.
 
 Each challenge is one self-contained file whose transitive imports resolve to Mathlib and Lean
 core only, the shape the [Palomar registry](https://palomar-registry.org/) enforces: no LML, no

@@ -64,7 +64,7 @@ theorem exists_psmr_maximinUCB_le :
   set G := ucbGoodEvent u (1 / T) X Y Rw with hG
   have hGm : MeasurableSet G := measurableSet_ucbGoodEvent u _ hX hY hRw
   have hGc : P.real Gᶜ ≤ mx * my * (1 / T) :=
-    measureReal_compl_ucbGoodEvent_le hu opp R hR hR' _ P h hδ
+    measureReal_compl_ucbGoodEvent_le opp R hR hR' _ P h hδ
   have hmax : ∀ᵐ ω ∂P, ∀ n < T, ∀ x,
       (fun y ↦ ucbIndex (1 / T) (history (fun _ _ ↦ ()) X (fun t ω ↦ (Y t ω, Rw t ω)) n ω) x y).min
         ≤ (fun y ↦ ucbIndex (1 / T)

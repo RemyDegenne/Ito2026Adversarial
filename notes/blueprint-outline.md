@@ -104,6 +104,11 @@ the corrected ones (frozen by the comparator challenges).
   below it), so the count bound is `N_T Δ_{xy}² ≤ Δ_{xy}² + 24 log T` (constant `24` instead of `6`);
   the statement, with a universal constant, is unaffected.
 
+* **Lemmas 11 and 13 (library review, 2026-10-09).** The paper's hypothesis `u ∈ [-1, 1]` of
+  Lemma 11 follows from the others (the utilities are the means of rewards in `[-1, 1]`); it is
+  dropped, as are the instances `NeZero m_x`, `NeZero m_y` that neither proof uses. Both
+  statements are strictly stronger than in phase 1.
+
 ## 4. Proof routes
 
 ### Elementary lemmas (Part I, `games.tex`)

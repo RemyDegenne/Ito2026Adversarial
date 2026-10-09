@@ -195,7 +195,7 @@ lemma measurableSet_linGoodEvent [MeasurableSpace Ω] (lam δ : ℝ) (hX : ∀ n
   exact measurableSet_setOfPred.1 (measurableSet_le (by fun_prop) measurable_const)
 
 /-- The good event of Maximin-LinUCB fails with probability at most `δ` (Lemma 13). -/
-lemma measureReal_compl_linGoodEvent_le [NeZero mx] [NeZero my] (hA : IsBilinearGame φ ψ A)
+lemma measureReal_compl_linGoodEvent_le (hA : IsBilinearGame φ ψ A)
     (opp : Player (Fin my) (Fin mx)) (R : RewardKernel (Fin mx) (Fin my))
     [∀ n, IsMarkovKernel (R n)] (hR : RewardKernel.HasMean R (bilinearGame φ ψ A))
     (hR' : RewardKernel.RewardsIn R (Set.Icc (-1) 1)) (alg : Player (Fin mx) (Fin my))

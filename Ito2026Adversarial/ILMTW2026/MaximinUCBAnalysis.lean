@@ -33,7 +33,7 @@ open MeasureTheory ProbabilityTheory Finset Real Learning Learning.ZeroSumGame
 
 namespace Ito2026Adversarial
 
-variable {mx my : ℕ} [NeZero mx] [NeZero my] {u : Fin mx → Fin my → ℝ} {Ω : Type*}
+variable {mx my : ℕ} {u : Fin mx → Fin my → ℝ} {Ω : Type*}
   {X : ℕ → Ω → Fin mx} {Y : ℕ → Ω → Fin my} {Rw : ℕ → Ω → ℝ}
 
 /-- The event on which the confidence bounds of Lemma 11 hold for the action pair `(x, y)` at all
@@ -50,7 +50,6 @@ def ucbGoodEvent (u : Fin mx → Fin my → ℝ) (δ : ℝ) (X : ℕ → Ω → 
     (Rw : ℕ → Ω → ℝ) : Set Ω :=
   ⋂ x, ⋂ y, ucbPairEvent u δ X Y Rw x y
 
-omit [NeZero mx] [NeZero my] in
 /-- The confidence event of a pair is measurable. -/
 lemma measurableSet_ucbPairEvent [MeasurableSpace Ω] (u : Fin mx → Fin my → ℝ) (δ : ℝ)
     (hX : ∀ n, Measurable (X n)) (hY : ∀ n, Measurable (Y n)) (hR : ∀ n, Measurable (Rw n))
@@ -66,7 +65,6 @@ lemma measurableSet_ucbPairEvent [MeasurableSpace Ω] (u : Fin mx → Fin my →
     have := hS t
     exact measurableSet_setOfPred.1 (measurableSet_le (by fun_prop) (by fun_prop))
 
-omit [NeZero mx] [NeZero my] in
 /-- The good event of Maximin-UCB is measurable. -/
 lemma measurableSet_ucbGoodEvent [MeasurableSpace Ω] (u : Fin mx → Fin my → ℝ) (δ : ℝ)
     (hX : ∀ n, Measurable (X n)) (hY : ∀ n, Measurable (Y n)) (hR : ∀ n, Measurable (Rw n)) :
@@ -76,7 +74,7 @@ lemma measurableSet_ucbGoodEvent [MeasurableSpace Ω] (u : Fin mx → Fin my →
 
 /-- **Union bound over the action pairs** for the confidence bounds of Lemma 11: the good event
 of Maximin-UCB fails with probability at most `m_x m_y δ`. -/
-lemma measureReal_compl_ucbGoodEvent_le (hu : ∀ x y, u x y ∈ Set.Icc (-1) 1)
+lemma measureReal_compl_ucbGoodEvent_le
     (opp : Player (Fin my) (Fin mx)) (R : RewardKernel (Fin mx) (Fin my))
     [∀ n, IsMarkovKernel (R n)] (hR : RewardKernel.HasMean R u)
     (hR' : RewardKernel.RewardsIn R (Set.Icc (-1) 1)) (alg : Player (Fin mx) (Fin my))
@@ -89,7 +87,7 @@ lemma measureReal_compl_ucbGoodEvent_le (hu : ∀ x y, u x y ∈ Set.Icc (-1) 1)
   have hRw (n : ℕ) : Measurable (Rw n) := (h.measurable_feedback n).snd
   have hpair (x : Fin mx) (y : Fin my) : P.real (ucbPairEvent u δ X Y Rw x y)ᶜ ≤ δ := by
     rw [measureReal_compl (measurableSet_ucbPairEvent u δ hX hY hRw x y), probReal_univ]
-    have := probReal_forall_abs_sub_div_le_ge u hu opp R hR hR' alg P X Y Rw h x y hδ
+    have := probReal_forall_abs_sub_div_le_ge u opp R hR hR' alg P X Y Rw h x y hδ
     unfold ucbPairEvent
     linarith
   calc P.real (ucbGoodEvent u δ X Y Rw)ᶜ
@@ -101,7 +99,6 @@ lemma measureReal_compl_ucbGoodEvent_le (hu : ∀ x y, u x y ∈ Set.Icc (-1) 1)
     _ ≤ ∑ _x : Fin mx, ∑ _y : Fin my, δ := sum_le_sum fun x _ ↦ sum_le_sum fun y _ ↦ hpair x y
     _ = mx * my * δ := by simp [mul_assoc]
 
-omit [NeZero mx] [NeZero my] in
 /-- The upper confidence bound of Maximin-UCB at round `t` of a run, in terms of the counts and
 reward sums of the run. -/
 lemma ucbIndex_history (δ : ℝ) (t : ℕ) (ω : Ω) (x : Fin mx) (y : Fin my) :
@@ -113,7 +110,6 @@ lemma ucbIndex_history (δ : ℝ) (t : ℕ) (ω : Ω) (x : Fin mx) (y : Fin my) 
   rw [ucbIndex, Nat.cast_ofNat]
   rfl
 
-omit [NeZero mx] [NeZero my] in
 /-- On the good event, the confidence bound of Lemma 11 holds for every pair already played. -/
 lemma abs_sub_le_of_mem_ucbGoodEvent {δ : ℝ} {ω : Ω} (hω : ω ∈ ucbGoodEvent u δ X Y Rw)
     {t : ℕ} {x : Fin mx} {y : Fin my} (h0 : 0 < pairCount X Y Rw x y t ω) :
@@ -121,7 +117,6 @@ lemma abs_sub_le_of_mem_ucbGoodEvent {δ : ℝ} {ω : Ω} (hω : ω ∈ ucbGoodE
       √((4 * log (1 / δ) + 2 * log (1 + pairCount X Y Rw x y t ω)) / pairCount X Y Rw x y t ω) :=
   (Set.mem_iInter.1 (Set.mem_iInter.1 hω x) y) t h0
 
-omit [NeZero mx] [NeZero my] in
 /-- On the good event, the upper confidence bounds of Maximin-UCB are above the utility. -/
 lemma le_ucbIndex_of_mem_ucbGoodEvent (hu : ∀ x y, u x y ∈ Set.Icc (-1) 1) {δ : ℝ} {ω : Ω}
     (hω : ω ∈ ucbGoodEvent u δ X Y Rw) (t : ℕ) (x : Fin mx) (y : Fin my) :
@@ -132,7 +127,6 @@ lemma le_ucbIndex_of_mem_ucbGoodEvent (hu : ∀ x y, u x y ∈ Set.Icc (-1) 1) {
   · have := (abs_le.1 (abs_sub_le_of_mem_ucbGoodEvent hω (Nat.pos_of_ne_zero h0))).2
     linarith
 
-omit [NeZero mx] [NeZero my] in
 /-- On the good event, the upper confidence bound of a pair already played exceeds its utility by
 at most twice the confidence radius. -/
 lemma ucbIndex_le_of_mem_ucbGoodEvent {δ : ℝ} {ω : Ω} (hω : ω ∈ ucbGoodEvent u δ X Y Rw)
@@ -144,6 +138,8 @@ lemma ucbIndex_le_of_mem_ucbGoodEvent {δ : ℝ} {ω : Ω} (hω : ω ∈ ucbGood
   simp only [h0.ne', ↓reduceIte]
   have := (abs_le.1 (abs_sub_le_of_mem_ucbGoodEvent hω h0)).1
   linarith
+
+variable [NeZero mx] [NeZero my]
 
 /-- **Number of plays of a pair with a positive gap.** On the good event, in a run of
 Maximin-UCB with `δ = 1 / T` (whose action at each round maximizes `x ↦ min_y U_t(x, y)`), every

@@ -130,8 +130,13 @@ status:
     the SPM multiplicative stability has constant `8` instead of `2` (the exploration rate only
     gives `|ℓ̂| ≤ (1-α) β q*^{α-1} / 4`); the strict-PSNE self-bounding uses
     `1 - p̂(x*) ≤ (2/Δʳ_min) ⟨p_t, Δʳ⟩`; Lemma 11 is the one-dimensional case of the vector
-    self-normalized bound. Unused hypotheses: Lemma 11 does not use `u ∈ [-1, 1]` (it follows
-    from the others), Lemmas 11 and 13 do not use `NeZero m_x`, `NeZero m_y`; they are kept in
-    the frozen statements. Library material to upstream: `notes/upstreaming-candidates.md`.
+    self-normalized bound. Library material to upstream: `notes/upstreaming-candidates.md`.
+
+    Library review, 2026-10-09: files organized by topic, API made more Mathlib-like (see
+    `notes/upstreaming-candidates.md`); the other statements unchanged. Lemmas 11 and 13 were
+    strengthened by dropping hypotheses the proofs do not use, so that no linter needs to be
+    silenced: the paper's `u ∈ [-1, 1]` in Lemma 11 (it follows from the reward hypotheses) and
+    the instances `NeZero m_x`, `NeZero m_y` in both. Their challenges were regenerated. The
+    library has no `set_option` and no `@[nolint]`.
   sorry_count: 0
   sorry_in_definitions: 0

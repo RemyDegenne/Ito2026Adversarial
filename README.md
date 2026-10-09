@@ -50,7 +50,7 @@ the library. They are listed in [`formalization.yaml`](formalization.yaml) and a
 | Lemma 8 (self-bounding) | `le_add_sqrt_add_of_le_sqrt_add` | |
 | Lemma 9 (KL of two-point laws) | `klDiv_twoPoint_le` | |
 | Lemma 10 (`Δ^mix ≥ Δ_M² / 4`) | `sq_entryGap_div_four_le_mixGap` | no PSNE instead of a unique equilibrium |
-| Lemma 11 (anytime confidence bounds) | `probReal_forall_abs_sub_div_le_ge` | |
+| Lemma 11 (anytime confidence bounds) | `probReal_forall_abs_sub_div_le_ge` | the paper's `u ∈ [-1, 1]` is dropped (implied by the reward hypotheses) |
 | Theorem 12 (Maximin-LinUCB) | `exists_psmr_maximinLinUCB_le` | |
 | Lemma 13 (confidence ellipsoid) | `probReal_forall_sqrt_mahalanobisSq_le_ge` | |
 
