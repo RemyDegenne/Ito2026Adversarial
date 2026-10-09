@@ -7,8 +7,9 @@ module
 
 public import Ito2026Adversarial.ILMTW2026.Lemma13
 public import Ito2026Adversarial.LeanMachineLearning.EllipticalPotential
-public import Ito2026Adversarial.LeanMachineLearning.Game.Optimism
-public import Ito2026Adversarial.LeanMachineLearning.Online.Bandit.Linear.Optimism
+public import Ito2026Adversarial.LeanMachineLearning.Game.Maximin
+public import Ito2026Adversarial.LeanMachineLearning.Game.Regret
+public import Ito2026Adversarial.LeanMachineLearning.Online.Bandit.Linear.ConfidenceEllipsoid
 
 /-!
 # Analysis of Maximin-LinUCB

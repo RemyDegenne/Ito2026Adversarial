@@ -24,6 +24,10 @@ rounds in which the actions are in `s`.
 
 * `exp_neg_klDiv_map_history_div_two_le`: the inequality for one round.
 * `mul_exp_neg_klDiv_map_history_div_two_le_sum`: the inequality summed over the rounds `t < M`.
+
+## Tags
+
+Bretagnolle-Huber inequality, lower bound, bandit
 -/
 
 @[expose] public section

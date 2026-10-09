@@ -217,4 +217,86 @@ def pairSum (X : ℕ → Ω → 𝒳) (Y : ℕ → Ω → 𝒴) (R : ℕ → Ω 
 
 end Counts
 
+section CountLemmas
+
+omit [MeasurableSpace 𝒳] [MeasurableSpace 𝒴]
+
+variable {Ω : Type*} [DecidableEq 𝒳] [DecidableEq 𝒴] {X : ℕ → Ω → 𝒳} {Y : ℕ → Ω → 𝒴}
+  {R : ℕ → Ω → ℝ}
+
+/-- The count of the pair `(x, y)` after `t` rounds is the number of rounds `s < t` in which it
+was played. -/
+lemma pairCount_eq_sum_range (x : 𝒳) (y : 𝒴) (t : ℕ) (ω : Ω) :
+    pairCount X Y R x y t ω = ∑ s ∈ range t, if X s ω = x ∧ Y s ω = y then 1 else 0 :=
+  Fin.sum_univ_eq_sum_range (fun s ↦ if X s ω = x ∧ Y s ω = y then 1 else 0) t
+
+/-- No pair has been played before the first round. -/
+@[simp]
+lemma pairCount_zero (x : 𝒳) (y : 𝒴) (ω : Ω) : pairCount X Y R x y 0 ω = 0 := by
+  simp [pairCount_eq_sum_range]
+
+/-- The count of a pair increases by one at the rounds in which it is played. -/
+lemma pairCount_succ (x : 𝒳) (y : 𝒴) (t : ℕ) (ω : Ω) :
+    pairCount X Y R x y (t + 1) ω
+      = pairCount X Y R x y t ω + if X t ω = x ∧ Y t ω = y then 1 else 0 := by
+  simp only [pairCount_eq_sum_range, sum_range_succ]
+
+/-- The count of a pair after `t` rounds is at most `t`. -/
+lemma pairCount_le (x : 𝒳) (y : 𝒴) (t : ℕ) (ω : Ω) : pairCount X Y R x y t ω ≤ t := by
+  rw [pairCount_eq_sum_range]
+  calc ∑ s ∈ range t, (if X s ω = x ∧ Y s ω = y then 1 else 0)
+      ≤ ∑ s ∈ range t, 1 := sum_le_sum fun s _ ↦ by split_ifs <;> simp
+    _ = t := by simp
+
+section Fintype
+
+variable [Fintype 𝒳] [Fintype 𝒴]
+
+/-- **Decomposition of a sum over rounds by action pairs**:
+`∑_{t < T} f(x_t, y_t) = ∑_{x, y} N_T(x, y) f(x, y)`. -/
+lemma sum_range_eq_sum_pairCount_mul (f : 𝒳 → 𝒴 → ℝ) (T : ℕ) (ω : Ω) :
+    ∑ t ∈ range T, f (X t ω) (Y t ω) = ∑ x, ∑ y, (pairCount X Y R x y T ω : ℝ) * f x y := by
+  have h1 (t : ℕ) : f (X t ω) (Y t ω)
+      = ∑ x, ∑ y, (if X t ω = x ∧ Y t ω = y then (1 : ℝ) else 0) * f x y := by
+    simp [ite_and, ite_mul]
+  calc ∑ t ∈ range T, f (X t ω) (Y t ω)
+      = ∑ t ∈ range T, ∑ x, ∑ y, (if X t ω = x ∧ Y t ω = y then (1 : ℝ) else 0) * f x y :=
+        sum_congr rfl fun t _ ↦ h1 t
+    _ = ∑ x, ∑ y, ∑ t ∈ range T, (if X t ω = x ∧ Y t ω = y then (1 : ℝ) else 0) * f x y := by
+        rw [sum_comm]
+        exact sum_congr rfl fun x _ ↦ sum_comm
+    _ = ∑ x, ∑ y, (pairCount X Y R x y T ω : ℝ) * f x y := by
+        simp_rw [pairCount_eq_sum_range, Nat.cast_sum, sum_mul, Nat.cast_ite, Nat.cast_one,
+          Nat.cast_zero]
+
+/-- The counts of all pairs after `T` rounds sum to `T`. -/
+lemma sum_pairCount (T : ℕ) (ω : Ω) : ∑ x, ∑ y, (pairCount X Y R x y T ω : ℝ) = T := by
+  have := sum_range_eq_sum_pairCount_mul (X := X) (Y := Y) (R := R) (fun _ _ ↦ (1 : ℝ)) T ω
+  simpa using this.symm
+
+end Fintype
+
+end CountLemmas
+
+section CountMeasurability
+
+variable [DecidableEq 𝒳] [DecidableEq 𝒴] [MeasurableSingletonClass 𝒳] [MeasurableSingletonClass 𝒴]
+  {Ω : Type*} [MeasurableSpace Ω] {X : ℕ → Ω → 𝒳} {Y : ℕ → Ω → 𝒴} {R : ℕ → Ω → ℝ}
+
+/-- The count of a pair after `t` rounds of a run is measurable. -/
+lemma measurable_pairCount (hX : ∀ n, Measurable (X n)) (hY : ∀ n, Measurable (Y n))
+    (hR : ∀ n, Measurable (R n)) (x : 𝒳) (y : 𝒴) (t : ℕ) :
+    Measurable (pairCount X Y R x y t) :=
+  (measurable_histPairCount t x y).comp
+    (measurable_history (fun _ ↦ measurable_const) hX (fun n ↦ (hY n).prodMk (hR n)) t)
+
+/-- The reward sum of a pair after `t` rounds of a run is measurable. -/
+lemma measurable_pairSum (hX : ∀ n, Measurable (X n)) (hY : ∀ n, Measurable (Y n))
+    (hR : ∀ n, Measurable (R n)) (x : 𝒳) (y : 𝒴) (t : ℕ) :
+    Measurable (pairSum X Y R x y t) :=
+  (measurable_histPairSum t x y).comp
+    (measurable_history (fun _ ↦ measurable_const) hX (fun n ↦ (hY n).prodMk (hR n)) t)
+
+end CountMeasurability
+
 end Learning.RepeatedGame

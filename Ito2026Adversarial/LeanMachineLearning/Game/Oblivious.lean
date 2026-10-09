@@ -6,7 +6,7 @@ Authors: Rémy Degenne
 module
 
 public import Ito2026Adversarial.LeanMachineLearning.Game.RepeatedGame
-public import Ito2026Adversarial.Mathlib.Probability.Distributions.TwoPointMixture
+public import Ito2026Adversarial.Mathlib.Probability.Distributions.TwoPoint
 
 /-!
 # Oblivious opponents in repeated games
@@ -38,6 +38,10 @@ two-point law of the mixed mean `∑ y, q t {y} u x y` (`obliviousBandit_twoPoin
 * `IsAlgEnvSeq.isAlgEnvSeq_banditSeq_oblivious`: the actions and rewards of an uninformed learner
   against an oblivious opponent form a run of the learner against the non-stationary bandit
   `Environment.banditSeq (obliviousBandit q ν)`.
+
+## Tags
+
+repeated game, oblivious adversary, non-stationary bandit
 -/
 
 @[expose] public section

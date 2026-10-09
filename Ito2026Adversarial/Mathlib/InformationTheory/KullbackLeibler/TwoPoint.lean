@@ -22,6 +22,10 @@ the parameters.
   `p, q ∈ [1/4, 3/4]`;
 * `ProbabilityTheory.klDiv_twoPoint`: `klDiv (twoPoint a) (twoPoint b) = klBer ((1 + a) / 2)
   ((1 + b) / 2)` for `a, b ∈ [-1, 1]`.
+
+## Tags
+
+Kullback-Leibler divergence, Bernoulli distribution, two-point distribution
 -/
 
 @[expose] public section
@@ -32,7 +36,7 @@ namespace InformationTheory
 
 /-- The derivative of `r ↦ klBerReal p r - 4 (p - r) ^ 2` on `(0, 1)`, in factored form: its
 sign is the sign of `(r - p) (1 - 8 r (1 - r))`. -/
-lemma hasDerivAt_klBerReal_sub_four_mul_sq (p : ℝ) {r : ℝ} (hr0 : 0 < r) (hr1 : r < 1) :
+private lemma hasDerivAt_klBerReal_sub_four_mul_sq (p : ℝ) {r : ℝ} (hr0 : 0 < r) (hr1 : r < 1) :
     HasDerivAt (fun r ↦ klBerReal p r - 4 * (p - r) ^ 2)
       ((r - p) * (1 - 8 * (r * (1 - r))) / (r * (1 - r))) r := by
   have h := (hasDerivAt_klBerReal p hr0 hr1).sub
@@ -43,7 +47,8 @@ lemma hasDerivAt_klBerReal_sub_four_mul_sq (p : ℝ) {r : ℝ} (hr0 : 0 < r) (hr
   ring
 
 /-- For `1/4 ≤ p ≤ q ≤ 3/4`, `klBerReal p q ≤ 4 (p - q) ^ 2`. -/
-lemma klBerReal_le_four_mul_sq_of_le {p q : ℝ} (hp : 1 / 4 ≤ p) (hpq : p ≤ q) (hq : q ≤ 3 / 4) :
+private lemma klBerReal_le_four_mul_sq_of_le {p q : ℝ} (hp : 1 / 4 ≤ p) (hpq : p ≤ q)
+    (hq : q ≤ 3 / 4) :
     klBerReal p q ≤ 4 * (p - q) ^ 2 := by
   -- `r ↦ klBerReal p r - 4 (p - r) ^ 2` is nonincreasing on `[p, q]`, where `r (1 - r) ≥ 3/16`
   have hanti : AntitoneOn (fun r ↦ klBerReal p r - 4 * (p - r) ^ 2) (Icc p q) := by

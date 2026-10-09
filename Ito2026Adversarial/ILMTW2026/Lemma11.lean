@@ -17,7 +17,7 @@ rewards of the rounds in which `(x, y)` was played is within
 `N_t(x, y) > 0`.
 
 The proof applies the self-normalized bound for the rewards of a repeated game
-(`probReal_forall_mahalanobisSq_inv_regGram_le_ge_of_isAlgEnvSeq`) in dimension one, with the
+(`IsAlgEnvSeq.probReal_forall_mahalanobisSq_inv_regGram_le_ge`) in dimension one, with the
 feature `𝟙{(x_s, y_s) = (x, y)}` and `λ = 1`: then `V_t = 1 + N_t(x, y)` and
 `S_t = R_t(x, y) - N_t(x, y) u(x, y)`, so that with probability at least `1 - δ`, for all `t`,
 `S_t² / (1 + N_t) ≤ 2 log(1/δ) + log(1 + N_t)` (the Gaussian mixture of the paper), and
@@ -74,7 +74,7 @@ theorem probReal_forall_abs_sub_div_le_ge {mx my : ℕ} [NeZero mx] [NeZero my]
   set ind : Fin mx → Fin my → ℝ := fun x' y' ↦ if x' = x ∧ y' = y then 1 else 0 with hind
   set f : Fin mx → Fin my → EuclideanSpace ℝ Unit := fun x' y' ↦ WithLp.toLp 2 fun _ ↦ ind x' y'
     with hf
-  have hbound := probReal_forall_mahalanobisSq_inv_regGram_le_ge_of_isAlgEnvSeq h
+  have hbound := h.probReal_forall_mahalanobisSq_inv_regGram_le_ge
     (u := u) (measurable_of_countable _) hR hR' f (measurable_of_countable _) one_pos hδ.1
   refine hbound.trans (measureReal_mono fun ω hω t ht ↦ ?_)
   have hωt := hω t

@@ -33,6 +33,10 @@ The value of this maximization is `ftrlValue (ψ t) (G t)` (`SimplexFTRL.lean`).
 The decomposition is stated for `T + 1` rounds, so that the penalty term at round `t + 1` reads
 the regularizers `ψ (t + 1)` and `ψ t` without subtraction of indices; the round `0` has the
 penalty `ψ 0 (p 0) - ψ 0 q` (the regularizer before round `0` being `0`).
+
+## Tags
+
+follow the regularized leader, FTRL, regret, Danskin's theorem
 -/
 
 @[expose] public section
@@ -44,35 +48,20 @@ namespace Learning
 
 variable {ι : Type*} [Fintype ι]
 
-/-- A point of the simplex has Euclidean norm at most `1`. -/
-lemma norm_le_one_of_mem_simplex {q : EuclideanSpace ℝ ι} (hq : q ∈ simplex ι) : ‖q‖ ≤ 1 := by
-  rw [EuclideanSpace.norm_eq, Real.sqrt_le_one]
-  calc ∑ i, ‖q i‖ ^ 2 ≤ ∑ i, q i := by
-        refine sum_le_sum fun i _ ↦ ?_
-        rw [Real.norm_eq_abs, sq_abs, sq]
-        exact mul_le_of_le_one_left (hq.1 i) (le_one_of_mem_simplex hq i)
-    _ = 1 := hq.2
-
-/-- The inner product of a point of the simplex with the constant vector `c` is `c`. -/
-lemma inner_const_of_mem_simplex {q : EuclideanSpace ℝ ι} (hq : q ∈ simplex ι) (c : ℝ) :
-    ⟪q, WithLp.toLp 2 (fun _ ↦ c)⟫ = c := by
-  simp only [PiLp.inner_apply, RCLike.inner_apply, conj_trivial]
-  rw [← mul_sum, hq.2, mul_one]
-
 section Value
 
 variable {ψ : EuclideanSpace ℝ ι → ℝ} {θ p : EuclideanSpace ℝ ι}
 
 /-- If the FTRL objective `⟪·, θ⟫ + ψ` has a maximizer `p` on the simplex, the objective at any
 other `θ'` is bounded above on the simplex by `⟪p, θ⟫ + ψ p + ‖θ' - θ‖`. -/
-lemma inner_add_le_of_isMaxOn (hmax : ∀ q ∈ simplex ι, ⟪q, θ⟫ + ψ q ≤ ⟪p, θ⟫ + ψ p)
+lemma inner_add_le_of_isMaxOn (hmax : IsMaxOn (fun q ↦ ⟪q, θ⟫ + ψ q) (simplex ι) p)
     {q : EuclideanSpace ℝ ι} (hq : q ∈ simplex ι) (θ' : EuclideanSpace ℝ ι) :
     ⟪q, θ'⟫ + ψ q ≤ ⟪p, θ⟫ + ψ p + ‖θ' - θ‖ := by
   have h1 : ⟪q, θ'⟫ = ⟪q, θ⟫ + ⟪q, θ' - θ⟫ := by rw [inner_sub_right]; ring
   have h2 : ⟪q, θ' - θ⟫ ≤ ‖θ' - θ‖ :=
     (real_inner_le_norm _ _).trans
       (mul_le_of_le_one_left (norm_nonneg _) (norm_le_one_of_mem_simplex hq))
-  linarith [hmax q hq]
+  linarith [show ⟪q, θ⟫ + ψ q ≤ ⟪p, θ⟫ + ψ p from hmax hq]
 
 /-- The value function is bounded above by any upper bound of the FTRL objective on the
 simplex. -/
@@ -93,7 +82,7 @@ lemma ftrlValue_le_of_forall_le [Nonempty ι] {C : ℝ}
 /-- **Fenchel–Young inequality** for the value function: if the FTRL objective at `θ` has a
 maximizer `p` on the simplex, then `⟪q, θ'⟫ + ψ q ≤ ftrlValue ψ θ'` for all `θ'` and all `q` in
 the simplex. -/
-lemma le_ftrlValue_of_isMaxOn (hmax : ∀ q ∈ simplex ι, ⟪q, θ⟫ + ψ q ≤ ⟪p, θ⟫ + ψ p)
+lemma le_ftrlValue_of_isMaxOn (hmax : IsMaxOn (fun q ↦ ⟪q, θ⟫ + ψ q) (simplex ι) p)
     {q : EuclideanSpace ℝ ι} (hq : q ∈ simplex ι) (θ' : EuclideanSpace ℝ ι) :
     ⟪q, θ'⟫ + ψ q ≤ ftrlValue ψ θ' := by
   have hle : fenchelConjugateOn (simplex ι) (-ψ) θ' ≤ ((⟪p, θ⟫ + ψ p + ‖θ' - θ‖ : ℝ) : EReal) :=
@@ -110,13 +99,14 @@ lemma le_ftrlValue_of_isMaxOn (hmax : ∀ q ∈ simplex ι, ⟪q, θ⟫ + ψ q �
 
 /-- The value function at `θ` is the FTRL objective at a maximizer `p`. -/
 lemma ftrlValue_eq_of_isMaxOn (hp : p ∈ simplex ι)
-    (hmax : ∀ q ∈ simplex ι, ⟪q, θ⟫ + ψ q ≤ ⟪p, θ⟫ + ψ p) :
+    (hmax : IsMaxOn (fun q ↦ ⟪q, θ⟫ + ψ q) (simplex ι) p) :
     ftrlValue ψ θ = ⟪p, θ⟫ + ψ p := by
   have : Nonempty ι := by
     by_contra h
     rw [not_nonempty_iff] at h
     simpa using hp.2
-  exact le_antisymm (ftrlValue_le_of_forall_le hmax) (le_ftrlValue_of_isMaxOn hmax hp θ)
+  exact le_antisymm (ftrlValue_le_of_forall_le fun q hq ↦ hmax hq)
+    (le_ftrlValue_of_isMaxOn hmax hp θ)
 
 end Value
 
@@ -130,8 +120,7 @@ variable (ψ : ℕ → EuclideanSpace ℝ ι → ℝ) (g p : ℕ → EuclideanSp
 `T + 1` rounds is at most the sum of the gains `⟪p t, g t⟫` of the plays, of the stability terms
 and of the increments `ψ (t + 1) (p (t + 1)) - ψ t (p (t + 1))` of the regularizers. -/
 lemma ftrlValue_le_sum (hp : ∀ t, p t ∈ simplex ι)
-    (hmax : ∀ t, ∀ q ∈ simplex ι,
-      ⟪q, ∑ s ∈ range t, g s⟫ + ψ t q ≤ ⟪p t, ∑ s ∈ range t, g s⟫ + ψ t (p t)) (T : ℕ) :
+    (hmax : ∀ t, IsMaxOn (fun q ↦ ⟪q, ∑ s ∈ range t, g s⟫ + ψ t q) (simplex ι) (p t)) (T : ℕ) :
     ftrlValue (ψ T) (∑ s ∈ range (T + 1), g s) ≤
       ψ 0 (p 0) + ∑ t ∈ range T, (ψ (t + 1) (p (t + 1)) - ψ t (p (t + 1)))
         + ∑ t ∈ range (T + 1), ⟪p t, g t⟫
@@ -160,8 +149,7 @@ lemma ftrlValue_le_sum (hp : ∀ t, p t ∈ simplex ι)
 plus the stability term
 `∑_{t ≤ T} (ftrlValue (ψ t) (G (t + 1)) - ftrlValue (ψ t) (G t) - ⟪p t, g t⟫)`. -/
 lemma sum_inner_sub_le_ftrl (hp : ∀ t, p t ∈ simplex ι)
-    (hmax : ∀ t, ∀ q ∈ simplex ι,
-      ⟪q, ∑ s ∈ range t, g s⟫ + ψ t q ≤ ⟪p t, ∑ s ∈ range t, g s⟫ + ψ t (p t))
+    (hmax : ∀ t, IsMaxOn (fun q ↦ ⟪q, ∑ s ∈ range t, g s⟫ + ψ t q) (simplex ι) (p t))
     {q : EuclideanSpace ℝ ι} (hq : q ∈ simplex ι) (T : ℕ) :
     ∑ t ∈ range (T + 1), ⟪q - p t, g t⟫ ≤
       ψ 0 (p 0) - ψ 0 q
@@ -184,8 +172,7 @@ regularizer `φ` and learning rates `η t`), the penalty term of `sum_inner_sub_
 `(η 0)⁻¹ (φ (p 0) - φ q) + ∑_{t < T} ((η (t + 1))⁻¹ - (η t)⁻¹) (φ (p (t + 1)) - φ q)`. -/
 lemma sum_inner_sub_le_ftrl_smul (φ : EuclideanSpace ℝ ι → ℝ) (η : ℕ → ℝ)
     (hp : ∀ t, p t ∈ simplex ι)
-    (hmax : ∀ t, ∀ q ∈ simplex ι, ⟪q, ∑ s ∈ range t, g s⟫ + (η t)⁻¹ * φ q
-      ≤ ⟪p t, ∑ s ∈ range t, g s⟫ + (η t)⁻¹ * φ (p t))
+    (hmax : ∀ t, IsMaxOn (fun q ↦ ⟪q, ∑ s ∈ range t, g s⟫ + (η t)⁻¹ * φ q) (simplex ι) (p t))
     {q : EuclideanSpace ℝ ι} (hq : q ∈ simplex ι) (T : ℕ) :
     ∑ t ∈ range (T + 1), ⟪q - p t, g t⟫ ≤
       (η 0)⁻¹ * (φ (p 0) - φ q)
@@ -216,8 +203,9 @@ lemma abs_ftrlValue_sub_sub_le (hμ : 0 < μ) (hP : ∀ θ, P θ ∈ simplex ι)
       ⟪q, θ⟫ + φ q + μ * ‖q - P θ‖ ^ 2 ≤ ⟪P θ, θ⟫ + φ (P θ))
     (θ θ' : EuclideanSpace ℝ ι) :
     |ftrlValue φ θ' - ftrlValue φ θ - ⟪P θ, θ' - θ⟫| ≤ ‖θ' - θ‖ ^ 2 / (2 * μ) := by
-  have hmax (θ : EuclideanSpace ℝ ι) : ∀ q ∈ simplex ι, ⟪q, θ⟫ + φ q ≤ ⟪P θ, θ⟫ + φ (P θ) :=
-    fun q hq ↦ by nlinarith [hgrowth θ q hq, sq_nonneg ‖q - P θ‖]
+  have hmax (θ : EuclideanSpace ℝ ι) : IsMaxOn (fun q ↦ ⟪q, θ⟫ + φ q) (simplex ι) (P θ) :=
+    fun q hq ↦ show ⟪q, θ⟫ + φ q ≤ ⟪P θ, θ⟫ + φ (P θ) by
+      nlinarith [hgrowth θ q hq, sq_nonneg ‖q - P θ‖]
   have h1 := hgrowth θ (P θ') (hP θ')
   have h2 := hgrowth θ' (P θ) (hP θ)
   rw [ftrlValue_eq_of_isMaxOn (hP θ') (hmax θ'), ftrlValue_eq_of_isMaxOn (hP θ) (hmax θ)]

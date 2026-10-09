@@ -6,6 +6,7 @@ Authors: Rémy Degenne
 module
 
 public import Ito2026Adversarial.LeanMachineLearning.Online.Bandit.FTRLRegret
+public import Ito2026Adversarial.LeanMachineLearning.Online.Bandit.TsallisEntropy
 public import Ito2026Adversarial.LeanMachineLearning.Online.Bandit.TsallisINF
 
 /-!
@@ -32,6 +33,10 @@ The maximizer is explicit: `p i = (ν - θ i)⁻²` for the normalization `ν > 
   the stability bound for the importance-weighted estimate of Tsallis-INF, and its crude form;
 * `Bandits.TsallisINF.sum_mul_stabilityWeight`: the conditional expectation of the stability
   bound, `∑ j, p j * w(p, j) = ∑ i, √(p i) (1 - p i)`.
+
+## Tags
+
+follow the regularized leader, Tsallis-INF, Tsallis entropy, importance weighting
 -/
 
 @[expose] public section
@@ -42,58 +47,6 @@ open scoped RealInnerProductSpace
 namespace Learning
 
 variable {ι : Type*} [Fintype ι]
-
-/-! ### The Tsallis-`1/2` entropy -/
-
-/-- The Tsallis entropy with parameter `1/2` is `2 ∑ i, (√(p i) - p i)`. -/
-lemma tsallisEntropy_half (p : EuclideanSpace ℝ ι) :
-    tsallisEntropy (1 / 2) p = 2 * ∑ i, (√(p i) - p i) := by
-  simp only [tsallisEntropy, Real.sqrt_eq_rpow]
-  norm_num
-
-/-- On the simplex, the Tsallis entropy with parameter `1/2` is `2 (∑ i, √(p i) - 1)`. -/
-lemma tsallisEntropy_half_of_mem_simplex {p : EuclideanSpace ℝ ι} (hp : p ∈ simplex ι) :
-    tsallisEntropy (1 / 2) p = 2 * (∑ i, √(p i) - 1) := by
-  rw [tsallisEntropy_half, sum_sub_distrib, hp.2]
-
-/-- The Tsallis entropy of a point of the simplex is nonnegative. -/
-lemma tsallisEntropy_half_nonneg {p : EuclideanSpace ℝ ι} (hp : p ∈ simplex ι) :
-    0 ≤ tsallisEntropy (1 / 2) p := by
-  rw [tsallisEntropy_half]
-  refine mul_nonneg zero_le_two (sum_nonneg fun i _ ↦ sub_nonneg.2 ?_)
-  have h0 := hp.1 i
-  have h1 := le_one_of_mem_simplex hp i
-  calc p i = √(p i) ^ 2 := (Real.sq_sqrt h0).symm
-    _ ≤ √(p i) := by
-      rw [sq]
-      exact mul_le_of_le_one_left (Real.sqrt_nonneg _) (Real.sqrt_le_one.2 h1)
-
-/-- The Tsallis entropy vanishes at the vertices of the simplex. -/
-lemma tsallisEntropy_half_single [DecidableEq ι] (x : ι) :
-    tsallisEntropy (1 / 2) (EuclideanSpace.single x (1 : ℝ)) = 0 := by
-  rw [tsallisEntropy_half_of_mem_simplex (single_mem_simplex x)]
-  simp only [PiLp.single_apply]
-  rw [sum_eq_single x (fun i _ hi ↦ by simp [hi]) (by simp)]
-  simp
-
-/-- The Tsallis entropy of `p` is at most `2 ∑_{i ≠ x} √(p i)`, for every `x`. -/
-lemma tsallisEntropy_half_le_sum_erase [DecidableEq ι] {p : EuclideanSpace ℝ ι}
-    (hp : p ∈ simplex ι) (x : ι) :
-    tsallisEntropy (1 / 2) p ≤ 2 * ∑ i ∈ univ.erase x, √(p i) := by
-  rw [tsallisEntropy_half_of_mem_simplex hp, ← add_sum_erase _ _ (mem_univ x)]
-  have : √(p x) ≤ 1 := Real.sqrt_le_one.2 (le_one_of_mem_simplex hp x)
-  linarith
-
-/-- `∑ i, √(p i) ≤ √|ι|` on the simplex (Cauchy–Schwarz). -/
-lemma sum_sqrt_le_sqrt_card {p : EuclideanSpace ℝ ι} (hp : p ∈ simplex ι) :
-    ∑ i, √(p i) ≤ √(Fintype.card ι) := by
-  have h := sum_mul_sq_le_sq_mul_sq univ (fun _ ↦ (1 : ℝ)) fun i ↦ √(p i)
-  simp only [one_mul, one_pow, sum_const, card_univ, nsmul_eq_mul, mul_one] at h
-  have h1 : ∑ i, √(p i) ^ 2 = 1 := by
-    rw [← hp.2]
-    exact sum_congr rfl fun i _ ↦ Real.sq_sqrt (hp.1 i)
-  rw [h1, mul_one] at h
-  exact Real.le_sqrt_of_sq_le h
 
 /-! ### The maximizer of the FTRL objective -/
 
@@ -222,11 +175,10 @@ lemma ftrlSimplex_tsallisEntropy_half [Nonempty ι] (θ : EuclideanSpace ℝ ι)
 /-- The FTRL distribution of the Tsallis-`1/2` entropy for the cumulative reward `G` and the
 learning rate `η > 0` maximizes `q ↦ ⟪q, G⟫ + η⁻¹ φ(q)` over the simplex. -/
 lemma isMaxOn_ftrlSimplex_tsallisEntropy_half [Nonempty ι] {η : ℝ} (hη : 0 < η)
-    (G : EuclideanSpace ℝ ι) (q : EuclideanSpace ℝ ι) (hq : q ∈ simplex ι) :
-    ⟪q, G⟫ + η⁻¹ * tsallisEntropy (1 / 2) q
-      ≤ ⟪(ftrlSimplex (tsallisEntropy (1 / 2)) (η • G) : EuclideanSpace ℝ ι), G⟫
-        + η⁻¹ * tsallisEntropy (1 / 2)
-          (ftrlSimplex (tsallisEntropy (1 / 2)) (η • G) : EuclideanSpace ℝ ι) := by
+    (G : EuclideanSpace ℝ ι) :
+    IsMaxOn (fun q ↦ ⟪q, G⟫ + η⁻¹ * tsallisEntropy (1 / 2) q) (simplex ι)
+      (ftrlSimplex (tsallisEntropy (1 / 2)) (η • G) : EuclideanSpace ℝ ι) := by
+  intro q hq
   have h := (ftrlSimplex_tsallisEntropy_half (η • G)).2 q hq
   have hD : 0 ≤ ∑ i, (√(q i) - √(ftrlSimplex (tsallisEntropy (1 / 2)) (η • G) i)) ^ 2
       / √(ftrlSimplex (tsallisEntropy (1 / 2)) (η • G) i) :=
@@ -334,30 +286,6 @@ lemma stabilityWeight_nonneg (p : ι → ℝ) (j : ι) :
     0 ≤ ∑ i, √(p i) ^ 3 * (if i = j then (1 / p j - 1) ^ 2 else 1) :=
   sum_nonneg fun i _ ↦ mul_nonneg (pow_nonneg (Real.sqrt_nonneg _) _)
     (by split_ifs <;> positivity)
-
-/-- The importance-weighted estimate, coordinatewise:
-`g i = 1 - 𝟙{x_t = i} (1 - r) / p x_t`. -/
-lemma estimate_apply_eq (p : simplex ι) (r : Round Unit ι ℝ) (i : ι) :
-    estimate p r i = 1 - if r.action = i then (1 - r.feedback) / p r.action else 0 := by
-  rw [estimate_apply, importanceWeighted]
-
-/-- The gain of the distribution `p` under its importance-weighted estimate is the reward. -/
-lemma inner_estimate (p : simplex ι) (r : Round Unit ι ℝ) (hp : p r.action ≠ 0) :
-    ⟪(p : EuclideanSpace ℝ ι), estimate p r⟫ = r.feedback := by
-  simp only [PiLp.inner_apply, RCLike.inner_apply, conj_trivial, estimate_apply_eq, sub_mul,
-    one_mul, sum_sub_distrib, ite_mul, zero_mul]
-  rw [sum_ite_eq univ r.action, ite_eq_left (mem_univ _)]
-  have h1 : ∑ i, (p : EuclideanSpace ℝ ι) i = 1 := p.2.2
-  change ∑ i, p i = 1 at h1
-  change ∑ i, p i - (1 - r.feedback) / p r.action * p r.action = r.feedback
-  rw [h1, div_mul_cancel₀ _ hp]
-  ring
-
-/-- The gain of a vertex `x` under the importance-weighted estimate. -/
-lemma inner_single_estimate (p : simplex ι) (r : Round Unit ι ℝ) (x : ι) :
-    ⟪EuclideanSpace.single x (1 : ℝ), estimate p r⟫ = estimate p r x := by
-  rw [EuclideanSpace.inner_single_left]
-  simp
 
 /-- **Stability for the importance-weighted estimate.** If `η ≤ 1/4` and the reward of the round
 is in `[-1, 1]`, the stability term of a round of FTRL with the Tsallis-`1/2` entropy and the

@@ -74,11 +74,13 @@ public import Mathlib.Analysis.SpecialFunctions.Log.Base
 public import Mathlib.Analysis.Convex.Integral
 public import Mathlib.Analysis.Convex.SpecificFunctions.Pow
 public import Mathlib.NumberTheory.Harmonic.Bounds
-public import Mathlib.Analysis.MeanInequalities
-public import Mathlib.Analysis.MeanInequalitiesPow
+public import Mathlib.MeasureTheory.Integral.IntegrableOn
+public import Mathlib.Probability.Kernel.Composition.Lemmas
 public import Mathlib.Analysis.Convex.SpecificFunctions.Basic
 public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 public import Mathlib.Analysis.Calculus.MeanValue
+public import Mathlib.Analysis.MeanInequalitiesPow
+public import Mathlib.Analysis.MeanInequalities
 
 /-! # Standalone extraction for `Ito2026Adversarial.forall_exists_psmr_tsallisSPMPaper_le`
 Definitions are copied verbatim; theorem proofs are replaced by `sorry`.

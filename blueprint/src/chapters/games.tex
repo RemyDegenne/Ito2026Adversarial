@@ -51,19 +51,17 @@
   \label{lem:regret_relations}
   \lean{Learning.RepeatedGame.nashRegret_eq_psmr_add,
     Learning.RepeatedGame.nashRegret_le_externalRegret,
-    Learning.RepeatedGame.IsStrictPSNE.colGapMin_mul_le,
-    Learning.RepeatedGame.IsPSNE.integral_sum_rowGap_sub_le,
     Learning.RepeatedGame.IsPSNE.colGapMin_mul_le, Learning.RepeatedGame.integral_sum_rowGap_sub_le}
   \leanok
   \uses{def:regrets, lem:maximin_attained}
   For every run of a learner against an adversary:
   \begin{enumerate}
     \item $\NR_T = \PSMR_T + \Dmix T$ and $\NR_T \le \ER_T$;
-    \item if $(x^\star, y^\star)$ is a strict PSNE and $C = \E[\#\{t < T : y_t \ne y^\star\}]$, then
+    \item if $(x^\star, y^\star)$ is a PSNE and $C = \E[\#\{t < T : y_t \ne y^\star\}]$, then
       $\ER_T(x^\star) - \PSMR_T = \E[\sum_{t < T} \indic\{y_t \ne y^\star\} \DC_{y_t}] \ge C \DCmin$;
-    \item if moreover $x_t$ has conditional law $p_t$ given the past and is conditionally
-      independent of $y_t$, and the utilities lie in $[-1, 1]$, then
-      $\E[\sum_{t < T} \langle \DR, p_t \rangle] - \ER_T(x^\star) \le 4 C$.
+    \item for every $(x^\star, y^\star)$, if the utilities lie in $[-1, 1]$, then
+      $\E[\sum_{t < T} \DR_{x_t}] - \ER_T(x^\star) \le 4 C$; if moreover $x_t$ has conditional law
+      $p_t$ given the past, $\E[\DR_{x_t}] = \E[\langle \DR, p_t\rangle]$.
   \end{enumerate}
 \end{lemma}
 
@@ -76,8 +74,8 @@
   so $\NR_T \le \sum_x p^\star_x \ER_T(x) \le \ER_T$. (2) $\vstar = u(x^\star, y^\star)$ for a
   PSNE, so $u(x^\star, y_t) - \vstar = \indic\{y_t \ne y^\star\} \DC_{y_t}$. (3) The summand
   $\DR_{x_t} - (u(x^\star, y_t) - u(x_t, y_t)) = u(x^\star, y^\star) - u(x^\star, y_t) + u(x_t, y_t) -
-  u(x_t, y^\star)$ vanishes when $y_t = y^\star$ and is at most $4$; and
-  $\E[\DR_{x_t}] = \E[\langle \DR, p_t\rangle]$.
+  u(x_t, y^\star)$ vanishes when $y_t = y^\star$ and is at most $4$ (no equilibrium property is
+  needed).
 \end{proof}
 
 \begin{remark}

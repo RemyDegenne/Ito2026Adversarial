@@ -6,7 +6,7 @@ Authors: Rémy Degenne
 module
 
 public import Ito2026Adversarial.LeanMachineLearning.Online.Bandit.FTRLRegret
-public import Ito2026Adversarial.Mathlib.Analysis.SpecialFunctions.Pow.Tangent
+public import Ito2026Adversarial.LeanMachineLearning.Online.Bandit.TsallisEntropy
 public import LeanMachineLearning.ForMathlib.MeasureTheory.Order.MeasurableArg
 public import Mathlib.Analysis.MeanInequalitiesPow
 public import Mathlib.MeasureTheory.Constructions.BorelSpace.Real
@@ -32,6 +32,17 @@ and Honda (2024). The FTRL objective is `hybridObjective α βbar β G p = ⟪p,
 * `ftrlSimplexParam_hybrid_eq`: the FTRL distribution `ftrlSimplexParam`, defined as the partial
   gradient of the joint value function in `(β, G)`, is the maximizer (Danskin's theorem for the
   joint value function, which is differentiable at every `(β, G)` with `β > 0`).
+* `ftrlValue_hybrid_add_sub_le`: **stability** of the hybrid FTRL, for estimates bounded by
+  `(1 - α) β q* ^ (α - 1) / 4`: the stability term is at most
+  `4 / ((1 - α) β) q* ^ (1 - α) ∑ i, p i g i²`;
+* `le_eight_mul_of_kkt`: **multiplicative stability**: under the same bound and a small increase of
+  `β`, the next maximizer is at most `8` times the current one coordinatewise (thanks to the
+  `βbar φ_{1-α}` term);
+* `rpow_inv_le_of_kkt`: a lower bound on the coordinates of the maximizer.
+
+## Tags
+
+follow the regularized leader, Tsallis entropy, stability-penalty matching, best of both worlds
 -/
 
 @[expose] public section
@@ -42,34 +53,6 @@ open scoped RealInnerProductSpace Topology
 namespace Learning
 
 variable {ι : Type*} [Fintype ι]
-
-/-! ### Tsallis entropies -/
-
-/-- The Tsallis entropy is continuous for a nonnegative parameter. -/
-lemma continuous_tsallisEntropy {a : ℝ} (ha : 0 ≤ a) : Continuous (tsallisEntropy (ι := ι) a) := by
-  unfold tsallisEntropy
-  refine continuous_const.mul (continuous_finsetSum _ fun i _ ↦ ?_)
-  exact ((Real.continuous_rpow_const ha).comp (PiLp.continuous_apply 2 _ i)).sub
-    (PiLp.continuous_apply 2 _ i)
-
-/-- The Tsallis entropy of a point of the simplex is nonnegative, for `0 < a ≤ 1`. -/
-lemma tsallisEntropy_nonneg {a : ℝ} (ha0 : 0 < a) (ha1 : a ≤ 1) {p : EuclideanSpace ℝ ι}
-    (hp : p ∈ simplex ι) : 0 ≤ tsallisEntropy a p := by
-  unfold tsallisEntropy
-  refine mul_nonneg (inv_nonneg.2 ha0.le) (sum_nonneg fun i _ ↦ sub_nonneg.2 ?_)
-  calc p i = p i ^ (1 : ℝ) := (Real.rpow_one _).symm
-    _ ≤ p i ^ a := Real.rpow_le_rpow_of_exponent_ge' (hp.1 i) (le_one_of_mem_simplex hp i)
-        ha0.le ha1
-
-/-- The Tsallis entropy vanishes at the vertices of the simplex. -/
-lemma tsallisEntropy_single [DecidableEq ι] {a : ℝ} (ha : a ≠ 0) (x : ι) :
-    tsallisEntropy a (EuclideanSpace.single x (1 : ℝ)) = 0 := by
-  unfold tsallisEntropy
-  rw [sum_eq_zero fun i _ ↦ ?_, mul_zero]
-  by_cases hi : i = x
-  · subst hi
-    simp
-  · simp [hi, Real.zero_rpow ha]
 
 /-! ### The objective and its coordinates -/
 
@@ -141,37 +124,6 @@ lemma hasDerivAt_hybridCoord {α : ℝ} (hα0 : 0 < α) (hα1 : α < 1) (βbar �
 /-! ### Positivity and first-order conditions at a maximizer -/
 
 section KKT
-
-omit [Fintype ι] in
-/-- The coordinates of `p + t (e_i - e_j)`. -/
-lemma add_smul_single_sub_apply [DecidableEq ι] (p : EuclideanSpace ℝ ι) (t : ℝ) (i j k : ι) :
-    (p + t • (EuclideanSpace.single i (1 : ℝ) - EuclideanSpace.single j 1) : EuclideanSpace ℝ ι) k
-      = p k + t * ((if k = i then 1 else 0) - if k = j then 1 else 0) := by
-  simp [PiLp.single_apply]
-
-/-- Moving mass `t` from the coordinate `j` to the coordinate `i` stays in the simplex for
-`-p i ≤ t ≤ p j`. -/
-lemma add_smul_single_sub_mem_simplex [DecidableEq ι] {p : EuclideanSpace ℝ ι}
-    (hp : p ∈ simplex ι) {i j : ι} (hij : i ≠ j) {t : ℝ} (hti : -p i ≤ t) (htj : t ≤ p j) :
-    p + t • (EuclideanSpace.single i (1 : ℝ) - EuclideanSpace.single j 1) ∈ simplex ι := by
-  refine ⟨fun k ↦ ?_, ?_⟩
-  · rw [add_smul_single_sub_apply]
-    by_cases hki : k = i
-    · subst hki
-      simp [hij]
-      linarith
-    · by_cases hkj : k = j
-      · subst hkj
-        simp [hki]
-        linarith
-      · simp [hki, hkj, hp.1 k]
-  · have : ∑ k, (p + t • (EuclideanSpace.single i (1 : ℝ) - EuclideanSpace.single j 1) :
-        EuclideanSpace ℝ ι) k = ∑ k, p k + t * (∑ k, (if k = i then (1 : ℝ) else 0)
-          - ∑ k, (if k = j then (1 : ℝ) else 0)) := by
-      simp only [add_smul_single_sub_apply, sum_add_distrib]
-      rw [← sum_sub_distrib, mul_sum]
-    rw [this, hp.2]
-    simp
 
 /-- The objective after moving mass `t` from the coordinate `j` to the coordinate `i`. -/
 lemma hybridObjective_add_smul_single_sub [DecidableEq ι] (α βbar β : ℝ)
@@ -512,17 +464,6 @@ lemma hybridObjective_add (α βbar β b : ℝ) (G θ q : EuclideanSpace ℝ ι)
   simp only [hybridObjective, hybridTsallis, inner_add_right]
   ring
 
-/-- The Tsallis entropy of a point of the simplex is at most `card ι / a`. -/
-lemma tsallisEntropy_le_card_div {a : ℝ} (ha0 : 0 < a) {q : EuclideanSpace ℝ ι}
-    (hq : q ∈ simplex ι) : tsallisEntropy a q ≤ Fintype.card ι / a := by
-  unfold tsallisEntropy
-  rw [div_eq_inv_mul]
-  refine mul_le_mul_of_nonneg_left ?_ (inv_nonneg.2 ha0.le)
-  calc ∑ i, (q i ^ a - q i) ≤ ∑ _i : ι, (1 : ℝ) := sum_le_sum fun i _ ↦ by
-        have := Real.rpow_le_one (hq.1 i) (le_one_of_mem_simplex hq i) ha0.le
-        linarith [hq.1 i]
-    _ = Fintype.card ι := by simp
-
 /-- **Danskin's theorem for the joint value function**: for `β > 0`, the joint value function
 `(β, G) ↦ max_{p ∈ simplex} ⟪p, G⟫ + β φ_α(p) + βbar φ_{1-α}(p)` is differentiable at `(β, G)`,
 with derivative `(b, θ) ↦ b φ_α(p) + ⟪p, θ⟫` where `p` is the maximizer. -/
@@ -673,25 +614,6 @@ end Maximizer
 
 /-! ### Stability -/
 
-/-- For `K ≥ 1` and `0 ≤ a ≤ 1`, `K ^ (-a) ≤ 1 - a (1 - 1 / K)` (Bernoulli's inequality). -/
-lemma rpow_neg_le_one_sub_mul {K a : ℝ} (hK : 1 ≤ K) (ha0 : 0 ≤ a) (ha1 : a ≤ 1) :
-    K ^ (-a) ≤ 1 - a * (1 - 1 / K) := by
-  have hK0 : 0 < K := by linarith
-  have h := rpow_one_add_le_one_add_mul_self (s := 1 / K - 1)
-    (by have : 0 ≤ 1 / K := by positivity
-        linarith) ha0 ha1
-  rw [add_sub_cancel, Real.div_rpow zero_le_one hK0.le, Real.one_rpow] at h
-  calc K ^ (-a) = 1 / K ^ a := by rw [Real.rpow_neg hK0.le, one_div]
-    _ ≤ 1 + a * (1 / K - 1) := h
-    _ = 1 - a * (1 - 1 / K) := by ring
-
-/-- `2 ^ (α - 1) ≤ 1 - (1 - α) / 2` for `0 ≤ α ≤ 1`. -/
-lemma two_rpow_sub_one_le {α : ℝ} (hα0 : 0 ≤ α) (hα1 : α ≤ 1) :
-    (2 : ℝ) ^ (α - 1) ≤ 1 - (1 - α) / 2 := by
-  have := rpow_neg_le_one_sub_mul (K := 2) (a := 1 - α) (by norm_num) (by linarith) (by linarith)
-  rw [neg_sub] at this
-  linarith
-
 /-- **One-dimensional stability** of the Tsallis entropy: for `β > 0`, `x > 0`, `y ≥ 0` and
 `g ≤ (1 - α) β x ^ (α - 1) / 2`,
 `g (y - x) - β / α powBregman α y x ≤ 2 x ^ (2 - α) g² / ((1 - α) β)`. -/
@@ -739,7 +661,7 @@ lemma mul_sub_sub_powBregman_le {α : ℝ} (hα0 : 0 < α) (hα1 : α < 1) {β :
     -- tangent line of `x ^ α` at `2 x`
     have ht := Real.rpow_le_rpow_add_mul_sub hα0.le hα1.le h2x hy
     have hcoef : g - β * x ^ (α - 1) + β * (2 * x) ^ (α - 1) ≤ 0 := by
-      have h2 := two_rpow_sub_one_le hα0.le hα1.le
+      have h2 := Real.two_rpow_sub_one_le hα0.le hα1.le
       rw [Real.mul_rpow (by norm_num) hx.le]
       have hxa : 0 < x ^ (α - 1) := Real.rpow_pos_of_pos hx _
       nlinarith [mul_le_mul_of_nonneg_right h2 (mul_nonneg hβ.le hxa.le)]
@@ -758,123 +680,6 @@ lemma mul_sub_sub_powBregman_le {α : ℝ} (hα0 : 0 < α) (hα1 : α < 1) {β :
         field_simp
       nlinarith
     nlinarith [mul_nonneg (neg_nonneg.2 hcoef) (by linarith : (0 : ℝ) ≤ y - 2 * x)]
-
-section QStar
-
-variable [Nonempty ι]
-
-/-- `q* = min (‖p‖_∞, 1 - ‖p‖_∞)`: the distance of the distribution `p` to the vertices. -/
-noncomputable def qStar (p : EuclideanSpace ℝ ι) : ℝ :=
-  min (fun i ↦ p i).max (1 - (fun i ↦ p i).max)
-
-/-- `q*` is measurable. -/
-@[fun_prop]
-lemma measurable_qStar : Measurable (qStar (ι := ι)) := by
-  have hm : Measurable fun p : EuclideanSpace ℝ ι ↦ (fun i ↦ p i).max :=
-    measurable_max.comp (by fun_prop)
-  exact hm.min (measurable_const.sub hm)
-
-/-- `q* ≤ ‖p‖_∞`. -/
-lemma qStar_le_max (p : EuclideanSpace ℝ ι) : qStar p ≤ (fun i ↦ p i).max := min_le_left _ _
-
-/-- `q* ≤ 1 - ‖p‖_∞`. -/
-lemma qStar_le_one_sub_max (p : EuclideanSpace ℝ ι) : qStar p ≤ 1 - (fun i ↦ p i).max :=
-  min_le_right _ _
-
-/-- `q*` is nonnegative on the simplex. -/
-lemma qStar_nonneg {p : EuclideanSpace ℝ ι} (hp : p ∈ simplex ι) : 0 ≤ qStar p := by
-  obtain ⟨j, hj⟩ := exists_argmax (fun i ↦ p i)
-  refine le_min ?_ ?_
-  · rw [← hj]
-    exact hp.1 j
-  · rw [← hj]
-    linarith [le_one_of_mem_simplex hp j]
-
-/-- `q* ≤ 1/2`. -/
-lemma qStar_le_half (p : EuclideanSpace ℝ ι) : qStar p ≤ 1 / 2 := by
-  unfold qStar
-  rcases le_total (fun i ↦ p i).max (1 / 2) with h | h
-  · exact (min_le_left _ _).trans h
-  · exact (min_le_right _ _).trans (by linarith)
-
-omit [Nonempty ι] in
-/-- Two distinct coordinates of a point of the simplex sum to at most `1`. -/
-lemma add_le_one_of_mem_simplex {p : EuclideanSpace ℝ ι} (hp : p ∈ simplex ι) {i j : ι}
-    (hij : i ≠ j) : p i + p j ≤ 1 := by
-  classical
-  rw [← hp.2, ← sum_pair hij]
-  exact sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _) fun k _ _ ↦ hp.1 k
-
-/-- A coordinate of `p` which is not a maximal coordinate is at most `q*`. -/
-lemma le_qStar_of_ne {p : EuclideanSpace ℝ ι} (hp : p ∈ simplex ι) {i j : ι}
-    (hj : p j = (fun i ↦ p i).max) (hij : i ≠ j) : p i ≤ qStar p := by
-  refine le_min (Function.le_max (fun i ↦ p i) i) ?_
-  have := add_le_one_of_mem_simplex hp hij
-  rw [← hj]
-  linarith
-
-/-- If a coordinate of `p` exceeds `q*`, it is larger than `1/2`. -/
-lemma half_lt_of_qStar_lt {p : EuclideanSpace ℝ ι} (hp : p ∈ simplex ι) {i : ι}
-    (hi : qStar p < p i) : 1 / 2 < p i := by
-  obtain ⟨j, hj⟩ := exists_argmax (fun i ↦ p i)
-  by_cases hij : i = j
-  · subst hij
-    by_contra hle
-    push Not at hle
-    have : qStar p = p i := by
-      unfold qStar
-      rw [← hj]
-      exact min_eq_left (by linarith)
-    linarith
-  · exact absurd (le_qStar_of_ne hp hj hij) (not_le.2 hi)
-
-/-- If all the coordinates of `p` are at least `ℓ` and there are at least two coordinates, then
-`ℓ ≤ q*`. -/
-lemma le_qStar_of_forall_le {p : EuclideanSpace ℝ ι} (hp : p ∈ simplex ι) {ℓ : ℝ}
-    (hℓ : ∀ i, ℓ ≤ p i) (hcard : 2 ≤ Fintype.card ι) : ℓ ≤ qStar p := by
-  obtain ⟨j, hj⟩ := exists_argmax (fun i ↦ p i)
-  obtain ⟨k, hk⟩ : ∃ k, k ≠ j := by
-    by_contra h
-    push Not at h
-    have : Fintype.card ι ≤ 1 := Fintype.card_le_one_iff.2 fun a b ↦ by rw [h a, h b]
-    omega
-  refine le_min ?_ ?_
-  · rw [← hj]
-    exact hℓ j
-  · have := add_le_one_of_mem_simplex hp hk
-    rw [← hj]
-    linarith [hℓ k]
-
-/-- For every coordinate `x`, `q* ≤ 1 - p x`. -/
-lemma qStar_le_one_sub {p : EuclideanSpace ℝ ι} (hp : p ∈ simplex ι) (x : ι) :
-    qStar p ≤ 1 - p x := by
-  obtain ⟨j, hj⟩ := exists_argmax (fun i ↦ p i)
-  by_cases hxj : x = j
-  · subst hxj
-    rw [hj]
-    exact qStar_le_one_sub_max p
-  · have := add_le_one_of_mem_simplex hp hxj
-    have := qStar_le_max p
-    rw [← hj] at this
-    linarith
-
-/-- `q* > 0` for a point of the simplex with positive coordinates and at least two coordinates. -/
-lemma qStar_pos {p : EuclideanSpace ℝ ι} (hp : p ∈ simplex ι) (hpos : ∀ i, 0 < p i)
-    (hcard : 2 ≤ Fintype.card ι) : 0 < qStar p := by
-  obtain ⟨j, hj⟩ := exists_argmax (fun i ↦ p i)
-  obtain ⟨k, hk⟩ : ∃ k, k ≠ j := by
-    by_contra h
-    push Not at h
-    have : Fintype.card ι ≤ 1 := Fintype.card_le_one_iff.2 fun a b ↦ by rw [h a, h b]
-    omega
-  refine lt_min ?_ ?_
-  · rw [← hj]
-    exact hpos j
-  · have := add_le_one_of_mem_simplex hp hk
-    rw [← hj]
-    linarith [hpos k]
-
-end QStar
 
 /-- **Stability on the simplex**: if `p` is a point of the simplex with positive coordinates and
 `|g i| ≤ (1 - α) β q* ^ (α - 1) / 4` for all `i`, then for every `r` of the simplex,
@@ -1060,11 +865,11 @@ lemma le_eight_mul_of_kkt [Nonempty ι] {α βbar β β' : ℝ} (hα : 1 / 2 ≤
     have hpb : 0 < p i ^ (-α) := Real.rpow_pos_of_pos (hpos i) _
     -- the numerical factors
     have h81 : (8 : ℝ) ^ (α - 1) ≤ 1 - (1 - α) * (7 / 8) := by
-      have := rpow_neg_le_one_sub_mul (K := 8) (a := 1 - α) (by norm_num) hα1'.le (by linarith)
+      have := Real.rpow_neg_le_one_sub_mul (K := 8) (a := 1 - α) (by norm_num) hα1'.le (by linarith)
       rw [neg_sub] at this
       linarith
     have h82 : (8 : ℝ) ^ (-α) ≤ 1 - α * (7 / 8) := by
-      have := rpow_neg_le_one_sub_mul (K := 8) (a := α) (by norm_num) hα0.le hα1.le
+      have := Real.rpow_neg_le_one_sub_mul (K := 8) (a := α) (by norm_num) hα0.le hα1.le
       linarith
     have h8le : (8 : ℝ) ^ (α - 1) ≤ 1 := Real.rpow_le_one_of_one_le_of_nonpos (by norm_num)
       (by linarith)
@@ -1122,207 +927,6 @@ lemma le_eight_mul_of_kkt [Nonempty ι] {α βbar β β' : ℝ} (hα : 1 / 2 ≤
     have h1 := half_lt_of_qStar_lt hp hi
     have := le_one_of_mem_simplex hr i
     linarith
-
-/-! ### Bounds on the Tsallis entropy -/
-
-/-- The Tsallis entropy on the simplex is at most `(card ι ^ (1 - a) - 1) / a` (its value at the
-uniform distribution), for `0 < a ≤ 1`. -/
-lemma tsallisEntropy_le_of_mem_simplex [Nonempty ι] {a : ℝ} (ha0 : 0 < a) (ha1 : a ≤ 1)
-    {p : EuclideanSpace ℝ ι} (hp : p ∈ simplex ι) :
-    tsallisEntropy a p ≤ ((Fintype.card ι : ℝ) ^ (1 - a) - 1) / a := by
-  have hK : (0 : ℝ) < Fintype.card ι := Nat.cast_pos.2 Fintype.card_pos
-  set u := (Fintype.card ι : ℝ)⁻¹ with hu
-  have hu0 : 0 < u := inv_pos.2 hK
-  have hsum : ∑ i, p i ^ a ≤ (Fintype.card ι : ℝ) ^ (1 - a) := by
-    calc ∑ i, p i ^ a ≤ ∑ i, (u ^ a + a * u ^ (a - 1) * (p i - u)) :=
-          sum_le_sum fun i _ ↦ Real.rpow_le_rpow_add_mul_sub ha0.le ha1 hu0 (hp.1 i)
-      _ = Fintype.card ι * u ^ a + a * u ^ (a - 1) * (∑ i, p i - Fintype.card ι * u) := by
-          rw [sum_add_distrib, ← mul_sum, sum_sub_distrib]
-          simp
-      _ = (Fintype.card ι : ℝ) ^ (1 - a) := by
-          rw [hp.2, hu, mul_inv_cancel₀ hK.ne', sub_self, mul_zero, add_zero,
-            Real.rpow_sub hK, Real.rpow_one, Real.inv_rpow hK.le, div_eq_mul_inv]
-  unfold tsallisEntropy
-  rw [sum_sub_distrib, hp.2, div_eq_inv_mul]
-  exact mul_le_mul_of_nonneg_left (by linarith) (inv_nonneg.2 ha0.le)
-
-/-- For `0 ≤ x ≤ 1/2` and `0 ≤ a ≤ 1`: `(1 - a) x ^ a / 2 ≤ x ^ a - x`. -/
-lemma mul_rpow_le_rpow_sub {a x : ℝ} (ha0 : 0 ≤ a) (ha1 : a ≤ 1) (hx0 : 0 ≤ x) (hx : x ≤ 1 / 2) :
-    (1 - a) * x ^ a / 2 ≤ x ^ a - x := by
-  rcases hx0.eq_or_lt with rfl | hx0
-  · rcases ha0.eq_or_lt with rfl | ha0
-    · norm_num
-    · simp [Real.zero_rpow ha0.ne']
-  have e : x = x ^ a * x ^ (1 - a) := by
-    rw [← Real.rpow_add hx0, show a + (1 - a) = 1 by ring, Real.rpow_one]
-  have h1 : x ^ (1 - a) ≤ (1 / 2) ^ (1 - a) :=
-    Real.rpow_le_rpow hx0.le hx (by linarith)
-  have h2 : (1 / 2 : ℝ) ^ (1 - a) ≤ 1 - (1 - a) / 2 := by
-    have := two_rpow_sub_one_le ha0 ha1
-    rwa [one_div, Real.inv_rpow (by norm_num), ← Real.rpow_neg (by norm_num), neg_sub]
-  have hxa : 0 < x ^ a := Real.rpow_pos_of_pos hx0 _
-  nlinarith [mul_le_mul_of_nonneg_left (h1.trans h2) hxa.le]
-
-/-- Subadditivity of `x ↦ x ^ a` for `0 ≤ a ≤ 1`, over a finite sum. -/
-lemma rpow_sum_le_sum_rpow {κ : Type*} (s : Finset κ) {x : κ → ℝ} (hx : ∀ i ∈ s, 0 ≤ x i)
-    {a : ℝ} (ha0 : 0 < a) (ha1 : a ≤ 1) : (∑ i ∈ s, x i) ^ a ≤ ∑ i ∈ s, x i ^ a := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simp [Real.zero_rpow ha0.ne']
-  | insert k s hk ih =>
-    rw [sum_insert hk, sum_insert hk]
-    have h0 : 0 ≤ ∑ i ∈ s, x i := sum_nonneg fun i hi ↦ hx i (mem_insert_of_mem hi)
-    calc (x k + ∑ i ∈ s, x i) ^ a ≤ x k ^ a + (∑ i ∈ s, x i) ^ a :=
-          Real.rpow_add_le_add_rpow (hx k (mem_insert_self k s)) h0 ha0.le ha1
-      _ ≤ x k ^ a + ∑ i ∈ s, x i ^ a := by
-          gcongr
-          exact ih fun i hi ↦ hx i (mem_insert_of_mem hi)
-
-/-- **Lower bound on the Tsallis entropy** (Ito, Tsuchiya, Honda 2024, Eq. (125)):
-`(1 - a) q* ^ a / (2 a) ≤ φ_a(p)` on the simplex, for `0 < a ≤ 1`. -/
-lemma mul_qStar_rpow_le_tsallisEntropy [Nonempty ι] {a : ℝ} (ha0 : 0 < a) (ha1 : a ≤ 1)
-    {p : EuclideanSpace ℝ ι} (hp : p ∈ simplex ι) :
-    (1 - a) * qStar p ^ a / (2 * a) ≤ tsallisEntropy a p := by
-  classical
-  obtain ⟨j, hj⟩ := exists_argmax (fun i ↦ p i)
-  have hterm (i : ι) : 0 ≤ p i ^ a - p i := by
-    have := Real.rpow_le_rpow_of_exponent_ge' (hp.1 i) (le_one_of_mem_simplex hp i) ha0.le ha1
-    rw [Real.rpow_one] at this
-    linarith
-  unfold tsallisEntropy
-  rw [show (1 - a) * qStar p ^ a / (2 * a) = a⁻¹ * ((1 - a) * qStar p ^ a * 2⁻¹) by
-    rw [div_eq_mul_inv, mul_inv]
-    ring]
-  refine mul_le_mul_of_nonneg_left ?_ (inv_nonneg.2 ha0.le)
-  rcases le_or_gt (p j) (1 / 2) with hj2 | hj2
-  · have hqj : qStar p = p j := by
-      unfold qStar
-      rw [← hj]
-      exact min_eq_left (by linarith)
-    rw [hqj]
-    calc (1 - a) * p j ^ a * 2⁻¹ ≤ p j ^ a - p j := by
-          have := mul_rpow_le_rpow_sub ha0.le ha1 (hp.1 j) hj2
-          linarith
-      _ ≤ ∑ i, (p i ^ a - p i) :=
-          single_le_sum (f := fun i ↦ p i ^ a - p i) (fun i _ ↦ hterm i) (Finset.mem_univ j)
-  · have hqj : qStar p = 1 - p j := by
-      unfold qStar
-      rw [← hj]
-      exact min_eq_right (by linarith)
-    have hsum : ∑ i ∈ univ.erase j, p i = 1 - p j := by
-      rw [← hp.2, ← add_sum_erase univ (fun i ↦ p i) (Finset.mem_univ j)]
-      ring
-    have hq2 : qStar p ≤ 1 / 2 := qStar_le_half p
-    have hq0 : 0 ≤ qStar p := by rw [hqj]; linarith [le_one_of_mem_simplex hp j]
-    calc (1 - a) * qStar p ^ a * 2⁻¹ ≤ qStar p ^ a - qStar p := by
-          have := mul_rpow_le_rpow_sub ha0.le ha1 hq0 hq2
-          linarith
-      _ ≤ ∑ i ∈ univ.erase j, p i ^ a - ∑ i ∈ univ.erase j, p i := by
-          rw [hqj, ← hsum]
-          gcongr
-          exact rpow_sum_le_sum_rpow _ (fun i _ ↦ hp.1 i) ha0 ha1
-      _ = ∑ i ∈ univ.erase j, (p i ^ a - p i) := by rw [sum_sub_distrib]
-      _ ≤ ∑ i, (p i ^ a - p i) :=
-          sum_le_sum_of_subset_of_nonneg (subset_univ _) fun i _ _ ↦ hterm i
-
-/-- **Lemma 23 of Ito, Tsuchiya, Honda (2024)**: if `r i ≤ c p i` for all `i` with `c ≥ 1`
-(distributions of the simplex, `p` with positive coordinates), then `φ_a(r) ≤ c φ_a(p)` for
-`0 < a ≤ 1`. -/
-lemma tsallisEntropy_le_mul_of_le_mul {a c : ℝ} (ha0 : 0 < a) (ha1 : a ≤ 1) (hc : 1 ≤ c)
-    {p r : EuclideanSpace ℝ ι} (hp : p ∈ simplex ι) (hpos : ∀ i, 0 < p i) (hr : r ∈ simplex ι)
-    (hrp : ∀ i, r i ≤ c * p i) :
-    tsallisEntropy a r ≤ c * tsallisEntropy a p := by
-  unfold tsallisEntropy
-  rw [mul_left_comm]
-  refine mul_le_mul_of_nonneg_left ?_ (inv_nonneg.2 ha0.le)
-  have hterm (i : ι) : r i ^ a - r i
-      ≤ (p i ^ a - p i) + a * (c - 1) * (p i ^ a - p i) - (1 - a) * (r i - p i)
-        + a * (p i ^ (a - 1) - 1) * ((r i - p i) - (c - 1) * p i) := by
-    have h1 := Real.rpow_le_rpow_add_mul_sub ha0.le ha1 (hpos i) (hr.1 i)
-    have e : p i ^ (a - 1) * p i = p i ^ a := by
-      rw [← Real.rpow_add_one (hpos i).ne', sub_add_cancel]
-    have e2 : a * (p i ^ (a - 1) - 1) * ((r i - p i) - (c - 1) * p i)
-        = a * p i ^ (a - 1) * (r i - p i) - a * (c - 1) * p i ^ a - a * (r i - p i)
-          + a * (c - 1) * p i := by
-      rw [← e]
-      ring
-    linarith
-  have hsum : ∑ i, (r i - p i) = 0 := by rw [sum_sub_distrib, hr.2, hp.2, sub_self]
-  have hneg (i : ι) : a * (p i ^ (a - 1) - 1) * ((r i - p i) - (c - 1) * p i) ≤ 0 := by
-    have h1 : 1 ≤ p i ^ (a - 1) :=
-      Real.one_le_rpow_of_pos_of_le_one_of_nonpos (hpos i) (le_one_of_mem_simplex hp i)
-        (by linarith)
-    have h2 : (r i - p i) - (c - 1) * p i ≤ 0 := by linarith [hrp i]
-    exact mul_nonpos_of_nonneg_of_nonpos (mul_nonneg ha0.le (by linarith)) h2
-  have hpos' : 0 ≤ ∑ i, (p i ^ a - p i) := sum_nonneg fun i _ ↦ by
-    have := Real.rpow_le_rpow_of_exponent_ge' (hp.1 i) (le_one_of_mem_simplex hp i) ha0.le ha1
-    rw [Real.rpow_one] at this
-    linarith
-  calc ∑ i, (r i ^ a - r i)
-      ≤ ∑ i, ((p i ^ a - p i) + a * (c - 1) * (p i ^ a - p i) - (1 - a) * (r i - p i)
-        + a * (p i ^ (a - 1) - 1) * ((r i - p i) - (c - 1) * p i)) := sum_le_sum fun i _ ↦ hterm i
-    _ ≤ ∑ i, ((p i ^ a - p i) + a * (c - 1) * (p i ^ a - p i) - (1 - a) * (r i - p i)) :=
-        sum_le_sum fun i _ ↦ by linarith [hneg i]
-    _ = (1 + a * (c - 1)) * ∑ i, (p i ^ a - p i) := by
-        rw [sum_sub_distrib, sum_add_distrib, ← mul_sum, ← mul_sum, hsum]
-        ring
-    _ ≤ c * ∑ i, (p i ^ a - p i) := by
-        gcongr
-        nlinarith
-
-/-- **Power mean inequality** for `x ↦ x ^ a`, `0 < a ≤ 1`:
-`∑_{i ∈ s} x i ^ a ≤ #s ^ (1 - a) (∑_{i ∈ s} x i) ^ a`. -/
-lemma sum_rpow_le_card_rpow_mul {κ : Type*} (s : Finset κ) {x : κ → ℝ} (hx : ∀ i ∈ s, 0 ≤ x i)
-    {a : ℝ} (ha0 : 0 < a) (ha1 : a ≤ 1) :
-    ∑ i ∈ s, x i ^ a ≤ (#s : ℝ) ^ (1 - a) * (∑ i ∈ s, x i) ^ a := by
-  rcases (sum_nonneg hx).eq_or_lt with h0 | hpos
-  · have hx0 : ∀ i ∈ s, x i = 0 := (sum_eq_zero_iff_of_nonneg hx).1 h0.symm
-    rw [sum_eq_zero fun i hi ↦ by rw [hx0 i hi, Real.zero_rpow ha0.ne']]
-    exact mul_nonneg (Real.rpow_nonneg (Nat.cast_nonneg _) _)
-      (Real.rpow_nonneg (sum_nonneg hx) _)
-  have hs : s.Nonempty := by
-    by_contra h
-    rw [Finset.not_nonempty_iff_eq_empty] at h
-    simp [h] at hpos
-  have hn : (0 : ℝ) < #s := Nat.cast_pos.2 (card_pos.2 hs)
-  have ht0 : 0 < (∑ i ∈ s, x i) / #s := div_pos hpos hn
-  calc ∑ i ∈ s, x i ^ a ≤ ∑ i ∈ s, (((∑ i ∈ s, x i) / #s) ^ a
-        + a * ((∑ i ∈ s, x i) / #s) ^ (a - 1) * (x i - (∑ i ∈ s, x i) / #s)) :=
-        sum_le_sum fun i hi ↦ Real.rpow_le_rpow_add_mul_sub ha0.le ha1 ht0 (hx i hi)
-    _ = #s * ((∑ i ∈ s, x i) / #s) ^ a + a * ((∑ i ∈ s, x i) / #s) ^ (a - 1)
-          * (∑ i ∈ s, x i - #s * ((∑ i ∈ s, x i) / #s)) := by
-        rw [sum_add_distrib, ← mul_sum, sum_sub_distrib]
-        simp
-    _ = #s * ((∑ i ∈ s, x i) / #s) ^ a := by
-        rw [mul_div_cancel₀ _ hn.ne', sub_self, mul_zero, add_zero]
-    _ = (#s : ℝ) ^ (1 - a) * (∑ i ∈ s, x i) ^ a := by
-        rw [Real.div_rpow hpos.le hn.le, Real.rpow_sub hn, Real.rpow_one]
-        field_simp
-
-/-- **Self-bounding bound on the Tsallis entropy** (Ito, Tsuchiya, Honda 2024, Eq. (132)): for
-every `x`, `φ_a(p) ≤ card ι ^ (1 - a) (1 - p x) ^ a / a` on the simplex, for `0 < a ≤ 1`. -/
-lemma tsallisEntropy_le_card_rpow_mul {a : ℝ} (ha0 : 0 < a) (ha1 : a ≤ 1)
-    {p : EuclideanSpace ℝ ι} (hp : p ∈ simplex ι) (x : ι) :
-    tsallisEntropy a p ≤ (Fintype.card ι : ℝ) ^ (1 - a) * (1 - p x) ^ a / a := by
-  classical
-  have hsum : ∑ i ∈ univ.erase x, p i = 1 - p x := by
-    rw [← hp.2, ← add_sum_erase univ (fun i ↦ p i) (Finset.mem_univ x)]
-    ring
-  have hx1 : p x ^ a ≤ 1 := Real.rpow_le_one (hp.1 x) (le_one_of_mem_simplex hp x) ha0.le
-  have h1 : ∑ i, (p i ^ a - p i) ≤ ∑ i ∈ univ.erase x, p i ^ a := by
-    rw [sum_sub_distrib, hp.2, ← add_sum_erase univ (fun i ↦ p i ^ a) (Finset.mem_univ x)]
-    linarith
-  have h2 := sum_rpow_le_card_rpow_mul (univ.erase x) (fun i _ ↦ hp.1 i) ha0 ha1
-  rw [hsum] at h2
-  have h3 : ((#(univ.erase x) : ℕ) : ℝ) ^ (1 - a) ≤ (Fintype.card ι : ℝ) ^ (1 - a) := by
-    refine Real.rpow_le_rpow (Nat.cast_nonneg _) ?_ (by linarith)
-    exact_mod_cast (card_erase_le).trans (le_of_eq card_univ)
-  have h4 : 0 ≤ (1 - p x) ^ a := Real.rpow_nonneg (by linarith [le_one_of_mem_simplex hp x]) _
-  unfold tsallisEntropy
-  rw [div_eq_inv_mul]
-  refine mul_le_mul_of_nonneg_left ?_ (inv_nonneg.2 ha0.le)
-  calc ∑ i, (p i ^ a - p i) ≤ ((#(univ.erase x) : ℕ) : ℝ) ^ (1 - a) * (1 - p x) ^ a := h1.trans h2
-    _ ≤ (Fintype.card ι : ℝ) ^ (1 - a) * (1 - p x) ^ a := mul_le_mul_of_nonneg_right h3 h4
 
 /-! ### A lower bound on the coordinates of the maximizer -/
 

@@ -65,6 +65,33 @@ lemma measurable_estimate {X : Type*} [MeasurableSpace X] {p : X → simplex ι}
   unfold estimate
   fun_prop
 
+omit [MeasurableSpace ι] [MeasurableSingletonClass ι] in
+/-- The importance-weighted estimate, coordinatewise:
+`g i = 1 - 𝟙{x_t = i} (1 - r) / p x_t`. -/
+lemma estimate_apply_eq (p : simplex ι) (r : Round Unit ι ℝ) (i : ι) :
+    estimate p r i = 1 - if r.action = i then (1 - r.feedback) / p r.action else 0 := by
+  rw [estimate_apply, importanceWeighted]
+
+omit [MeasurableSpace ι] [MeasurableSingletonClass ι] in
+/-- The gain of the distribution `p` under its importance-weighted estimate is the reward. -/
+lemma inner_estimate (p : simplex ι) (r : Round Unit ι ℝ) (hp : p r.action ≠ 0) :
+    ⟪(p : EuclideanSpace ℝ ι), estimate p r⟫ = r.feedback := by
+  simp only [PiLp.inner_apply, RCLike.inner_apply, conj_trivial, estimate_apply_eq, sub_mul,
+    one_mul, sum_sub_distrib, ite_mul, zero_mul]
+  rw [sum_ite_eq univ r.action, ite_eq_left (mem_univ _)]
+  have h1 : ∑ i, (p : EuclideanSpace ℝ ι) i = 1 := p.2.2
+  change ∑ i, p i = 1 at h1
+  change ∑ i, p i - (1 - r.feedback) / p r.action * p r.action = r.feedback
+  rw [h1, div_mul_cancel₀ _ hp]
+  ring
+
+omit [MeasurableSpace ι] [MeasurableSingletonClass ι] in
+/-- The gain of a vertex `x` under the importance-weighted estimate. -/
+lemma inner_single_estimate (p : simplex ι) (r : Round Unit ι ℝ) (x : ι) :
+    ⟪EuclideanSpace.single x (1 : ℝ), estimate p r⟫ = estimate p r x := by
+  rw [EuclideanSpace.inner_single_left]
+  simp
+
 variable [Nonempty ι]
 
 /-- The distribution played at round `n` from the cumulative estimate `G`:

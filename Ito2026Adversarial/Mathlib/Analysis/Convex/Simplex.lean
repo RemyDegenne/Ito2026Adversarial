@@ -163,4 +163,64 @@ noncomputable def uniformSimplex (ι : Type*) [Fintype ι] [Nonempty ι] : simpl
 
 instance [Nonempty ι] : Nonempty (simplex ι) := ⟨uniformSimplex ι⟩
 
+section Coordinates
+
+open Finset
+open scoped RealInnerProductSpace
+
+/-- A point of the simplex has Euclidean norm at most `1`. -/
+lemma norm_le_one_of_mem_simplex {q : EuclideanSpace ℝ ι} (hq : q ∈ simplex ι) : ‖q‖ ≤ 1 := by
+  rw [EuclideanSpace.norm_eq, Real.sqrt_le_one]
+  calc ∑ i, ‖q i‖ ^ 2 ≤ ∑ i, q i := by
+        refine sum_le_sum fun i _ ↦ ?_
+        rw [Real.norm_eq_abs, sq_abs, sq]
+        exact mul_le_of_le_one_left (hq.1 i) (le_one_of_mem_simplex hq i)
+    _ = 1 := hq.2
+
+/-- The inner product of a point of the simplex with the constant vector `c` is `c`. -/
+lemma inner_const_of_mem_simplex {q : EuclideanSpace ℝ ι} (hq : q ∈ simplex ι) (c : ℝ) :
+    ⟪q, WithLp.toLp 2 (fun _ ↦ c)⟫ = c := by
+  simp only [PiLp.inner_apply, RCLike.inner_apply, conj_trivial]
+  rw [← mul_sum, hq.2, mul_one]
+
+/-- Two distinct coordinates of a point of the simplex sum to at most `1`. -/
+lemma add_le_one_of_mem_simplex {p : EuclideanSpace ℝ ι} (hp : p ∈ simplex ι) {i j : ι}
+    (hij : i ≠ j) : p i + p j ≤ 1 := by
+  classical
+  rw [← hp.2, ← sum_pair hij]
+  exact sum_le_sum_of_subset_of_nonneg (Finset.subset_univ _) fun k _ _ ↦ hp.1 k
+
+omit [Fintype ι] in
+/-- The coordinates of `p + t (e_i - e_j)`. -/
+lemma add_smul_single_sub_apply [DecidableEq ι] (p : EuclideanSpace ℝ ι) (t : ℝ) (i j k : ι) :
+    (p + t • (EuclideanSpace.single i (1 : ℝ) - EuclideanSpace.single j 1) : EuclideanSpace ℝ ι) k
+      = p k + t * ((if k = i then 1 else 0) - if k = j then 1 else 0) := by
+  simp [PiLp.single_apply]
+
+/-- Moving mass `t` from the coordinate `j` to the coordinate `i` stays in the simplex for
+`-p i ≤ t ≤ p j`. -/
+lemma add_smul_single_sub_mem_simplex [DecidableEq ι] {p : EuclideanSpace ℝ ι}
+    (hp : p ∈ simplex ι) {i j : ι} (hij : i ≠ j) {t : ℝ} (hti : -p i ≤ t) (htj : t ≤ p j) :
+    p + t • (EuclideanSpace.single i (1 : ℝ) - EuclideanSpace.single j 1) ∈ simplex ι := by
+  refine ⟨fun k ↦ ?_, ?_⟩
+  · rw [add_smul_single_sub_apply]
+    by_cases hki : k = i
+    · subst hki
+      simp [hij]
+      linarith
+    · by_cases hkj : k = j
+      · subst hkj
+        simp [hki]
+        linarith
+      · simp [hki, hkj, hp.1 k]
+  · have : ∑ k, (p + t • (EuclideanSpace.single i (1 : ℝ) - EuclideanSpace.single j 1) :
+        EuclideanSpace ℝ ι) k = ∑ k, p k + t * (∑ k, (if k = i then (1 : ℝ) else 0)
+          - ∑ k, (if k = j then (1 : ℝ) else 0)) := by
+      simp only [add_smul_single_sub_apply, sum_add_distrib]
+      rw [← sum_sub_distrib, mul_sum]
+    rw [this, hp.2]
+    simp
+
+end Coordinates
+
 end Learning

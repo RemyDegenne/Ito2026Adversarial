@@ -16,6 +16,10 @@ public import Mathlib.Analysis.SpecialFunctions.Log.Basic
 * `Matrix.PosDef.log_det_le_card_mul_log_trace_div`: for a positive definite real matrix `A` of
   dimension `d`, `log det A ≤ d log(tr A / d)` (AM–GM inequality for the eigenvalues, in
   logarithmic form).
+
+## Tags
+
+determinant, trace, positive definite matrix, AM-GM inequality
 -/
 
 @[expose] public section

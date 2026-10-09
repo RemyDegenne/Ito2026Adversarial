@@ -29,6 +29,10 @@ Tsuchiya, Honda 2024, in the form used for best-of-both-worlds bounds).
   `∑_{t < T} z t / b t ≤ 4 √(J ∑_{t < T} h t z t) + 2 √(2 H 2⁻ᴶ ∑_{t < T} z t) + 2 zmax / b 0`
   for every number of levels `J`, which gives the logarithmic (in `T`) bound of the
   self-bounding analysis.
+
+## Tags
+
+learning rate, stability-penalty matching, follow the regularized leader
 -/
 
 @[expose] public section

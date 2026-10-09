@@ -196,6 +196,55 @@ lemma det_smul_add_smul_outerSelf {A : Matrix ι ι ℝ} (hA : IsUnit A.det) {t 
     smul_eq_mul, div_eq_mul_inv]
   ring
 
+section RegGram
+
+open Finset
+open scoped MatrixOrder
+
+variable {lam : ℝ}
+
+/-- For `λ > 0`, the regularized Gram matrix has a positive determinant. -/
+lemma det_regGram_pos (hlam : 0 < lam) (x : ℕ → EuclideanSpace ℝ ι) (t : ℕ) :
+    0 < (regGram lam x t).det :=
+  (posDef_regGram hlam x t).det_pos
+
+/-- `det V_0 = det (λ I) = λ ^ d`. -/
+lemma det_regGram_zero (lam : ℝ) (x : ℕ → EuclideanSpace ℝ ι) :
+    (regGram lam x 0).det = lam ^ Fintype.card ι := by
+  simp
+
+/-- For `λ > 0`, `‖v‖²_{V_t⁻¹} ≥ 0`. -/
+lemma mahalanobisSq_inv_regGram_nonneg (hlam : 0 < lam) (x : ℕ → EuclideanSpace ℝ ι) (t : ℕ)
+    (v : EuclideanSpace ℝ ι) : 0 ≤ mahalanobisSq (regGram lam x t)⁻¹ v :=
+  (posDef_regGram hlam x t).inv.posSemidef.mahalanobisSq_nonneg v
+
+/-- **Matrix determinant lemma** for the regularized Gram matrix:
+`det V_{t+1} = det V_t (1 + ‖x_t‖²_{V_t⁻¹})`. -/
+lemma det_regGram_succ (hlam : 0 < lam) (x : ℕ → EuclideanSpace ℝ ι) (t : ℕ) :
+    (regGram lam x (t + 1)).det
+      = (regGram lam x t).det * (1 + mahalanobisSq (regGram lam x t)⁻¹ (x t)) := by
+  rw [regGram_succ, outerSelf, det_add_vecMulVec (det_regGram_pos hlam x t).ne'.isUnit,
+    mahalanobisSq_apply]
+
+/-- The trace of the regularized Gram matrix: `tr V_t = λ d + ∑_{s < t} ‖x_s‖²`. -/
+lemma trace_regGram (lam : ℝ) (x : ℕ → EuclideanSpace ℝ ι) (t : ℕ) :
+    (regGram lam x t).trace = lam * Fintype.card ι + ∑ s ∈ range t, ‖x s‖ ^ 2 := by
+  simp [regGram, gram, trace_sum, trace_outerSelf]
+
+/-- `‖v‖²_{V⁻¹} ≤ ‖v‖² / λ` for the regularized Gram matrix `V = λ I + ∑_{s < t} x_s x_sᵀ`,
+`λ > 0`. -/
+lemma mahalanobisSq_inv_regGram_le {lam : ℝ} (hlam : 0 < lam) (x : ℕ → EuclideanSpace ℝ ι)
+    (t : ℕ) (v : EuclideanSpace ℝ ι) :
+    mahalanobisSq (regGram lam x t)⁻¹ v ≤ lam⁻¹ * ‖v‖ ^ 2 := by
+  have hle : lam • (1 : Matrix ι ι ℝ) ≤ regGram lam x t :=
+    le_add_of_nonneg_right (nonneg_iff_posSemidef.2 (posSemidef_gram x t))
+  have h := PosDef.one.dotProduct_inv_mulVec_le_of_smul_le hlam hle (WithLp.ofLp v)
+  simp only [star_trivial, inv_one] at h
+  rw [mahalanobisSq_apply, ← mahalanobisSq_one v, mahalanobisSq_apply]
+  simpa using h
+
+end RegGram
+
 section designSet
 
 variable {ι : Type*} [Fintype ι] [DecidableEq ι]

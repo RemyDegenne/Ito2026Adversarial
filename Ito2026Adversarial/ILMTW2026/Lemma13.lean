@@ -20,7 +20,7 @@ The proof: the ridge state of a run is the ridge state of the features `a_s = ve
 of the rewards (`linState_eq_ridgeState`); the error of the ridge estimate is at most
 `‖S_t‖_{V_t⁻¹} + √λ ‖vec(A)‖` (`Bandits.Linear.sqrt_mahalanobisSq_sub_ridgeEstimate_le`), where
 `S_t` is the sum of the noises times the features; the self-normalized bound for the rewards of a
-repeated game (`probReal_forall_mahalanobisSq_inv_regGram_le_ge_of_isAlgEnvSeq`) bounds
+repeated game (`IsAlgEnvSeq.probReal_forall_mahalanobisSq_inv_regGram_le_ge`) bounds
 `‖S_t‖²_{V_t⁻¹}` by `2 log(1/δ) + log(det V_t / λ^d)`, the determinant bound
 (`Learning.log_det_regGram_le`, with `‖a_s‖ = ‖x_s‖ ‖y_s‖ ≤ 1`) bounds the last term by
 `d log(1 + t/(dλ))`, and `‖vec(A)‖² ≤ d_y ≤ d` since the columns of `A` have norm at most `1`.
@@ -138,7 +138,7 @@ theorem probReal_forall_sqrt_mahalanobisSq_le_ge {dx dy : ℕ}
         (vecMatrix A - Bandits.Linear.ridgeEstimate (linState φ ψ lam X Y Rw t ω))) ≤
       linRadius (dx * dy) lam δ t} := by
   have hcard : Fintype.card (Fin dx × Fin dy) = dx * dy := by simp
-  have hbound := probReal_forall_mahalanobisSq_inv_regGram_le_ge_of_isAlgEnvSeq h
+  have hbound := h.probReal_forall_mahalanobisSq_inv_regGram_le_ge
     (u := bilinearGame φ ψ A) (measurable_of_countable _) hR hR'
     (fun x y ↦ pairFeature (φ x) (ψ y)) (measurable_of_countable _) hlam hδ.1
   refine hbound.trans (measureReal_mono fun ω hω t ↦ ?_)

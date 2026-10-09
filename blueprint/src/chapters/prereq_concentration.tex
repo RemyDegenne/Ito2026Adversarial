@@ -3,7 +3,7 @@
 
 \begin{lemma}[Conditional law of the reward]
   \label{lem:reward_cond_law}
-  \lean{Learning.RepeatedGame.lintegral_preReward_reward}
+  \lean{Learning.IsAlgEnvSeq.lintegral_preReward_reward}
   \leanok
   \uses{def:repeated_game}
   In a run of a player against an adaptive opponent with reward kernel $R$, the reward $r_t$ has
@@ -22,7 +22,7 @@
 \begin{lemma}[Bounded noise is sub-Gaussian]
   \label{lem:bounded_noise_subgaussian}
   \lean{Learning.RepeatedGame.RewardKernel.hasSubgaussianMGF_sub,
-    Learning.RepeatedGame.isCondSubgaussianNoise_preRewardFiltration}
+    Learning.IsAlgEnvSeq.isCondSubgaussianNoise_preRewardFiltration}
   \leanok
   \uses{def:repeated_game, lem:reward_cond_law}
   If the reward has conditional mean $u(x_t, y_t)$ and values in $[-1, 1]$, the noise
@@ -106,7 +106,7 @@
   \label{lem:self_normalized}
   \lean{Learning.measure_exists_lt_mahalanobisSq_inv_regGram_le,
     Learning.probReal_forall_mahalanobisSq_inv_regGram_le_ge,
-    Learning.RepeatedGame.probReal_forall_mahalanobisSq_inv_regGram_le_ge_of_isAlgEnvSeq}
+    Learning.IsAlgEnvSeq.probReal_forall_mahalanobisSq_inv_regGram_le_ge}
   \leanok
   \uses{lem:mixture_supermartingale, lem:ville}
   Let $S_t = \sum_{s < t} \eps_s a_s$ with predictable $a_s \in \R^d$ and conditionally

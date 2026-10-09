@@ -9,7 +9,7 @@ public import Ito2026Adversarial.LeanMachineLearning.Game.Maximin
 public import Ito2026Adversarial.LeanMachineLearning.Game.RepeatedGame
 
 /-!
-# Relations between the regrets of a repeated game
+# Regrets of a repeated game
 
 For actions `x_t`, `y_t` of the two players of a repeated zero-sum game `u` (any processes, under
 any probability measure), relations between the pure-strategy maximin regret `PSMR_T`, the Nash
@@ -19,13 +19,21 @@ regret `NR_T` and the external regret `ER_T`.
 
 * `nashRegret_eq_psmr_add`: `NR_T = PSMR_T + Δ^mix T`;
 * `nashRegret_le_externalRegret`: `NR_T ≤ ER_T`;
-* `IsStrictPSNE.colGapMin_mul_le`: for a strict PSNE `(x*, y*)`, `ER_T(x*) - PSMR_T` is at least
-  `Δᶜ_min` times the expected number of rounds in which the adversary does not play `y*`;
-* `IsPSNE.integral_sum_rowGap_sub_le`: for a PSNE and utilities in `[-1, 1]`,
-  `E[∑_t Δʳ_{x_t}] - ER_T(x*)` is at most `4` times that number.
+* `IsPSNE.colGapMin_mul_le`: for a PSNE `(x*, y*)`, `ER_T(x*) - PSMR_T` is at least `Δᶜ_min`
+  times the expected number of rounds in which the adversary does not play `y*`;
+* `integral_sum_rowGap_sub_le`: for utilities in `[-1, 1]`, `E[∑_t Δʳ_{x_t}] - ER_T(x*)` is at
+  most `4` times that number;
+* `psmr_le_add_mul_measureReal_compl`: if the pathwise regret is at most `B` on a measurable event
+  `G` and at most `B + c` outside, then `PSMR_T ≤ B + c P(Gᶜ)` (the failure event of
+  high-probability bounds); `psmr_le_mul_of_pairGap_le`: `PSMR_T ≤ c T` if all the gaps are at
+  most `c`.
 
 The actions take values in spaces with measurable singletons (for an arbitrary σ-algebra on the
 action sets, `ω ↦ u (x_t ω) (y_t ω)` need not be measurable and the statements fail).
+
+## Tags
+
+repeated game, zero-sum game, regret, Nash equilibrium
 -/
 
 @[expose] public section
@@ -60,6 +68,8 @@ lemma integrable_comp_of_finite [Finite 𝒳] [Finite 𝒴] (f : 𝒳 → 𝒴 �
   exact integrable_comp_of_abs_le (fun x y ↦ hC ⟨(x, y), rfl⟩) hX hY
 
 end Integrable
+
+section Relations
 
 variable {𝒳 𝒴 Ω : Type*} [Fintype 𝒳] [Fintype 𝒴] [Nonempty 𝒳] [Nonempty 𝒴]
   [MeasurableSpace 𝒳] [MeasurableSpace 𝒴] {mΩ : MeasurableSpace Ω} {P : Measure Ω}
@@ -143,21 +153,11 @@ lemma IsPSNE.colGapMin_mul_le [Finite 𝒳] [Finite 𝒴] [MeasurableSingletonCl
     exact ciInf_le (Set.finite_range _).bddBelow (⟨Y t ω, hy⟩ : {y' // y' ≠ y₀})
 
 omit [Fintype 𝒳] [Fintype 𝒴] [Nonempty 𝒳] [Nonempty 𝒴] in
-/-- For a strict PSNE `(x₀, y₀)`, `ER_T(x₀) - PSMR_T ≥ Δᶜ_min E[#{t < T : y_t ≠ y₀}]`. -/
-lemma IsStrictPSNE.colGapMin_mul_le [Finite 𝒳] [Finite 𝒴] [MeasurableSingletonClass 𝒳]
-    [MeasurableSingletonClass 𝒴] {x₀ : 𝒳} {y₀ : 𝒴} (h : IsStrictPSNE u x₀ y₀)
-    (hX : ∀ t, Measurable (X t)) (hY : ∀ t, Measurable (Y t)) (T : ℕ) :
-    colGapMin u x₀ y₀ * P[fun ω ↦ ∑ t ∈ range T, if Y t ω = y₀ then (0 : ℝ) else 1] ≤
-      externalRegretAgainst u X Y P T x₀ - psmr u X Y P T :=
-  IsPSNE.colGapMin_mul_le h.isPSNE hX hY T
-
-omit [Fintype 𝒳] [Fintype 𝒴] [Nonempty 𝒳] [Nonempty 𝒴] in
 /-- For utilities in `[-1, 1]` and any `(x₀, y₀)`, `E[∑_t Δʳ_{x_t}] - ER_T(x₀) ≤
 4 E[#{t < T : y_t ≠ y₀}]`, where `Δʳ_x = u x₀ y₀ - u x y₀`. -/
 lemma integral_sum_rowGap_sub_le [Countable 𝒳] [Countable 𝒴] [MeasurableSingletonClass 𝒳]
-    [MeasurableSingletonClass 𝒴] {x₀ : 𝒳} {y₀ : 𝒴}
-    (hu : ∀ x y, u x y ∈ Set.Icc (-1) 1) (hX : ∀ t, Measurable (X t))
-    (hY : ∀ t, Measurable (Y t)) (T : ℕ) :
+    [MeasurableSingletonClass 𝒴] (x₀ : 𝒳) (y₀ : 𝒴) (hu : ∀ x y, u x y ∈ Set.Icc (-1) 1)
+    (hX : ∀ t, Measurable (X t)) (hY : ∀ t, Measurable (Y t)) (T : ℕ) :
     P[fun ω ↦ ∑ t ∈ range T, rowGap u x₀ y₀ (X t ω)] - externalRegretAgainst u X Y P T x₀ ≤
       4 * P[fun ω ↦ ∑ t ∈ range T, if Y t ω = y₀ then (0 : ℝ) else 1] := by
   have hu' : ∀ x y, |u x y| ≤ 1 := fun x y ↦ abs_le.2 (hu x y)
@@ -185,17 +185,53 @@ lemma integral_sum_rowGap_sub_le [Countable 𝒳] [Countable 𝒴] [MeasurableSi
   · simp [hy]
   · linarith [(hu x₀ y₀).2, (hu (X t ω) y₀).1, (hu x₀ (Y t ω)).1, (hu (X t ω) (Y t ω)).2]
 
-omit [Fintype 𝒳] [Fintype 𝒴] [Nonempty 𝒳] [Nonempty 𝒴] in
-/-- For a PSNE `(x₀, y₀)` and utilities in `[-1, 1]`,
-`E[∑_t Δʳ_{x_t}] - ER_T(x₀) ≤ 4 E[#{t < T : y_t ≠ y₀}]` (the equilibrium property is not needed,
-`integral_sum_rowGap_sub_le`). -/
-@[nolint unusedArguments]
-lemma IsPSNE.integral_sum_rowGap_sub_le [Finite 𝒳] [Finite 𝒴] [MeasurableSingletonClass 𝒳]
-    [MeasurableSingletonClass 𝒴] {x₀ : 𝒳} {y₀ : 𝒴} (_h : IsPSNE u x₀ y₀)
-    (hu : ∀ x y, u x y ∈ Set.Icc (-1) 1) (hX : ∀ t, Measurable (X t))
-    (hY : ∀ t, Measurable (Y t)) (T : ℕ) :
-    P[fun ω ↦ ∑ t ∈ range T, rowGap u x₀ y₀ (X t ω)] - externalRegretAgainst u X Y P T x₀ ≤
-      4 * P[fun ω ↦ ∑ t ∈ range T, if Y t ω = y₀ then (0 : ℝ) else 1] :=
-  Learning.RepeatedGame.integral_sum_rowGap_sub_le hu hX hY T
+end Relations
+
+/-! ### Bounds on the pure-strategy maximin regret -/
+
+section Bounds
+
+variable {𝒳 𝒴 Ω : Type*} [MeasurableSpace 𝒳] [MeasurableSpace 𝒴] [MeasurableSingletonClass 𝒳]
+  [MeasurableSingletonClass 𝒴] [Finite 𝒳] [Finite 𝒴] {mΩ : MeasurableSpace Ω} {P : Measure Ω}
+  [IsProbabilityMeasure P] {X : ℕ → Ω → 𝒳} {Y : ℕ → Ω → 𝒴}
+
+/-- The pathwise regret of a run is integrable. -/
+lemma integrable_sum_pureMaximin_sub (u : 𝒳 → 𝒴 → ℝ) (hX : ∀ n, Measurable (X n))
+    (hY : ∀ n, Measurable (Y n)) (T : ℕ) :
+    Integrable (fun ω ↦ ∑ t ∈ range T, (pureMaximin u - u (X t ω) (Y t ω))) P :=
+  integrable_finsetSum _ fun t _ ↦
+    (Integrable.of_finite (f := fun p : 𝒳 × 𝒴 ↦ pureMaximin u - u p.1 p.2)).comp_measurable
+      ((hX t).prodMk (hY t))
+
+/-- **The failure event of a high-probability regret bound.** If the pathwise regret is at most
+`B` on a measurable event `G` and at most `B + c` outside of it, then
+`PSMR_T ≤ B + c P(Gᶜ)`. -/
+lemma psmr_le_add_mul_measureReal_compl (u : 𝒳 → 𝒴 → ℝ) (hX : ∀ n, Measurable (X n))
+    (hY : ∀ n, Measurable (Y n)) {T : ℕ} {G : Set Ω} (hG : MeasurableSet G) {B c : ℝ}
+    (h : ∀ᵐ ω ∂P, ∑ t ∈ range T, (pureMaximin u - u (X t ω) (Y t ω))
+      ≤ B + Gᶜ.indicator (fun _ ↦ c) ω) :
+    psmr u X Y P T ≤ B + c * P.real Gᶜ := by
+  unfold psmr
+  calc ∫ ω, ∑ t ∈ range T, (pureMaximin u - u (X t ω) (Y t ω)) ∂P
+      ≤ ∫ ω, (B + Gᶜ.indicator (fun _ ↦ c) ω) ∂P :=
+        integral_mono_ae (integrable_sum_pureMaximin_sub u hX hY T)
+          ((integrable_const B).add ((integrable_const c).indicator hG.compl)) h
+    _ = B + c * P.real Gᶜ := by
+        rw [integral_add (integrable_const B) ((integrable_const c).indicator hG.compl),
+          integral_const, integral_indicator_const _ hG.compl]
+        simp [mul_comm]
+
+/-- If all the gaps are at most `c`, then `PSMR_T ≤ c T`. -/
+lemma psmr_le_mul_of_pairGap_le (u : 𝒳 → 𝒴 → ℝ) (hX : ∀ n, Measurable (X n))
+    (hY : ∀ n, Measurable (Y n)) {c : ℝ} (hc : ∀ x y, pairGap u x y ≤ c) (T : ℕ) :
+    psmr u X Y P T ≤ c * T := by
+  have h := psmr_le_add_mul_measureReal_compl (P := P) u hX hY (T := T) MeasurableSet.univ
+    (B := c * T) (c := 0) (ae_of_all _ fun ω ↦ ?_)
+  · simpa using h
+  calc ∑ t ∈ range T, (pureMaximin u - u (X t ω) (Y t ω)) ≤ ∑ t ∈ range T, c :=
+        sum_le_sum fun t _ ↦ hc _ _
+    _ ≤ c * T + Set.univᶜ.indicator (fun _ ↦ (0 : ℝ)) ω := by simp [mul_comm]
+
+end Bounds
 
 end Learning.RepeatedGame

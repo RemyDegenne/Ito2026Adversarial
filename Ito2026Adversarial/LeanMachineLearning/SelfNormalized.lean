@@ -7,7 +7,7 @@ module
 
 public import Ito2026Adversarial.LeanMachineLearning.DesignMatrix
 public import Ito2026Adversarial.Mathlib.Analysis.SpecialFunctions.Gaussian.QuadraticForm
-public import Ito2026Adversarial.Mathlib.Probability.Martingale.VilleLintegral
+public import Ito2026Adversarial.Mathlib.Probability.Martingale.Ville
 public import Mathlib.Analysis.Matrix.MeasurableSpace
 public import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
 
@@ -45,6 +45,10 @@ questions.
   upper bound on the probability of the bad event;
 * `Learning.probReal_forall_mahalanobisSq_inv_regGram_le_ge`: the same, as a lower bound on the
   probability of the good event.
+
+## Tags
+
+self-normalized bound, method of mixtures, martingale, linear bandit
 -/
 
 @[expose] public section

@@ -8,7 +8,7 @@ module
 public import Ito2026Adversarial.LeanMachineLearning.Online.Bandit.Linear.Ridge
 
 /-!
-# The error of the ridge regression estimate
+# Confidence ellipsoids of ridge regression and optimism
 
 For features `x_s`, a parameter `θ` and rewards `y_s = ⟪x_s, θ⟫ + η_s`, the ridge regression
 estimate `θ̂_t = V_t⁻¹ b_t` (`ridgeEstimate (ridgeState λ x y t)`) satisfies
@@ -20,7 +20,17 @@ ellipsoids of linear bandit algorithms.
 ## Main statements
 
 * `Bandits.Linear.sqrt_mahalanobisSq_sub_ridgeEstimate_le`: the deterministic bound
-  `‖θ - θ̂_t‖_{V_t} ≤ ‖∑_{s < t} (y_s - ⟪x_s, θ⟫) x_s‖_{V_t⁻¹} + √λ ‖θ‖`.
+  `‖θ - θ̂_t‖_{V_t} ≤ ‖∑_{s < t} (y_s - ⟪x_s, θ⟫) x_s‖_{V_t⁻¹} + √λ ‖θ‖`;
+* `Bandits.Linear.abs_inner_sub_inner_ridgeEstimate_le`: on the confidence ellipsoid
+  `‖θ - θ̂‖_V ≤ β`, `|⟪v, θ⟫ - ⟪v, θ̂⟫| ≤ β ‖v‖_{V⁻¹}` (Cauchy–Schwarz for the inner product
+  of `V`);
+* `Bandits.Linear.inner_le_ucbIndex`, `Bandits.Linear.ucbIndex_le_inner_add`: the optimistic index
+  `ucbIndex β' s v = ⟪v, θ̂⟫ + β' ‖v‖_{V⁻¹}` of any radius `β' ≥ β` satisfies
+  `⟪v, θ⟫ ≤ ucbIndex β' s v ≤ ⟪v, θ⟫ + 2 β' ‖v‖_{V⁻¹}`.
+
+## Tags
+
+linear bandit, ridge regression, confidence ellipsoid, LinUCB, optimism
 -/
 
 @[expose] public section
@@ -31,18 +41,6 @@ open scoped RealInnerProductSpace MatrixOrder
 namespace Bandits.Linear
 
 variable {ι : Type*} [Fintype ι] [DecidableEq ι]
-
-/-- `‖v‖²_{V⁻¹} ≤ ‖v‖² / λ` for the regularized Gram matrix `V = λ I + ∑_{s < t} x_s x_sᵀ`,
-`λ > 0`. -/
-lemma mahalanobisSq_inv_regGram_le {lam : ℝ} (hlam : 0 < lam) (x : ℕ → EuclideanSpace ℝ ι)
-    (t : ℕ) (v : EuclideanSpace ℝ ι) :
-    mahalanobisSq (regGram lam x t)⁻¹ v ≤ lam⁻¹ * ‖v‖ ^ 2 := by
-  have hle : lam • (1 : Matrix ι ι ℝ) ≤ regGram lam x t :=
-    le_add_of_nonneg_right (nonneg_iff_posSemidef.2 (posSemidef_gram x t))
-  have h := PosDef.one.dotProduct_inv_mulVec_le_of_smul_le hlam hle (WithLp.ofLp v)
-  simp only [star_trivial, inv_one] at h
-  rw [mahalanobisSq_apply, ← mahalanobisSq_one v, mahalanobisSq_apply]
-  simpa using h
 
 /-- **The error of the ridge regression estimate** (Abbasi-Yadkori, Pál, Szepesvári 2011, proof of
 Theorem 2). For `λ > 0`, features `x_s`, rewards `y_s` and any parameter `θ`, with
@@ -99,5 +97,50 @@ lemma sqrt_mahalanobisSq_sub_ridgeEstimate_le {lam : ℝ} (hlam : 0 < lam)
   calc ‖lam • N θ - N S‖ ≤ ‖lam • N θ‖ + ‖N S‖ := norm_sub_le _ _
     _ = lam * ‖N θ‖ + ‖N S‖ := by rw [norm_smul, Real.norm_of_nonneg hlam.le]
     _ ≤ ‖N S‖ + √lam * ‖θ‖ := by linarith
+
+/-! ### Optimism of the linear UCB index -/
+
+section Optimism
+
+open Real
+
+variable {s : RidgeState ι} {θ : EuclideanSpace ℝ ι}
+  {β β' : ℝ}
+
+/-- On the confidence ellipsoid `‖θ - θ̂‖_V ≤ β`, `|⟪v, θ⟫ - ⟪v, θ̂⟫| ≤ β ‖v‖_{V⁻¹}` for every `v`
+(Cauchy–Schwarz for the inner product of `V`). -/
+lemma abs_inner_sub_inner_ridgeEstimate_le (hV : s.1.PosDef)
+    (hθ : √(mahalanobisSq s.1 (θ - ridgeEstimate s)) ≤ β) (v : EuclideanSpace ℝ ι) :
+    |⟪v, θ⟫ - ⟪v, ridgeEstimate s⟫| ≤ β * √(mahalanobisSq s.1⁻¹ v) := by
+  rw [← inner_sub_right]
+  have h := hV.inner_sq_le_mahalanobisSq_inv_mul v (θ - ridgeEstimate s)
+  refine (abs_le_sqrt h).trans ?_
+  rw [sqrt_mul (hV.inv.posSemidef.mahalanobisSq_nonneg v), mul_comm]
+  exact mul_le_mul_of_nonneg_right hθ (sqrt_nonneg _)
+
+/-- **Optimism of the linear UCB index.** On the confidence ellipsoid `‖θ - θ̂‖_V ≤ β`, the
+optimistic index of any radius `β' ≥ β` is an upper bound of `⟪v, θ⟫`. -/
+lemma inner_le_ucbIndex (hV : s.1.PosDef) (hθ : √(mahalanobisSq s.1 (θ - ridgeEstimate s)) ≤ β)
+    (hβ : β ≤ β') (v : EuclideanSpace ℝ ι) :
+    ⟪v, θ⟫ ≤ ucbIndex β' s v := by
+  have h := (abs_le.1 (abs_inner_sub_inner_ridgeEstimate_le hV hθ v)).2
+  have h' : β * √(mahalanobisSq s.1⁻¹ v) ≤ β' * √(mahalanobisSq s.1⁻¹ v) :=
+    mul_le_mul_of_nonneg_right hβ (sqrt_nonneg _)
+  rw [ucbIndex]
+  linarith
+
+/-- On the confidence ellipsoid `‖θ - θ̂‖_V ≤ β`, the optimistic index of a radius `β' ≥ β`
+exceeds `⟪v, θ⟫` by at most `2 β' ‖v‖_{V⁻¹}`. -/
+lemma ucbIndex_le_inner_add (hV : s.1.PosDef)
+    (hθ : √(mahalanobisSq s.1 (θ - ridgeEstimate s)) ≤ β) (hβ : β ≤ β')
+    (v : EuclideanSpace ℝ ι) :
+    ucbIndex β' s v ≤ ⟪v, θ⟫ + 2 * β' * √(mahalanobisSq s.1⁻¹ v) := by
+  have h := (abs_le.1 (abs_inner_sub_inner_ridgeEstimate_le hV hθ v)).1
+  have h' : β * √(mahalanobisSq s.1⁻¹ v) ≤ β' * √(mahalanobisSq s.1⁻¹ v) :=
+    mul_le_mul_of_nonneg_right hβ (sqrt_nonneg _)
+  rw [ucbIndex]
+  linarith
+
+end Optimism
 
 end Bandits.Linear

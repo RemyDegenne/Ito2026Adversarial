@@ -510,8 +510,8 @@ lemma psmr_tsallisSPMPaper_le_of_isStrictPSNE (hdm : dx ≤ mx) {x₀ : Fin mx}
     ciInf_le (Set.finite_range _).bddBelow (⟨x, hx⟩ : {x' // x' ≠ x₀})
   have hself := externalRegretAgainst_tsallisSPMPaper_le_self hc hd hm hV hu hu1 hRu hR h T
     hΔmin hΔ0 hΔ
-  have h6 := IsPSNE.integral_sum_rowGap_sub_le (P := P) hxy.isPSNE hu1 hX hY T
-  have hcol := IsStrictPSNE.colGapMin_mul_le (P := P) hxy hX hY T
+  have h6 := integral_sum_rowGap_sub_le (P := P) x₀ y₀ hu1 hX hY T
+  have hcol := IsPSNE.colGapMin_mul_le (P := P) hxy.isPSNE hX hY T
   have hK := spm_const_le hc hd hdm hm
   have hCy0 : 0 ≤ P[fun ω ↦ ∑ t ∈ range T, if Y t ω = y₀ then (0 : ℝ) else 1] :=
     integral_nonneg fun ω ↦ sum_nonneg fun t _ ↦ by split_ifs <;> norm_num

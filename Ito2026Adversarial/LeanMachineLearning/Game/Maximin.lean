@@ -6,6 +6,7 @@ Authors: Rémy Degenne
 module
 
 public import Ito2026Adversarial.LeanMachineLearning.Game.ZeroSum
+public import LeanMachineLearning.ForMathlib.MeasureTheory.Order.MeasurableArg
 
 /-!
 # Maximin mixed strategies and the value of `2 × 2` games
@@ -27,6 +28,10 @@ classical closed form of the value.
   cyclically ordered;
 * `nashValue_eq_of_not_hasPSNE`: the value `(a d - b c) / (a - b - c + d)` of a `2 × 2` game
   without PSNE.
+
+## Tags
+
+zero-sum game, maximin, minimax, Nash equilibrium, value of a game
 -/
 
 @[expose] public section
@@ -34,6 +39,46 @@ classical closed form of the value.
 open Finset
 
 namespace Learning.ZeroSumGame
+
+section PureMaximin
+
+variable {𝒳 𝒴 : Type*} [Nonempty 𝒳] [Nonempty 𝒴] {u : 𝒳 → 𝒴 → ℝ}
+
+omit [Nonempty 𝒴] in
+/-- The pure maximin value is attained: there is `x` with `min_y u x y = v*`. -/
+lemma exists_iInf_eq_pureMaximin [Finite 𝒳] (u : 𝒳 → 𝒴 → ℝ) :
+    ∃ x, ⨅ y, u x y = pureMaximin u :=
+  exists_eq_ciSup_of_finite
+
+/-- **Optimism of the pure maximin action of upper bounds.** If `u ≤ U` and `x₀` maximizes
+`x ↦ min_y U(x, y)`, then `v* ≤ min_y U(x₀, y) ≤ U(x₀, y)` for every `y`. -/
+lemma pureMaximin_le_of_le [Finite 𝒳] [Fintype 𝒴] {U : 𝒳 → 𝒴 → ℝ} (hU : ∀ x y, u x y ≤ U x y)
+    {x₀ : 𝒳} (hx₀ : ∀ x, (fun y ↦ U x y).min ≤ (fun y ↦ U x₀ y).min) (y : 𝒴) :
+    pureMaximin u ≤ U x₀ y := by
+  obtain ⟨x, hx⟩ := exists_iInf_eq_pureMaximin u
+  rw [← hx]
+  refine le_trans ?_ ((hx₀ x).trans (Function.min_le _ y))
+  exact le_inf' _ _ fun y' _ ↦ (ciInf_le (Set.finite_range _).bddBelow y').trans (hU x y')
+
+/-- The pure maximin value is at most an upper bound of the utility. -/
+lemma pureMaximin_le_of_forall_le [Finite 𝒴] {b : ℝ} (h : ∀ x y, u x y ≤ b) : pureMaximin u ≤ b :=
+  ciSup_le fun _ ↦ (ciInf_le (Set.finite_range _).bddBelow (Classical.arbitrary 𝒴)).trans (h _ _)
+
+/-- The pure maximin value is at least a lower bound of the utility. -/
+lemma le_pureMaximin_of_forall_le [Finite 𝒳] {a : ℝ} (h : ∀ x y, a ≤ u x y) :
+    a ≤ pureMaximin u :=
+  (le_ciInf fun y ↦ h (Classical.arbitrary 𝒳) y).trans
+    (le_ciSup (f := fun x ↦ ⨅ y, u x y) (Set.finite_range _).bddAbove _)
+
+/-- If the utility takes values in `[-1, 1]`, the gaps `Δ_{xy} = v* - u x y` are at most `2`. -/
+lemma pairGap_le_two [Finite 𝒴] (hu : ∀ x y, u x y ∈ Set.Icc (-1) 1) (x : 𝒳)
+    (y : 𝒴) : pairGap u x y ≤ 2 := by
+  have h1 := pureMaximin_le_of_forall_le (u := u) (b := 1) fun x y ↦ (hu x y).2
+  have h2 := (hu x y).1
+  unfold pairGap
+  linarith
+
+end PureMaximin
 
 section Maximin
 

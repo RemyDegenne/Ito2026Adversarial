@@ -26,6 +26,9 @@ event), `c ℙ(∃ k < N, Z k ≥ c) + ∫⁻_{B N} Z N ≤ 𝔼[Z 0]` by induct
 
 * `MeasureTheory.mul_measure_exists_le_le_lintegral`: `c ℙ(∃ n, c ≤ Z n) ≤ ∫⁻ Z 0`;
 * `MeasureTheory.measure_exists_le_le_lintegral_div`: `ℙ(∃ n, c ≤ Z n) ≤ (∫⁻ Z 0) / c`.
+## Tags
+
+Ville's inequality, supermartingale, maximal inequality
 -/
 
 @[expose] public section

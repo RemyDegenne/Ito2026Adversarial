@@ -7,6 +7,7 @@ module
 
 public import Ito2026Adversarial.LeanMachineLearning.DesignMatrix
 public import Ito2026Adversarial.Mathlib.Analysis.Matrix.LogDet
+public import Ito2026Adversarial.Mathlib.Analysis.SpecialFunctions.Log.OneAdd
 
 /-!
 # The elliptical potential lemma
@@ -19,14 +20,19 @@ other optimistic linear bandit algorithms.
 
 ## Main statements
 
-* `Learning.det_regGram_succ`: the matrix determinant lemma
-  `det V_{t+1} = det V_t (1 + ‖x_t‖²_{V_t⁻¹})`;
 * `Learning.log_det_regGram_le`: if `‖x_s‖ ≤ L`, then `log det V_t ≤ d log(λ + L² t / d)`
   (AM–GM inequality for the eigenvalues);
 * `Learning.sum_min_one_mahalanobisSq_inv_regGram_le`: **the elliptical potential lemma**
   `∑_{t < T} min(1, ‖x_t‖²_{V_t⁻¹}) ≤ 2 log(det V_T / det V_0)`;
 * `Learning.sum_min_one_mahalanobisSq_inv_regGram_le_card_mul_log`: with `‖x_t‖ ≤ L`, the sum is
   at most `2 d log(1 + L² T / (d λ))`.
+
+The proof rests on the matrix determinant lemma `Learning.det_regGram_succ`,
+`det V_{t+1} = det V_t (1 + ‖x_t‖²_{V_t⁻¹})`.
+
+## Tags
+
+elliptical potential, linear bandit, LinUCB, regularized Gram matrix
 -/
 
 @[expose] public section
@@ -35,49 +41,7 @@ open Matrix Finset Real
 
 namespace Learning
 
-/-- `min(1, w) ≤ 2 log(1 + w)` for `w ≥ 0`: both `min(1, w) ≤ 2 w / (1 + w)` and
-`w / (1 + w) = 1 - 1 / (1 + w) ≤ log(1 + w)`. -/
-lemma min_one_le_two_mul_log_one_add {w : ℝ} (hw : 0 ≤ w) : min 1 w ≤ 2 * log (1 + w) := by
-  have h1 : 0 < 1 + w := by linarith
-  have h2 : 1 - (1 + w)⁻¹ ≤ log (1 + w) := one_sub_inv_le_log_of_pos h1
-  have h3 : min 1 w ≤ 2 * (1 - (1 + w)⁻¹) := by
-    rw [show 1 - (1 + w)⁻¹ = w / (1 + w) by field_simp; ring]
-    rcases le_total w 1 with h | h
-    · rw [min_eq_right h, mul_div_assoc', le_div_iff₀ h1]
-      nlinarith
-    · rw [min_eq_left h, mul_div_assoc', le_div_iff₀ h1]
-      linarith
-  linarith
-
 variable {ι : Type*} [Fintype ι] [DecidableEq ι] {lam : ℝ}
-
-/-- For `λ > 0`, the regularized Gram matrix has a positive determinant. -/
-lemma det_regGram_pos (hlam : 0 < lam) (x : ℕ → EuclideanSpace ℝ ι) (t : ℕ) :
-    0 < (regGram lam x t).det :=
-  (posDef_regGram hlam x t).det_pos
-
-/-- `det V_0 = det (λ I) = λ ^ d`. -/
-lemma det_regGram_zero (lam : ℝ) (x : ℕ → EuclideanSpace ℝ ι) :
-    (regGram lam x 0).det = lam ^ Fintype.card ι := by
-  simp
-
-/-- For `λ > 0`, `‖v‖²_{V_t⁻¹} ≥ 0`. -/
-lemma mahalanobisSq_inv_regGram_nonneg (hlam : 0 < lam) (x : ℕ → EuclideanSpace ℝ ι) (t : ℕ)
-    (v : EuclideanSpace ℝ ι) : 0 ≤ mahalanobisSq (regGram lam x t)⁻¹ v :=
-  (posDef_regGram hlam x t).inv.posSemidef.mahalanobisSq_nonneg v
-
-/-- **Matrix determinant lemma** for the regularized Gram matrix:
-`det V_{t+1} = det V_t (1 + ‖x_t‖²_{V_t⁻¹})`. -/
-lemma det_regGram_succ (hlam : 0 < lam) (x : ℕ → EuclideanSpace ℝ ι) (t : ℕ) :
-    (regGram lam x (t + 1)).det
-      = (regGram lam x t).det * (1 + mahalanobisSq (regGram lam x t)⁻¹ (x t)) := by
-  rw [regGram_succ, outerSelf, det_add_vecMulVec (det_regGram_pos hlam x t).ne'.isUnit,
-    mahalanobisSq_apply]
-
-/-- The trace of the regularized Gram matrix: `tr V_t = λ d + ∑_{s < t} ‖x_s‖²`. -/
-lemma trace_regGram (lam : ℝ) (x : ℕ → EuclideanSpace ℝ ι) (t : ℕ) :
-    (regGram lam x t).trace = lam * Fintype.card ι + ∑ s ∈ range t, ‖x s‖ ^ 2 := by
-  simp [regGram, gram, trace_sum, trace_outerSelf]
 
 /-- **Determinant bound.** If `‖x_s‖ ≤ L` for `s < t`, then `log det V_t ≤ d log(λ + L² t / d)`,
 where `d` is the dimension. -/
@@ -114,7 +78,7 @@ lemma sum_min_one_mahalanobisSq_inv_regGram_le (hlam : 0 < lam) (x : ℕ → Euc
     have hw := mahalanobisSq_inv_regGram_nonneg hlam x T (x T)
     rw [sum_range_succ, det_regGram_succ hlam,
       log_mul (det_regGram_pos hlam x T).ne' (by linarith)]
-    linarith [min_one_le_two_mul_log_one_add hw]
+    linarith [Real.min_one_le_two_mul_log_one_add hw]
 
 /-- **Elliptical potential lemma**, explicit form: if `λ > 0` and `‖x_t‖ ≤ L` for `t < T`, then
 `∑_{t < T} min(1, ‖x_t‖²_{V_t⁻¹}) ≤ 2 d log(1 + L² T / (d λ))`. -/

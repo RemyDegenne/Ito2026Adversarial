@@ -6,7 +6,7 @@ Authors: Rémy Degenne
 module
 
 public import Ito2026Adversarial.ILMTW2026.TsallisSPMPath
-public import Ito2026Adversarial.LeanMachineLearning.Game.UninformedRunIntegral
+public import Ito2026Adversarial.LeanMachineLearning.Game.Run
 public import Ito2026Adversarial.ILMTW2026.TsallisINFRegret
 
 /-!
@@ -519,7 +519,7 @@ lemma externalRegretAgainst_tsallisSPM_le (T : ℕ) (x : Fin mx) :
             (hβ₁.trans_le (hβst ω t)).le
       _ ≤ _ := div_le_div_of_nonneg_left (by positivity) hβ₁ (hβst ω t)
   have hzbi (t : ℕ) : Integrable (fun ω ↦ zb ω t) P :=
-    integrable_of_ae_abs_le (hzbm t).aestronglyMeasurable (M := Fintype.card ιx / (1 - α) / β₁)
+    Integrable.of_ae_abs_le (hzbm t).aestronglyMeasurable (M := Fintype.card ιx / (1 - α) / β₁)
       (ae_of_all _ fun ω ↦ by rw [abs_of_nonneg (hzb0 ω t)]; exact hzbb ω t)
   have hRall := h.ae_forall_gameReward_mem measurableSet_Icc hR
   have hgb : ∀ᵐ ω ∂P, ∀ t i, |g ω t i| ≤ spmBound α β₁ βbar mx (t + 1) := by
@@ -530,7 +530,7 @@ lemma externalRegretAgainst_tsallisSPM_le (T : ℕ) (x : Fin mx) :
     rw [Fintype.card_fin] at hB
     exact (abs_spmEstimate_le φ hP hV (hβst ω t) h𝒳' (hr t) i).trans hB
   have hDi (t : ℕ) : Integrable (fun ω ↦ D ω t) P := by
-    refine integrable_of_ae_abs_le (hDm t).aestronglyMeasurable
+    refine Integrable.of_ae_abs_le (hDm t).aestronglyMeasurable
       (M := mx * spmBound α β₁ βbar mx (t + 1)) ?_
     filter_upwards [hgb] with ω hω
     simp only [hD, PiLp.inner_apply]
@@ -545,7 +545,7 @@ lemma externalRegretAgainst_tsallisSPM_le (T : ℕ) (x : Fin mx) :
             _ = _ := mul_one _
       _ = _ := by simp
   have hVi (t : ℕ) : Integrable (fun ω ↦ Vs ω t) P := by
-    refine integrable_of_ae_abs_le (hVm t).aestronglyMeasurable
+    refine Integrable.of_ae_abs_le (hVm t).aestronglyMeasurable
       (M := 4 / ((1 - α) * β₁) * spmBound α β₁ βbar mx (t + 1) ^ 2) ?_
     filter_upwards [hgb] with ω hω
     have hβ0 : 0 < (st ω t).2 := hβ₁.trans_le (hβst ω t)
@@ -578,17 +578,17 @@ lemma externalRegretAgainst_tsallisSPM_le (T : ℕ) (x : Fin mx) :
       ≤ ∫ ω, D ω t ∂P + 8 * c * ∫ ω, zb ω t ∂P := by
     have hu1' : ∀ x y, |u x y| ≤ 1 := fun x y ↦ abs_le.2 ⟨(hu1 x y).1, (hu1 x y).2⟩
     have hint1 : Integrable (fun ω ↦ u x (Y t ω)) P :=
-      integrable_of_ae_abs_le ((measurable_of_countable (u x)).comp (hY t)).aestronglyMeasurable
+      Integrable.of_ae_abs_le ((measurable_of_countable (u x)).comp (hY t)).aestronglyMeasurable
         (M := 1) (ae_of_all _ fun ω ↦ hu1' _ _)
     have hint2 : Integrable (fun ω ↦ u (X t ω) (Y t ω)) P :=
-      integrable_of_ae_abs_le ((measurable_of_countable (Function.uncurry u)).comp
+      Integrable.of_ae_abs_le ((measurable_of_countable (Function.uncurry u)).comp
         ((hX t).prodMk (hY t))).aestronglyMeasurable (M := 1) (ae_of_all _ fun ω ↦ hu1' _ _)
     have hpdm : Measurable fun ω ↦ (spmDist α βbar (Fintype.card ιx) p₀ c (st ω t) :
         EuclideanSpace ℝ (Fin mx)) :=
       measurable_subtype_coe.comp ((measurable_spmDist α βbar _ p₀ c).comp (hstm t))
     have hint3 : Integrable (fun ω ↦ ∑ x', (spmDist α βbar (Fintype.card ιx) p₀ c (st ω t) :
         EuclideanSpace ℝ (Fin mx)) x' * u x' (Y t ω)) P := by
-      refine integrable_of_ae_abs_le ?_ (M := 1) (ae_of_all _ fun ω ↦ ?_)
+      refine Integrable.of_ae_abs_le ?_ (M := 1) (ae_of_all _ fun ω ↦ ?_)
       · exact (Finset.measurable_sum _ fun x' _ ↦ ((PiLp.continuous_apply 2 _ x').measurable.comp
           hpdm).mul ((measurable_of_countable (u x')).comp (hY t))).aestronglyMeasurable
       · calc |∑ x', (spmDist α βbar (Fintype.card ιx) p₀ c (st ω t) :
@@ -607,7 +607,7 @@ lemma externalRegretAgainst_tsallisSPM_le (T : ℕ) (x : Fin mx) :
       Finset.measurable_sum _ fun i _ ↦ ((PiLp.continuous_apply 2 _ i).measurable.comp
         (hphm t)).mul ((measurable_of_countable (u i)).comp (hY t))
     have hint4 : Integrable (fun ω ↦ u x (Y t ω) - ∑ i, ph ω t i * u i (Y t ω)) P := by
-      refine integrable_of_ae_abs_le ((((measurable_of_countable (u x)).comp (hY t)).sub
+      refine Integrable.of_ae_abs_le ((((measurable_of_countable (u x)).comp (hY t)).sub
         hphm').aestronglyMeasurable) (M := 2) (ae_of_all _ fun ω ↦ ?_)
       have : |∑ i, ph ω t i * u i (Y t ω)| ≤ 1 := by
         refine (abs_sum_le_sum_abs _ _).trans ?_
@@ -701,7 +701,7 @@ lemma externalRegretAgainst_tsallisSPM_le (T : ℕ) (x : Fin mx) :
     rw [externalRegretAgainst, integral_finsetSum]
     intro t _
     have hu1' : ∀ x y, |u x y| ≤ 1 := fun x y ↦ abs_le.2 ⟨(hu1 x y).1, (hu1 x y).2⟩
-    exact integrable_of_ae_abs_le ((((measurable_of_countable (u x)).comp (hY t)).sub
+    exact Integrable.of_ae_abs_le ((((measurable_of_countable (u x)).comp (hY t)).sub
       ((measurable_of_countable (Function.uncurry u)).comp ((hX t).prodMk (hY t))))
         |>.aestronglyMeasurable) (M := 2) (ae_of_all _ fun ω ↦ by
           have := hu1' x (Y t ω)
@@ -815,7 +815,7 @@ lemma externalRegretAgainst_tsallisSPM_le_self (T J : ℕ) {x₀ : Fin mx} {Δ :
         (measurable_spmState_run (my := my) φ α β₁ βbar p₀ c hX hY hRw t)))).mul
       measurable_const
   have hSi : Integrable S P :=
-    integrable_of_ae_abs_le hSm.aestronglyMeasurable (M := T * M)
+    Integrable.of_ae_abs_le hSm.aestronglyMeasurable (M := T * M)
       (ae_of_all _ fun ω ↦ by rw [abs_of_nonneg (hS0 ω)]; exact hSb ω)
   -- `E[S] = E[∑_t Δ x_t]`
   have hES : ∫ ω, S ω ∂P = ∫ ω, ∑ t ∈ range T, Δ (X t ω) ∂P := by
@@ -825,9 +825,9 @@ lemma externalRegretAgainst_tsallisSPM_le_self (T J : ℕ) {x₀ : Fin mx} {Δ :
     rw [integral_finsetSum _ fun t _ ↦ ?_, integral_finsetSum _ fun t _ ↦ ?_]
     · refine sum_congr rfl fun t _ ↦ ?_
       rw [integral_comp_action_tsallisSPM h t (fun x _ ↦ Δ x) hΔb]
-    · exact integrable_of_ae_abs_le ((measurable_of_countable Δ).comp (hX t)).aestronglyMeasurable
+    · exact Integrable.of_ae_abs_le ((measurable_of_countable Δ).comp (hX t)).aestronglyMeasurable
         (M := M) (ae_of_all _ fun ω ↦ hΔb _ (Y t ω))
-    · refine integrable_of_ae_abs_le (Finset.measurable_sum _ fun x _ ↦
+    · refine Integrable.of_ae_abs_le (Finset.measurable_sum _ fun x _ ↦
         ((PiLp.continuous_apply 2 _ x).measurable.comp (measurable_subtype_coe.comp
           ((measurable_spmDist α βbar _ p₀ c).comp
             (measurable_spmState_run (my := my) φ α β₁ βbar p₀ c hX hY hRw t)))).mul
@@ -858,7 +858,7 @@ lemma externalRegretAgainst_tsallisSPM_le_self (T J : ℕ) {x₀ : Fin mx} {Δ :
     rw [mul_assoc]
     exact mul_le_mul_of_nonneg_left h2 (Nat.cast_nonneg J)
   have hsqi : Integrable (fun ω ↦ √(J * W * S ω)) P :=
-    integrable_of_ae_abs_le (measurable_const.mul hSm).sqrt.aestronglyMeasurable
+    Integrable.of_ae_abs_le (measurable_const.mul hSm).sqrt.aestronglyMeasurable
       (M := √(J * W * (T * M))) (ae_of_all _ fun ω ↦ by
         rw [abs_of_nonneg (Real.sqrt_nonneg _)]
         exact Real.sqrt_le_sqrt (mul_le_mul_of_nonneg_left (hSb ω) (by positivity)))

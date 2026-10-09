@@ -7,8 +7,8 @@ module
 
 public import Ito2026Adversarial.ILMTW2026.Setting
 public import Ito2026Adversarial.LeanMachineLearning.Online.Bandit.TsallisHalf
-public import Ito2026Adversarial.LeanMachineLearning.Game.UninformedRun
-public import Ito2026Adversarial.LeanMachineLearning.Game.RegretRelations
+public import Ito2026Adversarial.LeanMachineLearning.Game.Run
+public import Ito2026Adversarial.LeanMachineLearning.Game.Regret
 public import Ito2026Adversarial.ILMTW2026.Lemma7
 public import Ito2026Adversarial.ILMTW2026.Lemma8
 public import Mathlib.Analysis.Convex.Integral
@@ -162,7 +162,7 @@ lemma inv_halfRate_sub_mul_le (t : ℕ) {p : EuclideanSpace ℝ (Fin m)} (hp : p
   have hb2 : b ^ 2 = a ^ 2 + 1 := by
     rw [ha, hb, Real.sq_sqrt (by positivity), Real.sq_sqrt (by positivity)]
   have hb0 : 0 < b := ha0.trans_le hab
-  have hφ0 := tsallisEntropy_half_nonneg hp
+  have hφ0 := tsallisEntropy_nonneg (a := 1 / 2) (by norm_num) (by norm_num) hp
   have hφ := tsallisEntropy_half_le_sum_erase hp x
   have hc0 : 0 ≤ 2 * b - 2 * a := by linarith
   have hc : 2 * b - 2 * a ≤ 2 / b := by
@@ -191,11 +191,11 @@ lemma sum_inner_halfEstimate_le (r : ℕ → Round Unit (Fin m) ℝ)
         ≤ ⟪(halfDist r t : EuclideanSpace ℝ (Fin m)), ∑ s ∈ range t, halfEstimate r s⟫
           + (halfRate t)⁻¹ * tsallisEntropy (1 / 2) (halfDist r t : EuclideanSpace ℝ (Fin m)) := by
     rw [halfDist_eq_ftrlSimplex]
-    exact isMaxOn_ftrlSimplex_tsallisEntropy_half (halfRate_pos t) _ q hq
+    exact isMaxOn_ftrlSimplex_tsallisEntropy_half (halfRate_pos t) _ hq
   have h := sum_inner_sub_le_ftrl_smul (halfEstimate r)
     (fun t ↦ (halfDist r t : EuclideanSpace ℝ (Fin m))) (tsallisEntropy (1 / 2)) halfRate
     (fun t ↦ (halfDist r t).2) hmax (single_mem_simplex x) n
-  rw [tsallisEntropy_half_single] at h
+  rw [tsallisEntropy_single (by norm_num)] at h
   simp only [sub_zero] at h
   rw [sum_add_distrib]
   refine h.trans (add_le_add ?_ (sum_le_sum fun t _ ↦ stability_halfEstimate_le r t (hr t)))
@@ -863,7 +863,7 @@ lemma externalRegretAgainst_le_of_isStrictPSNE {x₀ : Fin mx} {y₀ : Fin my}
     rw [← add_sum_erase _ _ (mem_univ x₀)]
     simp only [rowGap, sub_self, mul_zero, zero_add]
     exact sum_congr rfl fun x _ ↦ mul_comm _ _
-  have h6 := IsPSNE.integral_sum_rowGap_sub_le (P := P) hxy.isPSNE hu hX hY T
+  have h6 := integral_sum_rowGap_sub_le (P := P) x₀ y₀ hu hX hY T
   have hHS : 0 ≤ HS := mul_nonneg (sum_nonneg fun t _ ↦ by positivity)
     (sum_nonneg fun x hx ↦ (one_div_pos.2 (hΔ x hx)).le)
   calc externalRegretAgainst u X Y P T x₀
@@ -934,9 +934,9 @@ lemma psmr_tsallisINFHalf_le_of_isStrictPSNE' {x₀ : Fin mx} {y₀ : Fin my}
         * (∑ x ∈ univ.erase x₀, 1 / rowGap u x₀ y₀ x) * (1 + 1 / colGapMin u x₀ y₀) + 12 := by
   have hX : ∀ t, Measurable (X t) := h.measurable_action
   have hY : ∀ t, Measurable (Y t) := fun t ↦ (h.measurable_feedback t).fst
-  have hcol := IsStrictPSNE.colGapMin_mul_le (P := P) hxy hX hY T
+  have hcol := IsPSNE.colGapMin_mul_le (P := P) hxy.isPSNE hX hY T
   have hself := externalRegretAgainst_le_of_isStrictPSNE hu hRu hR h hxy T
-  have h6 := IsPSNE.integral_sum_rowGap_sub_le (P := P) hxy.isPSNE hu hX hY T
+  have h6 := integral_sum_rowGap_sub_le (P := P) x₀ y₀ hu hX hY T
   generalize hA : externalRegretAgainst u X Y P T x₀ = A at hcol hself h6
   generalize hCy : P[fun ω ↦ ∑ t ∈ range T, if Y t ω = y₀ then (0 : ℝ) else 1] = Cy
     at hcol hself h6
@@ -1034,7 +1034,7 @@ lemma psmr_tsallisINFHalf_le_of_isStrictPSNE {x₀ : Fin mx} {y₀ : Fin my}
       have : x ∈ univ.erase x₀ := mem_erase.2 ⟨hne, mem_univ x⟩
       rw [hE] at this
       exact absurd this (notMem_empty x)
-    have hcol := IsStrictPSNE.colGapMin_mul_le (P := P) hxy hX hY T
+    have hcol := IsPSNE.colGapMin_mul_le (P := P) hxy.isPSNE hX hY T
     have hA0 : externalRegretAgainst u X Y P T x₀ = 0 := by
       have : ∀ t ω, X t ω = x₀ := fun t ω ↦ hx _
       simp [externalRegretAgainst, this]

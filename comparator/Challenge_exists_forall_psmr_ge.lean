@@ -38,7 +38,6 @@ public import Mathlib.InformationTheory.KullbackLeibler.ChainRule
 public import Mathlib.Probability.Kernel.Composition.RadonNikodym
 public import Mathlib.Probability.Kernel.Composition.AbsolutelyContinuous
 public import Mathlib.Probability.Kernel.Composition.Lemmas
-public import Mathlib.MeasureTheory.Measure.Typeclasses.Probability
 public import Mathlib.Probability.Distributions.Bernoulli
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
 public import Mathlib.Analysis.Calculus.Deriv.MeanValue

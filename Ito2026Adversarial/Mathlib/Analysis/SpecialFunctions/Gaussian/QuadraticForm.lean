@@ -24,10 +24,14 @@ This is the Gaussian integral behind the method of mixtures for vector-valued ma
 
 ## Main statements
 
-* `integrable_rexp_neg_mul_sq_norm_add`, `integral_rexp_neg_mul_sq_norm_add`;
+* `integrable_exp_neg_mul_sq_norm_add`, `integral_exp_neg_mul_sq_norm_add`;
 * `Matrix.PosDef.det_sqrt`: `det √A = √(det A)`;
 * `Matrix.PosDef.lintegral_exp_inner_sub_mahalanobisSq`: the Gaussian integral of the quadratic
   form of `A`, as a lower Lebesgue integral.
+
+## Tags
+
+Gaussian integral, quadratic form, positive definite matrix
 -/
 
 @[expose] public section
@@ -42,7 +46,7 @@ variable {V : Type*} [NormedAddCommGroup V] [InnerProductSpace ℝ V] [FiniteDim
 
 /-- The real Gaussian function with a linear term `v ↦ exp(-b ‖v‖² + c ⟪w, v⟫)` is integrable
 for `b > 0`. -/
-lemma integrable_rexp_neg_mul_sq_norm_add {b : ℝ} (hb : 0 < b) (c : ℝ) (w : V) :
+lemma integrable_exp_neg_mul_sq_norm_add {b : ℝ} (hb : 0 < b) (c : ℝ) (w : V) :
     Integrable (fun v : V ↦ rexp (-b * ‖v‖ ^ 2 + c * ⟪w, v⟫)) := by
   have h := (GaussianFourier.integrable_cexp_neg_mul_sq_norm_add
     (show 0 < (b : ℂ).re from hb) (c : ℂ) w).norm
@@ -53,7 +57,7 @@ lemma integrable_rexp_neg_mul_sq_norm_add {b : ℝ} (hb : 0 < b) (c : ℝ) (w : 
 
 /-- **Gaussian integral with a linear term** on a finite-dimensional real inner product space:
 `∫ exp(-b ‖v‖² + c ⟪w, v⟫) dv = (π / b)^{d/2} exp(c² ‖w‖² / (4 b))` for `b > 0`. -/
-lemma integral_rexp_neg_mul_sq_norm_add {b : ℝ} (hb : 0 < b) (c : ℝ) (w : V) :
+lemma integral_exp_neg_mul_sq_norm_add {b : ℝ} (hb : 0 < b) (c : ℝ) (w : V) :
     ∫ v : V, rexp (-b * ‖v‖ ^ 2 + c * ⟪w, v⟫) =
       (π / b) ^ (Module.finrank ℝ V / 2 : ℝ) * rexp (c ^ 2 * ‖w‖ ^ 2 / (4 * b)) := by
   rw [← Complex.ofReal_inj]
@@ -83,7 +87,7 @@ lemma PosDef.det_sqrt {A : Matrix ι ι ℝ} (hA : A.PosDef) : (CFC.sqrt A).det 
 and a vector `s`,
 `∫⁻ exp(⟪θ, s⟫ - θᵀ A θ / 2) dθ = (2π)^{d/2} / √(det A) · exp(sᵀ A⁻¹ s / 2)`. Proof: the change
 of variables `x = √A θ` (of Jacobian `√(det A)`) reduces it to the isotropic Gaussian integral
-`integral_rexp_neg_mul_sq_norm_add`. -/
+`integral_exp_neg_mul_sq_norm_add`. -/
 lemma PosDef.lintegral_exp_inner_sub_mahalanobisSq {A : Matrix ι ι ℝ} (hA : A.PosDef)
     (s : EuclideanSpace ℝ ι) :
     ∫⁻ θ : EuclideanSpace ℝ ι, ENNReal.ofReal (rexp (⟪θ, s⟫ - mahalanobisSq A θ / 2)) =
@@ -113,9 +117,9 @@ lemma PosDef.lintegral_exp_inner_sub_mahalanobisSq {A : Matrix ι ι ℝ} (hA : 
   rw [ContinuousLinearMap.coe_coe] at hmap
   rw [← lintegral_map hgm L.continuous.measurable, hmap,
     lintegral_smul_measure, hdetL, hg,
-    ← ofReal_integral_eq_lintegral_ofReal (integrable_rexp_neg_mul_sq_norm_add (by norm_num) _ _)
+    ← ofReal_integral_eq_lintegral_ofReal (integrable_exp_neg_mul_sq_norm_add (by norm_num) _ _)
       (ae_of_all _ fun _ ↦ (exp_pos _).le),
-    integral_rexp_neg_mul_sq_norm_add (by norm_num), smul_eq_mul,
+    integral_exp_neg_mul_sq_norm_add (by norm_num), smul_eq_mul,
     ← ENNReal.ofReal_mul (abs_nonneg _), finrank_euclideanSpace, hw,
     norm_toEuclideanCLM_sqrt_inv_sq hA]
   congr 1

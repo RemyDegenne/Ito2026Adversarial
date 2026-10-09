@@ -66,6 +66,12 @@ public import Mathlib.Topology.Algebra.Ring.Real
 public import Mathlib.Analysis.Convex.Integral
 public import Mathlib.Analysis.Convex.SpecificFunctions.Pow
 public import Mathlib.NumberTheory.Harmonic.Bounds
+public import Mathlib.MeasureTheory.Integral.IntegrableOn
+public import Mathlib.Probability.Kernel.Composition.Lemmas
+public import Mathlib.Analysis.Convex.SpecificFunctions.Basic
+public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
+public import Mathlib.Analysis.Calculus.MeanValue
+public import Mathlib.Analysis.MeanInequalitiesPow
 
 /-! # Standalone extraction for `Ito2026Adversarial.exists_psmr_tsallisINFHalf_le`
 Definitions are copied verbatim; theorem proofs are replaced by `sorry`.

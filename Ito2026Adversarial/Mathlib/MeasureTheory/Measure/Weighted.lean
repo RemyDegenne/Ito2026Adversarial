@@ -95,6 +95,12 @@ lemma weightedMeasure_absolutelyContinuous [MeasurableSingletonClass ι]
     exact absurd hi (not_le.2 (hq i (not_le.1 h)))
   · simp [Set.indicator_of_notMem his]
 
+/-- The integral against `weightedMeasure p` is the weighted sum `∑ x, p x * f x`. -/
+lemma lintegral_weightedMeasure_eq_sum [MeasurableSingletonClass ι] (p : ι → ℝ) (f : ι → ℝ≥0∞) :
+    ∫⁻ x, f x ∂(weightedMeasure p) = ∑ x, ENNReal.ofReal (p x) * f x := by
+  simp only [weightedMeasure, lintegral_finsetSum_measure, lintegral_smul_measure,
+    lintegral_dirac, smul_eq_mul]
+
 /-- The map `p ↦ weightedMeasure p` is measurable. -/
 lemma measurable_weightedMeasure : Measurable (weightedMeasure (ι := ι)) := by
   refine Measure.measurable_of_measurable_coe _ fun s hs ↦ ?_
