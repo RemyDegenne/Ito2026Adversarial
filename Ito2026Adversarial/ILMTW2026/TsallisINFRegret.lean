@@ -6,9 +6,9 @@ Authors: Rémy Degenne
 module
 
 public import Ito2026Adversarial.ILMTW2026.Setting
-public import Ito2026Adversarial.LeanMachineLearning.Online.Bandit.TsallisHalf
-public import Ito2026Adversarial.LeanMachineLearning.Game.Run
-public import Ito2026Adversarial.LeanMachineLearning.Game.Regret
+public import Ito2026Adversarial.ForLMLExplore.OnlineLearning.TsallisHalf
+public import Ito2026Adversarial.ForLMLExplore.Game.Run
+public import Ito2026Adversarial.ForLMLExplore.Game.Regret
 public import Ito2026Adversarial.ILMTW2026.Lemma7
 public import Ito2026Adversarial.ILMTW2026.Lemma8
 public import Mathlib.Analysis.Convex.Integral
@@ -415,14 +415,14 @@ variable (hu : ∀ x y, u x y ∈ Set.Icc (-1) 1) (hRu : R.HasMean u)
     (Player.ofUninformed (tsallisINFHalf mx)) (gameEnv opp R) P)
 include h
 
-omit [NeZero my] in
+omit [NeZero my] [IsProbabilityMeasure P] in
 /-- The distribution of round `t` of a run is measurable. -/
 lemma measurable_halfDist_run (t : ℕ) :
     Measurable fun ω ↦ (halfDist (fun s ↦ ((), X s ω, Rw s ω)) t : Fin mx → ℝ) := by
   have := (measurable_halfDistHist (my := my) t).comp (h.measurable_history t)
   exact this
 
-omit [NeZero my] in
+omit [NeZero my] [IsProbabilityMeasure P] in
 /-- The utility `f x_t y_t` of the actions of round `t` of a run is measurable. -/
 lemma measurable_utility_run (t : ℕ) (f : Fin mx → Fin my → ℝ) :
     Measurable fun ω ↦ f (X t ω) (Y t ω) := by

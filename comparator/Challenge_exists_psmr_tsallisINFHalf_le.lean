@@ -1,20 +1,7 @@
 module
 
-public import Mathlib.Probability.Kernel.Basic
-public import Mathlib.Probability.Kernel.IonescuTulcea.Traj
-public import Mathlib.Probability.Process.FiniteDimensionalLaws
-public import Mathlib.Probability.HasCondDistrib
-public import Mathlib.MeasureTheory.Measure.ProbabilityMeasure
-public import Mathlib.Probability.Independence.Basic
-public import Mathlib.Probability.Independence.Conditional
-public import Mathlib.MeasureTheory.Measure.SubFinite
-public import Mathlib.Probability.Kernel.RadonNikodym
-public import Mathlib.MeasureTheory.MeasurableSpace.Embedding
-public import Mathlib.Order.Restriction
-public import Mathlib.Probability.Kernel.IonescuTulcea.Maps
-public import Mathlib.Analysis.Normed.Ring.Basic
-public import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
-public import Mathlib.MeasureTheory.Order.Lattice
+public import Mathlib.Analysis.InnerProductSpace.Basic
+public import Mathlib.Data.EReal.Basic
 public import Mathlib.Analysis.Convex.Basic
 public import Mathlib.Analysis.InnerProductSpace.PiL2
 public import Mathlib.Analysis.Normed.Lp.MeasurableSpace
@@ -22,13 +9,14 @@ public import Mathlib.Geometry.Convex.ConvexSpace.CompactSpaceStdSimplex
 public import Mathlib.MeasureTheory.Measure.GiryMonad
 public import Mathlib.MeasureTheory.Measure.Dirac.Basic
 public import Mathlib.MeasureTheory.Measure.Dirac.Def
+public import LeanMachineLearning.SequentialLearning.Deterministic
+public import LeanMachineLearning.SequentialLearning.Comap
 public import Mathlib.Algebra.BigOperators.Field
-public import Mathlib.Probability.IdentDistrib
-public import Mathlib.Probability.Independence.InfinitePi
-public import Mathlib.Probability.Kernel.Composition.MapComap
+public import LeanMachineLearning.SequentialLearning.EvaluationEnv
+public import LeanMachineLearning.SequentialLearning.StationaryEnv
+public import LeanMachineLearning.ForMathlib.Probability.Independence.Basic
 public import Mathlib.MeasureTheory.Constructions.BorelSpace.Order
-public import Mathlib.Analysis.InnerProductSpace.Basic
-public import Mathlib.Data.EReal.Basic
+public import Mathlib.MeasureTheory.MeasurableSpace.Embedding
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
 public import Mathlib.MeasureTheory.Constructions.BorelSpace.ContinuousLinearMap
 public import Mathlib.MeasureTheory.Function.SpecialFunctions.Basic
@@ -37,15 +25,11 @@ public import Mathlib.Analysis.Calculus.Gradient.Basic
 public import Mathlib.Data.Matrix.Mul
 public import Mathlib.Order.ConditionallyCompleteLattice.Finset
 public import Mathlib.Probability.Kernel.Composition.CompProd
+public import LeanMachineLearning.ForMathlib.Analysis.Convex.Subgradient.Deriv
 public import Mathlib.Algebra.BigOperators.Intervals
-public import Mathlib.Analysis.Calculus.LineDeriv.Basic
-public import Mathlib.Analysis.Convex.Function
-public import Mathlib.Topology.Algebra.Module.ContinuousLinearMap.PiProd
+public import LeanMachineLearning.ForMathlib.MeasureTheory.Order.MeasurableArg
 public import Mathlib.Analysis.SpecialFunctions.Log.Basic
 public import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
-public import Mathlib.CategoryTheory.Countable
-public import Mathlib.MeasureTheory.Constructions.Polish.Basic
-public import Mathlib.Order.CompletePartialOrder
 public import Mathlib.Probability.Distributions.Bernoulli
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
 public import Mathlib.Analysis.Matrix.MeasurableSpace
@@ -67,10 +51,13 @@ public import Mathlib.Analysis.Convex.Integral
 public import Mathlib.Analysis.Convex.SpecificFunctions.Pow
 public import Mathlib.NumberTheory.Harmonic.Bounds
 public import Mathlib.MeasureTheory.Integral.IntegrableOn
+public import Mathlib.Probability.HasCondDistrib
 public import Mathlib.Probability.Kernel.Composition.Lemmas
 public import Mathlib.Analysis.Convex.SpecificFunctions.Basic
 public import Mathlib.Analysis.SpecialFunctions.Pow.Deriv
 public import Mathlib.Analysis.Calculus.MeanValue
+public import Mathlib.Analysis.Calculus.Deriv.MeanValue
+public import Mathlib.Analysis.Calculus.Deriv.Pow
 public import Mathlib.Analysis.MeanInequalitiesPow
 
 /-! # Standalone extraction for `Ito2026Adversarial.exists_psmr_tsallisINFHalf_le`
@@ -86,14 +73,10 @@ set_option relaxedAutoImplicit false
 -- Namespace stubs (so later `open`s resolve).
 namespace MeasureTheory
 end MeasureTheory
-namespace ProbabilityTheory
-end ProbabilityTheory
-namespace Real
-end Real
-namespace Finset
-end Finset
 namespace Learning
 end Learning
+namespace ProbabilityTheory
+end ProbabilityTheory
 namespace Bandits
 end Bandits
 namespace Bandits.TsallisINF
@@ -104,188 +87,24 @@ namespace Learning.RepeatedGame
 end Learning.RepeatedGame
 namespace Matrix
 end Matrix
+namespace Real
+end Real
 namespace Ito2026Adversarial
 end Ito2026Adversarial
 
--- ═══ LeanMachineLearning.SequentialLearning.Algorithm ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Analysis.Convex.FenchelConjugate ═══
 @[expose] public section
-open MeasureTheory ProbabilityTheory Filter Real Finset
-open scoped ENNReal NNReal
-namespace Learning
-variable {𝓞 𝓐 𝓨 Ω : Type*} {m𝓞 : MeasurableSpace 𝓞} {m𝓐 : MeasurableSpace 𝓐} {m𝓨 : MeasurableSpace 𝓨} {mΩ : MeasurableSpace Ω}
+open scoped RealInnerProductSpace
+variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] {s t : Set E} {f : E → ℝ} {x θ : E}
 
-/-- One round of interaction: an observation, then an action, then a feedback. -/
-abbrev Round (𝓞 𝓐 𝓨 : Type*) := 𝓞 × 𝓐 × 𝓨
+/-- The Fenchel conjugate of `f` restricted to `s`: `θ ↦ sup_{x ∈ s} ⟪x, θ⟫ - f x`, with values in
+`EReal` (`⊥` if `s` is empty, `⊤` if the supremum is infinite). -/
+noncomputable def fenchelConjugateOn (s : Set E) (f : E → ℝ) (θ : E) : EReal :=
+  ⨆ x : s, ((⟪(x : E), θ⟫ - f x : ℝ) : EReal)
 
-/-- The observation of a round. -/
-def Round.obs (r : Round 𝓞 𝓐 𝓨) : 𝓞 := r.1
-
-/-- The action of a round. -/
-def Round.action (r : Round 𝓞 𝓐 𝓨) : 𝓐 := r.2.1
-
-/-- The feedback of a round. -/
-def Round.feedback (r : Round 𝓞 𝓐 𝓨) : 𝓨 := r.2.2
-
-/-- History of `n` complete rounds; `n = 0` is the empty history. -/
-abbrev Hist (𝓞 𝓐 𝓨 : Type*) (n : ℕ) := Fin n → Round 𝓞 𝓐 𝓨
-
-/-- A stochastic, sequential algorithm.
-At each round, it sees an observation in `𝓞`, then takes an action in `𝓐`, and finally receives
-feedback in `𝓨`. The action is a random function of the past rounds and the current observation. -/
-@[ext]
-structure Algorithm (𝓞 𝓐 𝓨 : Type*) [MeasurableSpace 𝓞] [MeasurableSpace 𝓐] [MeasurableSpace 𝓨]
-    where
-  /-- Law of the action of round `n` given the past rounds and the current observation. -/
-  policy : (n : ℕ) → Kernel (Hist 𝓞 𝓐 𝓨 n × 𝓞) 𝓐
-  /-- The policy is a Markov kernel. -/
-  [isMarkovKernel_policy : ∀ n, IsMarkovKernel (policy n)]
-
-instance instIsMarkovKernelProdHistPolicy (alg : Algorithm 𝓞 𝓐 𝓨) (n : ℕ) : IsMarkovKernel (alg.policy n) :=
-  alg.isMarkovKernel_policy n
-
-/-- A stochastic environment.
-At each round, an observation is drawn prior to the algorithm taking an action. Then the environment
-provides feedback based on the observation and the action. -/
-@[ext]
-structure Environment (𝓞 𝓐 𝓨 : Type*) [MeasurableSpace 𝓞] [MeasurableSpace 𝓐] [MeasurableSpace 𝓨]
-    where
-  /-- Law of the observation of round `n` given the past rounds. -/
-  obs : (n : ℕ) → Kernel (Hist 𝓞 𝓐 𝓨 n) 𝓞
-  /-- Law of the feedback of round `n` given the past rounds, the observation and the action. -/
-  feedback : (n : ℕ) → Kernel ((Hist 𝓞 𝓐 𝓨 n × 𝓞) × 𝓐) 𝓨
-  /-- The observation kernel is a Markov kernel. -/
-  [isMarkovKernel_obs : ∀ n, IsMarkovKernel (obs n)]
-  /-- The feedback kernel is a Markov kernel. -/
-  [isMarkovKernel_feedback : ∀ n, IsMarkovKernel (feedback n)]
-
-section IsAlgEnvSeq
-variable {O : ℕ → Ω → 𝓞} {A : ℕ → Ω → 𝓐} {Y : ℕ → Ω → 𝓨} {alg : Algorithm 𝓞 𝓐 𝓨} {env : Environment 𝓞 𝓐 𝓨} {P : Measure Ω} [IsFiniteMeasure P] {N : ℕ}
-
-/-- History of the algorithm-environment sequence before time `n`: the rounds at
-times `0, ..., n - 1`. -/
-def history (O : ℕ → Ω → 𝓞) (A : ℕ → Ω → 𝓐) (Y : ℕ → Ω → 𝓨) (n : ℕ) (ω : Ω) : Hist 𝓞 𝓐 𝓨 n :=
-  fun i ↦ (O i ω, A i ω, Y i ω)
-
-/-- An algorithm-environment sequence: a sequence of observations, actions and feedbacks generated
-by an algorithm interacting with an environment. -/
-structure IsAlgEnvSeq
-    (O : ℕ → Ω → 𝓞) (A : ℕ → Ω → 𝓐) (Y : ℕ → Ω → 𝓨)
-    (alg : Algorithm 𝓞 𝓐 𝓨) (env : Environment 𝓞 𝓐 𝓨)
-    (P : Measure Ω) [IsFiniteMeasure P] : Prop where
-  /-- The observation sequence is measurable. -/
-  measurable_obs n : Measurable (O n) := by fun_prop
-  /-- The action sequence is measurable. -/
-  measurable_action n : Measurable (A n) := by fun_prop
-  /-- The feedback sequence is measurable. -/
-  measurable_feedback n : Measurable (Y n) := by fun_prop
-  /-- The observation at time `n` has the correct conditional distribution given the history. -/
-  hasCondDistrib_obs n :
-    HasCondDistrib (O n) (history O A Y n) (env.obs n) P
-  /-- The action at time `n` has the correct conditional distribution given the history and the
-  observation at time `n`. -/
-  hasCondDistrib_action n :
-    HasCondDistrib (A n) (fun ω ↦ (history O A Y n ω, O n ω)) (alg.policy n) P
-  /-- The feedback at time `n` has the correct conditional distribution given the history, the
-  observation and the action at time `n`. -/
-  hasCondDistrib_feedback n :
-    HasCondDistrib (Y n) (fun ω ↦ ((history O A Y n ω, O n ω), A n ω)) (env.feedback n) P
-
-end IsAlgEnvSeq
-end Learning
 end
 
--- ═══ LeanMachineLearning.SequentialLearning.Comap ═══
-@[expose] public section
-open MeasureTheory ProbabilityTheory
-namespace Learning
-variable {𝓞 𝓞' 𝓞'' 𝓐 𝓐' 𝓐'' 𝓨 𝓨' 𝓨'' Ω : Type*} {m𝓞 : MeasurableSpace 𝓞} {m𝓞' : MeasurableSpace 𝓞'} {m𝓞'' : MeasurableSpace 𝓞''} {m𝓐 : MeasurableSpace 𝓐} {m𝓐' : MeasurableSpace 𝓐'} {m𝓐'' : MeasurableSpace 𝓐''} {m𝓨 : MeasurableSpace 𝓨} {m𝓨' : MeasurableSpace 𝓨'} {m𝓨'' : MeasurableSpace 𝓨''} {mΩ : MeasurableSpace Ω} {fo : 𝓞 → 𝓞'} {fa : 𝓐 → 𝓐'} {fy : 𝓨 → 𝓨'} {go : 𝓞' → 𝓞''} {ga : 𝓐' → 𝓐''} {gy : 𝓨' → 𝓨''}
-section Map
-
-/-- Transport a round along maps of the observation, the action and the feedback. -/
-def Round.map (fo : 𝓞 → 𝓞') (fa : 𝓐 → 𝓐') (fy : 𝓨 → 𝓨') (r : Round 𝓞 𝓐 𝓨) : Round 𝓞' 𝓐' 𝓨' :=
-  (fo r.obs, fa r.action, fy r.feedback)
-
-/-- Transport a history round-wise. -/
-def Hist.map (fo : 𝓞 → 𝓞') (fa : 𝓐 → 𝓐') (fy : 𝓨 → 𝓨') {n : ℕ} (h : Hist 𝓞 𝓐 𝓨 n) :
-    Hist 𝓞' 𝓐' 𝓨' n :=
-  fun i ↦ Round.map fo fa fy (h i)
-
-@[fun_prop]
-lemma Hist.measurable_map (hfo : Measurable fo) (hfa : Measurable fa) (hfy : Measurable fy)
-    (n : ℕ) :
-    Measurable (Hist.map fo fa fy (n := n)) := sorry
-
-/-- Transport the feedback of a history. -/
-abbrev Hist.mapFeedback (f : 𝓨 → 𝓨') {n : ℕ} (h : Hist 𝓞 𝓐 𝓨 n) : Hist 𝓞 𝓐 𝓨' n :=
-  Hist.map id id f h
-
-end Map
-section Comap
-
-/-- The algorithm with observations in `𝓞'` and feedbacks in `𝓨'` obtained from
-`alg : Algorithm 𝓞 𝓐 𝓨` by transforming the pair (past rounds, current observation) by `F n` at
-each round `n` before applying the policy of `alg`.
-
-This is the primitive transport operation on algorithms: `Algorithm.comapObs` and
-`Algorithm.comapFeedback` are the special cases in which `F n` is a round-wise map of the
-observation and of the feedback. -/
-def Algorithm.comap (alg : Algorithm 𝓞 𝓐 𝓨)
-    (F : (n : ℕ) → Hist 𝓞' 𝓐 𝓨' n × 𝓞' → Hist 𝓞 𝓐 𝓨 n × 𝓞) (hF : ∀ n, Measurable (F n)) :
-    Algorithm 𝓞' 𝓐 𝓨' where
-  policy n := (alg.policy n).comap (F n) (hF n)
-
-section ComapFeedback
-variable {g : 𝓨' → 𝓨}
-
-/-- The algorithm that sees `g y` when the feedback of a past round is `y`. -/
-def Algorithm.comapFeedback (alg : Algorithm 𝓞 𝓐 𝓨) (g : 𝓨' → 𝓨)
-    (hg : Measurable g := by fun_prop) : Algorithm 𝓞 𝓐 𝓨' :=
-  alg.comap (fun _ p ↦ (Hist.mapFeedback g p.1, p.2)) fun _ ↦ by fun_prop
-
-end ComapFeedback
-end Comap
-end Learning
-end
-
--- ═══ Ito2026Adversarial.LeanMachineLearning.SequentialLearning.Algorithms.Stateful ═══
-@[expose] public section
-open MeasureTheory ProbabilityTheory
-namespace Learning
-variable {𝓞 𝓐 𝓨 𝓞' 𝓐' 𝓨' σ Ω : Type*}
-
-/-- The state after the `t` rounds of history `h`, starting from `s0` and updating at round `t`
-by `upd t`. -/
-def foldHistIdx (upd : ℕ → σ → Round 𝓞 𝓐 𝓨 → σ) (s0 : σ) : (t : ℕ) → Hist 𝓞 𝓐 𝓨 t → σ
-  | 0, _ => s0
-  | t + 1, h => upd t (foldHistIdx upd s0 t fun i ↦ h i.castSucc) (h (Fin.last t))
-
-variable [MeasurableSpace 𝓞] [MeasurableSpace 𝓐] [MeasurableSpace 𝓨] [MeasurableSpace σ]
-
-@[fun_prop]
-lemma measurable_foldHistIdx {upd : ℕ → σ → Round 𝓞 𝓐 𝓨 → σ}
-    (hupd : Measurable fun p : ℕ × σ × Round 𝓞 𝓐 𝓨 ↦ upd p.1 p.2.1 p.2.2) (s0 : σ) (t : ℕ) :
-    Measurable (foldHistIdx upd s0 t) := sorry
-
-/-- The stateful algorithm with initial state `s0`, state update `upd` and policy `π`: the action
-at round `n` is drawn from `π n` applied to the current state and the current observation. -/
-noncomputable def Algorithm.stateful (s0 : σ) (upd : ℕ → σ → Round 𝓞 𝓐 𝓨 → σ)
-    (hupd : Measurable fun p : ℕ × σ × Round 𝓞 𝓐 𝓨 ↦ upd p.1 p.2.1 p.2.2)
-    (π : ℕ → Kernel (σ × 𝓞) 𝓐) [∀ n, IsMarkovKernel (π n)] : Algorithm 𝓞 𝓐 𝓨 where
-  policy n := (π n).comap (fun p ↦ (foldHistIdx upd s0 n p.1, p.2))
-    (((measurable_foldHistIdx hupd s0 n).comp measurable_fst).prodMk measurable_snd)
-
-variable [MeasurableSpace Ω]
-end Learning
-end
-
--- ═══ LeanMachineLearning.ForMathlib.MeasureTheory.Order.Lattice ═══
-@[expose] public section
-open Finset
-variable {α δ : Type*} [MeasurableSpace δ] [SemilatticeInf α] {m : MeasurableSpace α} [MeasurableInf₂ α]
-attribute [to_dual existing] MeasurableInf₂
-end
-
--- ═══ Ito2026Adversarial.Mathlib.Analysis.Convex.Simplex ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Analysis.Convex.Simplex ═══
 @[expose] public section
 open MeasureTheory
 namespace Learning
@@ -316,7 +135,7 @@ instance instNonemptyElemEuclideanSpaceRealSimplex [Nonempty ι] : Nonempty (sim
 end Learning
 end
 
--- ═══ Ito2026Adversarial.Mathlib.MeasureTheory.Measure.Weighted ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.MeasureTheory.Measure.Weighted ═══
 @[expose] public section
 open scoped ENNReal
 namespace MeasureTheory
@@ -336,7 +155,38 @@ lemma measurable_weightedMeasure : Measurable (weightedMeasure (ι := ι)) := so
 end MeasureTheory
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.Online.Bandit.ImportanceWeighting ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.SequentialLearning.Algorithms.Stateful ═══
+@[expose] public section
+open MeasureTheory ProbabilityTheory
+namespace Learning
+variable {𝓞 𝓐 𝓨 𝓞' 𝓐' 𝓨' σ Ω : Type*}
+
+/-- The state after the `t` rounds of history `h`, starting from `s0` and updating at round `t`
+by `upd t`. -/
+def foldHistIdx (upd : ℕ → σ → Round 𝓞 𝓐 𝓨 → σ) (s0 : σ) : (t : ℕ) → Hist 𝓞 𝓐 𝓨 t → σ
+  | 0, _ => s0
+  | t + 1, h => upd t (foldHistIdx upd s0 t fun i ↦ h i.castSucc) (h (Fin.last t))
+
+variable [MeasurableSpace 𝓞] [MeasurableSpace 𝓐] [MeasurableSpace 𝓨] [MeasurableSpace σ]
+
+@[fun_prop]
+lemma measurable_foldHistIdx {upd : ℕ → σ → Round 𝓞 𝓐 𝓨 → σ}
+    (hupd : Measurable fun p : ℕ × σ × Round 𝓞 𝓐 𝓨 ↦ upd p.1 p.2.1 p.2.2) (s0 : σ) (t : ℕ) :
+    Measurable (foldHistIdx upd s0 t) := sorry
+
+/-- The stateful algorithm with initial state `s0`, state update `upd` and policy `π`: the action
+at round `n` is drawn from `π n` applied to the current state and the current observation. -/
+noncomputable def Algorithm.stateful (s0 : σ) (upd : ℕ → σ → Round 𝓞 𝓐 𝓨 → σ)
+    (hupd : Measurable fun p : ℕ × σ × Round 𝓞 𝓐 𝓨 ↦ upd p.1 p.2.1 p.2.2)
+    (π : ℕ → Kernel (σ × 𝓞) 𝓐) [∀ n, IsMarkovKernel (π n)] : Algorithm 𝓞 𝓐 𝓨 where
+  policy n := (π n).comap (fun p ↦ (foldHistIdx upd s0 n p.1, p.2))
+    (((measurable_foldHistIdx hupd s0 n).comp measurable_fst).prodMk measurable_snd)
+
+variable [MeasurableSpace Ω]
+end Learning
+end
+
+-- ═══ Ito2026Adversarial.ForLMLExplore.Bandits.ImportanceWeighting ═══
 @[expose] public section
 open MeasureTheory ProbabilityTheory Finset
 namespace Learning
@@ -363,7 +213,7 @@ noncomputable def importanceWeighted (p : ι → ℝ) (i : ι) (v : ℝ) (j : ι
 end Bandits
 end
 
--- ═══ Ito2026Adversarial.Mathlib.MeasureTheory.MeasurableSpace.ToSet ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.MeasureTheory.MeasurableSpace.ToSet ═══
 @[expose] public section
 namespace Learning
 variable {X : Type*} {K : Set X} [Nonempty K] {v : X}
@@ -376,19 +226,7 @@ noncomputable def toSet (K : Set X) [Nonempty K] (v : X) : K :=
 end Learning
 end
 
--- ═══ Ito2026Adversarial.Mathlib.Analysis.Convex.FenchelConjugate ═══
-@[expose] public section
-open scoped RealInnerProductSpace
-variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] {s t : Set E} {f : E → ℝ} {x θ : E}
-
-/-- The Fenchel conjugate of `f` restricted to `s`: `θ ↦ sup_{x ∈ s} ⟪x, θ⟫ - f x`, with values in
-`EReal` (`⊥` if `s` is empty, `⊤` if the supremum is infinite). -/
-noncomputable def fenchelConjugateOn (s : Set E) (f : E → ℝ) (θ : E) : EReal :=
-  ⨆ x : s, ((⟪(x : E), θ⟫ - f x : ℝ) : EReal)
-
-end
-
--- ═══ Ito2026Adversarial.LeanMachineLearning.Online.Bandit.SimplexFTRL ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.OnlineLearning.SimplexFTRL ═══
 @[expose] public section
 open MeasureTheory Finset
 open scoped RealInnerProductSpace
@@ -415,7 +253,7 @@ noncomputable def tsallisEntropy (α : ℝ) (p : EuclideanSpace ℝ ι) : ℝ :=
 end Learning
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.Online.Bandit.TsallisINF ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Bandits.TsallisINF ═══
 @[expose] public section
 open MeasureTheory ProbabilityTheory Finset Learning
 open scoped RealInnerProductSpace
@@ -472,7 +310,7 @@ noncomputable def tsallisINF (α : ℝ) (η : ℕ → ℝ) : Algorithm Unit ι �
 end Bandits
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.Game.ZeroSum ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Game.ZeroSum ═══
 @[expose] public section
 open Finset
 namespace Learning.ZeroSumGame
@@ -517,7 +355,7 @@ end Mixed
 end Learning.ZeroSumGame
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.Game.RepeatedGame ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Game.RepeatedGame ═══
 @[expose] public section
 open MeasureTheory ProbabilityTheory Finset
 open scoped ProbabilityTheory

@@ -4,8 +4,6 @@
     "theorem_names": [
         "Ito2026Adversarial.forall_exists_psmr_tsallisSPMPaper_le",
         "Learning.instNonemptyElemEuclideanSpaceRealSimplex",
-        "Learning.Algorithm.comap._proof_1",
-        "Learning.Algorithm.comapFeedback._proof_1",
         "Learning.Algorithm.stateful._proof_1",
         "Learning.Algorithm.stateful._proof_2",
         "Ito2026Adversarial.ucbIndex._proof_1",

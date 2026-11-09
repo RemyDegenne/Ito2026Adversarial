@@ -6,9 +6,9 @@ Authors: Rémy Degenne
 module
 
 public import Ito2026Adversarial.ILMTW2026.Lemma9
-public import Ito2026Adversarial.LeanMachineLearning.Game.Oblivious
-public import Ito2026Adversarial.LeanMachineLearning.SequentialLearning.BretagnolleHuber
-public import Ito2026Adversarial.LeanMachineLearning.SequentialLearning.DivergenceDecomposition
+public import Ito2026Adversarial.ForLMLExplore.Game.Oblivious
+public import Ito2026Adversarial.ForLMLExplore.SequentialLearning.BretagnolleHuber
+public import Ito2026Adversarial.ForLMLExplore.SequentialLearning.DivergenceDecomposition
 public import Mathlib.Analysis.Complex.ExponentialBounds
 
 /-!

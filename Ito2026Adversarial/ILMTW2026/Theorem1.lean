@@ -26,7 +26,7 @@ universe u
 
 namespace Ito2026Adversarial
 
-/-- **Theorem 1** (Ito, Luo, Maiti, Tsuchiya, Wu 2026). There is a universal constant `C` such
+/-- **Theorem 1** [ILMTW26, Theorem 1]. There is a universal constant `C` such
 that for every game `u` with utilities in `[-1, 1]`, every adaptive adversary and every reward
 noise with conditional mean `u` and rewards in `[-1, 1]`, the run of Tsallis-INF (`α = 1/2`,
 `η_t = 1 / (2 √t)`) satisfies `PSMR_T ≤ C √(m_x T)`; moreover

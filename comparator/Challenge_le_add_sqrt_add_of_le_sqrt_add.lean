@@ -1,32 +1,15 @@
 module
 
-public import Mathlib.MeasureTheory.Order.Lattice
+public import LeanMachineLearning.ForMathlib.MeasureTheory.Order.MeasurableArg
+public import LeanMachineLearning.SequentialLearning.Deterministic
 public import Mathlib.Analysis.SpecialFunctions.Log.Basic
 public import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
-public import Mathlib.Probability.Kernel.Basic
-public import Mathlib.Probability.Kernel.IonescuTulcea.Traj
-public import Mathlib.Probability.Process.FiniteDimensionalLaws
-public import Mathlib.Probability.HasCondDistrib
-public import Mathlib.MeasureTheory.Measure.ProbabilityMeasure
-public import Mathlib.Probability.Independence.Basic
-public import Mathlib.Probability.Independence.Conditional
-public import Mathlib.MeasureTheory.Measure.SubFinite
-public import Mathlib.Probability.Kernel.RadonNikodym
-public import Mathlib.MeasureTheory.MeasurableSpace.Embedding
-public import Mathlib.Order.Restriction
-public import Mathlib.Probability.Kernel.IonescuTulcea.Maps
-public import Mathlib.Analysis.Normed.Ring.Basic
-public import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
-public import Mathlib.CategoryTheory.Countable
-public import Mathlib.MeasureTheory.Constructions.Polish.Basic
-public import Mathlib.Order.CompletePartialOrder
+public import LeanMachineLearning.SequentialLearning.Comap
+public import LeanMachineLearning.SequentialLearning.StationaryEnv
 public import Mathlib.Probability.Kernel.Composition.CompProd
-public import Mathlib.Probability.Kernel.Composition.MapComap
+public import LeanMachineLearning.ForMathlib.Analysis.Convex.Subgradient.Deriv
 public import Mathlib.Algebra.BigOperators.Intervals
 public import Mathlib.Analysis.Calculus.Gradient.Basic
-public import Mathlib.Analysis.Calculus.LineDeriv.Basic
-public import Mathlib.Analysis.Convex.Function
-public import Mathlib.Topology.Algebra.Module.ContinuousLinearMap.PiProd
 public import Mathlib.Analysis.Convex.Basic
 public import Mathlib.Analysis.InnerProductSpace.PiL2
 public import Mathlib.Analysis.Normed.Lp.MeasurableSpace
@@ -55,10 +38,11 @@ public import Mathlib.MeasureTheory.Constructions.BorelSpace.ContinuousLinearMap
 public import Mathlib.MeasureTheory.Function.SpecialFunctions.Basic
 public import Mathlib.Analysis.InnerProductSpace.Basic
 public import Mathlib.Data.EReal.Basic
+public import Mathlib.MeasureTheory.MeasurableSpace.Embedding
 public import Mathlib.Analysis.Calculus.FDeriv.Measurable
 public import Mathlib.Algebra.BigOperators.Field
-public import Mathlib.Probability.IdentDistrib
-public import Mathlib.Probability.Independence.InfinitePi
+public import LeanMachineLearning.SequentialLearning.EvaluationEnv
+public import LeanMachineLearning.ForMathlib.Probability.Independence.Basic
 public import Mathlib.MeasureTheory.Measure.GiryMonad
 public import Mathlib.MeasureTheory.Measure.Dirac.Basic
 public import Mathlib.MeasureTheory.Measure.Dirac.Def
@@ -75,8 +59,6 @@ set_option autoImplicit false
 set_option relaxedAutoImplicit false
 
 -- Namespace stubs (so later `open`s resolve).
-namespace Finset
-end Finset
 namespace MeasureTheory
 end MeasureTheory
 namespace ProbabilityTheory
@@ -91,13 +73,6 @@ namespace Learning.RepeatedGame
 end Learning.RepeatedGame
 namespace Ito2026Adversarial
 end Ito2026Adversarial
-
--- ═══ LeanMachineLearning.ForMathlib.MeasureTheory.Order.Lattice ═══
-@[expose] public section
-open Finset
-variable {α δ : Type*} [MeasurableSpace δ] [SemilatticeInf α] {m : MeasurableSpace α} [MeasurableInf₂ α]
-attribute [to_dual existing] MeasurableInf₂
-end
 
 -- ═══ Ito2026Adversarial.ILMTW2026.Lemma8 ═══
 @[expose] public section

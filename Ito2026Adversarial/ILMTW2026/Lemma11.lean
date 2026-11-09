@@ -6,7 +6,7 @@ Authors: Rémy Degenne
 module
 
 public import Ito2026Adversarial.ILMTW2026.Setting
-public import Ito2026Adversarial.LeanMachineLearning.Game.Concentration
+public import Ito2026Adversarial.ForLMLExplore.Game.Concentration
 
 /-!
 # Lemma 11: confidence bounds of Maximin-UCB
@@ -47,7 +47,7 @@ lemma mahalanobisSq_inv_unit {M : Matrix Unit Unit ℝ} (hM : M () () ≠ 0)
   simp [Matrix.mahalanobisSq, dotProduct, Matrix.mulVec, hinv]
   ring
 
-/-- **Lemma 11** (Ito, Luo, Maiti, Tsuchiya, Wu 2026). In a run of any informed player against
+/-- **Lemma 11** [ILMTW26, Lemma 11]. In a run of any informed player against
 any adaptive adversary, with reward noise of conditional mean `u` and rewards in `[-1, 1]`, for
 every action pair `(x, y)` and `δ ∈ (0, 1)`, with probability at least `1 - δ`, for all `t` with
 `N_t(x, y) > 0`,

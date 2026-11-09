@@ -25,7 +25,7 @@ universe u
 
 namespace Ito2026Adversarial
 
-/-- **Theorem 12** (Ito, Luo, Maiti, Tsuchiya, Wu 2026; formal version of Theorem 6). There is
+/-- **Theorem 12** [ILMTW26, Theorem 12] (formal version of Theorem 6). There is
 a universal constant `C` such that for every bilinear game, every horizon `T ≥ 2`, every adaptive
 adversary and every reward noise with conditional mean `u` and rewards in `[-1, 1]`, the run of
 Maximin-LinUCB with `λ = 1` and radii `β_t = linRadius (d_x d_y) 1 (1 / T) t` satisfies

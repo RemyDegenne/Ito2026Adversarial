@@ -5,8 +5,6 @@
         "Ito2026Adversarial.exists_psmr_tsallisINFHalf_le",
         "Learning.instNonemptyElemEuclideanSpaceRealSimplex",
         "Bandits.TsallisINF.instIsMarkovKernelProdEuclideanSpaceRealUnitPolicy",
-        "Learning.Algorithm.comap._proof_1",
-        "Learning.Algorithm.comapFeedback._proof_1",
         "Learning.Algorithm.stateful._proof_1",
         "Learning.Algorithm.stateful._proof_2",
         "Learning.ftrlSimplex._proof_1",

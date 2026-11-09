@@ -7,11 +7,17 @@ pp.unicode.fun = true
 autoImplicit = false
 relaxedAutoImplicit = false
 weak.linter.mathlibStandardSet = true
+# LMLExplore's settings, which ForLMLExplore/ must meet. The two long-file options must agree, or
+# the linter asks for a `set_option` in every short file.
+weak.linter.style.header = true
+weak.linter.style.longFile = 1500
+weak.linter.style.longFileDefValue = 1500
 
+# LMLExplore brings Mathlib, Tau Ceti and LML at the versions it pins: never require them here.
 [[require]]
-name = "LeanMachineLearning"
-git = "https://github.com/LeanMachineLearning/LML"
-rev = "rename"
+name = "LMLExplore"
+git = "https://github.com/LeanMachineLearning/LMLExplore"
+rev = "main"
 
 [[require]]
 name = "checkdecls"
@@ -28,7 +34,7 @@ name = "Ito2026Adversarial"
 [[lean_lib]]
 name = "Comparator"
 srcDir = "comparator"
-leanOptions = { weak.linter.mathlibStandardSet = false }
+leanOptions = { weak.linter.mathlibStandardSet = false, weak.linter.style.header = false }
 globs = [
   "Comparator",
   "Solution",

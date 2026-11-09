@@ -19,7 +19,7 @@
 # Requirements: the project toolchain (elan), git, and — unless --insecure — landrun
 # (https://github.com/Zouuup/landrun, built from the main branch) in PATH. comparator and
 # lean4export are cloned and built automatically into $COMPARATOR_TOOLS_DIR
-# (default: ~/.cache/Ito2026Adversarial/comparator-tools).
+# (default: ~/.cache/<library>/comparator-tools).
 #
 # For the strongest guarantee comparator's README additionally recommends wrapping the whole run
 # in systemd-run; see comparator/README.md.
@@ -31,7 +31,8 @@ COMPARATOR_REPO=https://github.com/leanprover/comparator
 COMPARATOR_REV=e45f3b841ab6cb0e6d6a12e300bbfd84b265561c
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-TOOLS_DIR="${COMPARATOR_TOOLS_DIR:-$HOME/.cache/Ito2026Adversarial/comparator-tools}"
+LIB="$(sed -n 's/^name = "\(.*\)"$/\1/p' "$REPO_ROOT/lakefile.toml" | head -1)"
+TOOLS_DIR="${COMPARATOR_TOOLS_DIR:-$HOME/.cache/$LIB/comparator-tools}"
 
 insecure=0
 configs=()

@@ -1,20 +1,5 @@
 module
 
-public import Mathlib.Probability.Kernel.Basic
-public import Mathlib.Probability.Kernel.IonescuTulcea.Traj
-public import Mathlib.Probability.Process.FiniteDimensionalLaws
-public import Mathlib.Probability.HasCondDistrib
-public import Mathlib.MeasureTheory.Measure.ProbabilityMeasure
-public import Mathlib.Probability.Independence.Basic
-public import Mathlib.Probability.Independence.Conditional
-public import Mathlib.MeasureTheory.Measure.SubFinite
-public import Mathlib.Probability.Kernel.RadonNikodym
-public import Mathlib.MeasureTheory.MeasurableSpace.Embedding
-public import Mathlib.Order.Restriction
-public import Mathlib.Probability.Kernel.IonescuTulcea.Maps
-public import Mathlib.Analysis.Normed.Ring.Basic
-public import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
-public import Mathlib.MeasureTheory.Order.Lattice
 public import Mathlib.Analysis.InnerProductSpace.PiL2
 public import Mathlib.Analysis.Normed.Lp.MeasurableSpace
 public import Mathlib.LinearAlgebra.Matrix.PosDef
@@ -34,20 +19,18 @@ public import Mathlib.Analysis.Convex.Caratheodory
 public import Mathlib.Geometry.Convex.ConvexSpace.CompactSpaceStdSimplex
 public import Mathlib.LinearAlgebra.AffineSpace.FiniteDimensional
 public import Mathlib.Topology.Algebra.Ring.Real
+public import LeanMachineLearning.SequentialLearning.Deterministic
+public import LeanMachineLearning.SequentialLearning.Comap
+public import LeanMachineLearning.SequentialLearning.StationaryEnv
 public import Mathlib.Probability.Kernel.Composition.CompProd
-public import Mathlib.Probability.Kernel.Composition.MapComap
+public import LeanMachineLearning.ForMathlib.Analysis.Convex.Subgradient.Deriv
 public import Mathlib.Algebra.BigOperators.Intervals
 public import Mathlib.Analysis.Calculus.Gradient.Basic
-public import Mathlib.Analysis.Calculus.LineDeriv.Basic
-public import Mathlib.Analysis.Convex.Function
-public import Mathlib.Topology.Algebra.Module.ContinuousLinearMap.PiProd
 public import Mathlib.Data.Matrix.Mul
 public import Mathlib.Order.ConditionallyCompleteLattice.Finset
+public import LeanMachineLearning.ForMathlib.MeasureTheory.Order.MeasurableArg
 public import Mathlib.Analysis.SpecialFunctions.Log.Basic
 public import Mathlib.MeasureTheory.Function.SpecialFunctions.Inner
-public import Mathlib.CategoryTheory.Countable
-public import Mathlib.MeasureTheory.Constructions.Polish.Basic
-public import Mathlib.Order.CompletePartialOrder
 public import Mathlib.Probability.Distributions.Bernoulli
 public import Mathlib.MeasureTheory.Integral.Bochner.Basic
 public import Mathlib.Analysis.SpecialFunctions.Pow.Real
@@ -55,10 +38,11 @@ public import Mathlib.MeasureTheory.Constructions.BorelSpace.ContinuousLinearMap
 public import Mathlib.MeasureTheory.Function.SpecialFunctions.Basic
 public import Mathlib.Analysis.InnerProductSpace.Basic
 public import Mathlib.Data.EReal.Basic
+public import Mathlib.MeasureTheory.MeasurableSpace.Embedding
 public import Mathlib.Analysis.Calculus.FDeriv.Measurable
 public import Mathlib.Algebra.BigOperators.Field
-public import Mathlib.Probability.IdentDistrib
-public import Mathlib.Probability.Independence.InfinitePi
+public import LeanMachineLearning.SequentialLearning.EvaluationEnv
+public import LeanMachineLearning.ForMathlib.Probability.Independence.Basic
 public import Mathlib.MeasureTheory.Measure.GiryMonad
 public import Mathlib.MeasureTheory.Measure.Dirac.Basic
 public import Mathlib.MeasureTheory.Measure.Dirac.Def
@@ -81,18 +65,16 @@ set_option autoImplicit false
 set_option relaxedAutoImplicit false
 
 -- Namespace stubs (so later `open`s resolve).
+namespace Matrix
+end Matrix
+namespace Real
+end Real
+namespace Learning
+end Learning
 namespace MeasureTheory
 end MeasureTheory
 namespace ProbabilityTheory
 end ProbabilityTheory
-namespace Real
-end Real
-namespace Finset
-end Finset
-namespace Learning
-end Learning
-namespace Matrix
-end Matrix
 namespace Bandits.Linear
 end Bandits.Linear
 namespace Learning.RepeatedGame
@@ -102,91 +84,39 @@ end Learning.ZeroSumGame
 namespace Ito2026Adversarial
 end Ito2026Adversarial
 
--- ═══ LeanMachineLearning.SequentialLearning.Algorithm ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Analysis.InnerProductSpace.Mahalanobis ═══
 @[expose] public section
-open MeasureTheory ProbabilityTheory Filter Real Finset
-open scoped ENNReal NNReal
+open Matrix
+namespace Matrix
+variable {ι : Type*} [Fintype ι]
+
+/-- The squared Mahalanobis norm `‖x‖_A² = xᵀ A x`. -/
+def mahalanobisSq (A : Matrix ι ι ℝ) (x : EuclideanSpace ℝ ι) : ℝ :=
+  WithLp.ofLp x ⬝ᵥ A *ᵥ WithLp.ofLp x
+
+end Matrix
+end
+
+-- ═══ Ito2026Adversarial.ForLMLExplore.Analysis.Matrix.DesignMatrix ═══
+@[expose] public section
+open Matrix Real
+open scoped RealInnerProductSpace
 namespace Learning
-variable {𝓞 𝓐 𝓨 Ω : Type*} {m𝓞 : MeasurableSpace 𝓞} {m𝓐 : MeasurableSpace 𝓐} {m𝓨 : MeasurableSpace 𝓨} {mΩ : MeasurableSpace Ω}
+variable {ι : Type*}
 
-/-- One round of interaction: an observation, then an action, then a feedback. -/
-abbrev Round (𝓞 𝓐 𝓨 : Type*) := 𝓞 × 𝓐 × 𝓨
+/-- The design matrix `x xᵀ` of a point `x`. -/
+def outerSelf (x : EuclideanSpace ℝ ι) : Matrix ι ι ℝ :=
+  Matrix.vecMulVec (WithLp.ofLp x) (WithLp.ofLp x)
 
-/-- The action of a round. -/
-def Round.action (r : Round 𝓞 𝓐 𝓨) : 𝓐 := r.2.1
-
-/-- The feedback of a round. -/
-def Round.feedback (r : Round 𝓞 𝓐 𝓨) : 𝓨 := r.2.2
-
-/-- History of `n` complete rounds; `n = 0` is the empty history. -/
-abbrev Hist (𝓞 𝓐 𝓨 : Type*) (n : ℕ) := Fin n → Round 𝓞 𝓐 𝓨
-
-/-- A stochastic, sequential algorithm.
-At each round, it sees an observation in `𝓞`, then takes an action in `𝓐`, and finally receives
-feedback in `𝓨`. The action is a random function of the past rounds and the current observation. -/
-@[ext]
-structure Algorithm (𝓞 𝓐 𝓨 : Type*) [MeasurableSpace 𝓞] [MeasurableSpace 𝓐] [MeasurableSpace 𝓨]
-    where
-  /-- Law of the action of round `n` given the past rounds and the current observation. -/
-  policy : (n : ℕ) → Kernel (Hist 𝓞 𝓐 𝓨 n × 𝓞) 𝓐
-  /-- The policy is a Markov kernel. -/
-  [isMarkovKernel_policy : ∀ n, IsMarkovKernel (policy n)]
-
-instance instIsMarkovKernelProdHistPolicy (alg : Algorithm 𝓞 𝓐 𝓨) (n : ℕ) : IsMarkovKernel (alg.policy n) :=
-  alg.isMarkovKernel_policy n
-
-/-- A stochastic environment.
-At each round, an observation is drawn prior to the algorithm taking an action. Then the environment
-provides feedback based on the observation and the action. -/
-@[ext]
-structure Environment (𝓞 𝓐 𝓨 : Type*) [MeasurableSpace 𝓞] [MeasurableSpace 𝓐] [MeasurableSpace 𝓨]
-    where
-  /-- Law of the observation of round `n` given the past rounds. -/
-  obs : (n : ℕ) → Kernel (Hist 𝓞 𝓐 𝓨 n) 𝓞
-  /-- Law of the feedback of round `n` given the past rounds, the observation and the action. -/
-  feedback : (n : ℕ) → Kernel ((Hist 𝓞 𝓐 𝓨 n × 𝓞) × 𝓐) 𝓨
-  /-- The observation kernel is a Markov kernel. -/
-  [isMarkovKernel_obs : ∀ n, IsMarkovKernel (obs n)]
-  /-- The feedback kernel is a Markov kernel. -/
-  [isMarkovKernel_feedback : ∀ n, IsMarkovKernel (feedback n)]
-
-section IsAlgEnvSeq
-variable {O : ℕ → Ω → 𝓞} {A : ℕ → Ω → 𝓐} {Y : ℕ → Ω → 𝓨} {alg : Algorithm 𝓞 𝓐 𝓨} {env : Environment 𝓞 𝓐 𝓨} {P : Measure Ω} [IsFiniteMeasure P] {N : ℕ}
-
-/-- History of the algorithm-environment sequence before time `n`: the rounds at
-times `0, ..., n - 1`. -/
-def history (O : ℕ → Ω → 𝓞) (A : ℕ → Ω → 𝓐) (Y : ℕ → Ω → 𝓨) (n : ℕ) (ω : Ω) : Hist 𝓞 𝓐 𝓨 n :=
-  fun i ↦ (O i ω, A i ω, Y i ω)
-
-/-- An algorithm-environment sequence: a sequence of observations, actions and feedbacks generated
-by an algorithm interacting with an environment. -/
-structure IsAlgEnvSeq
-    (O : ℕ → Ω → 𝓞) (A : ℕ → Ω → 𝓐) (Y : ℕ → Ω → 𝓨)
-    (alg : Algorithm 𝓞 𝓐 𝓨) (env : Environment 𝓞 𝓐 𝓨)
-    (P : Measure Ω) [IsFiniteMeasure P] : Prop where
-  /-- The observation sequence is measurable. -/
-  measurable_obs n : Measurable (O n) := by fun_prop
-  /-- The action sequence is measurable. -/
-  measurable_action n : Measurable (A n) := by fun_prop
-  /-- The feedback sequence is measurable. -/
-  measurable_feedback n : Measurable (Y n) := by fun_prop
-  /-- The observation at time `n` has the correct conditional distribution given the history. -/
-  hasCondDistrib_obs n :
-    HasCondDistrib (O n) (history O A Y n) (env.obs n) P
-  /-- The action at time `n` has the correct conditional distribution given the history and the
-  observation at time `n`. -/
-  hasCondDistrib_action n :
-    HasCondDistrib (A n) (fun ω ↦ (history O A Y n ω, O n ω)) (alg.policy n) P
-  /-- The feedback at time `n` has the correct conditional distribution given the history, the
-  observation and the action at time `n`. -/
-  hasCondDistrib_feedback n :
-    HasCondDistrib (Y n) (fun ω ↦ ((history O A Y n ω, O n ω), A n ω)) (env.feedback n) P
-
-end IsAlgEnvSeq
+variable [Fintype ι]
+variable [DecidableEq ι]
+variable {ι : Type*} {𝒳 : Set (EuclideanSpace ℝ ι)} {x : EuclideanSpace ℝ ι} {A : Matrix ι ι ℝ} {R : ℝ}
+variable [Fintype ι]
+variable [DecidableEq ι]
 end Learning
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.SequentialLearning.Algorithms.Stateful ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.SequentialLearning.Algorithms.Stateful ═══
 @[expose] public section
 open MeasureTheory ProbabilityTheory
 namespace Learning
@@ -208,46 +138,7 @@ variable [MeasurableSpace Ω]
 end Learning
 end
 
--- ═══ LeanMachineLearning.ForMathlib.MeasureTheory.Order.Lattice ═══
-@[expose] public section
-open Finset
-variable {α δ : Type*} [MeasurableSpace δ] [SemilatticeInf α] {m : MeasurableSpace α} [MeasurableInf₂ α]
-attribute [to_dual existing] MeasurableInf₂
-end
-
--- ═══ Ito2026Adversarial.Mathlib.Analysis.InnerProductSpace.Mahalanobis ═══
-@[expose] public section
-open Matrix
-namespace Matrix
-variable {ι : Type*} [Fintype ι]
-
-/-- The squared Mahalanobis norm `‖x‖_A² = xᵀ A x`. -/
-def mahalanobisSq (A : Matrix ι ι ℝ) (x : EuclideanSpace ℝ ι) : ℝ :=
-  WithLp.ofLp x ⬝ᵥ A *ᵥ WithLp.ofLp x
-
-end Matrix
-end
-
--- ═══ Ito2026Adversarial.LeanMachineLearning.DesignMatrix ═══
-@[expose] public section
-open Matrix Real
-open scoped RealInnerProductSpace
-namespace Learning
-variable {ι : Type*}
-
-/-- The design matrix `x xᵀ` of a point `x`. -/
-def outerSelf (x : EuclideanSpace ℝ ι) : Matrix ι ι ℝ :=
-  Matrix.vecMulVec (WithLp.ofLp x) (WithLp.ofLp x)
-
-variable [Fintype ι]
-variable [DecidableEq ι]
-variable {ι : Type*} {𝒳 : Set (EuclideanSpace ℝ ι)} {x : EuclideanSpace ℝ ι} {A : Matrix ι ι ℝ} {R : ℝ}
-variable [Fintype ι]
-variable [DecidableEq ι]
-end Learning
-end
-
--- ═══ Ito2026Adversarial.LeanMachineLearning.Online.Bandit.Linear.Ridge ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Bandits.LinearBandit.Ridge ═══
 @[expose] public section
 open MeasureTheory Finset Matrix Learning
 open scoped RealInnerProductSpace
@@ -275,7 +166,7 @@ end Estimate
 end Bandits.Linear
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.Game.RepeatedGame ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Game.RepeatedGame ═══
 @[expose] public section
 open MeasureTheory ProbabilityTheory Finset
 open scoped ProbabilityTheory

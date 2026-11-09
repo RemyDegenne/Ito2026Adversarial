@@ -1,0 +1,44 @@
+{
+  "ILMTW26": {
+    "uri": "https://arxiv.org/abs/2602.06348",
+    "identifiers": {
+      "arxiv": "2602.06348"
+    },
+    "citation": {
+      "id": "ILMTW26",
+      "type": "paper-conference",
+      "title": "Adversarial Learning in Games with Bandit Feedback: Logarithmic Pure-Strategy Maximin Regret",
+      "author": [
+        {
+          "family": "Ito",
+          "given": "Shinji"
+        },
+        {
+          "family": "Luo",
+          "given": "Haipeng"
+        },
+        {
+          "family": "Maiti",
+          "given": "Arnab"
+        },
+        {
+          "family": "Tsuchiya",
+          "given": "Taira"
+        },
+        {
+          "family": "Wu",
+          "given": "Yue"
+        }
+      ],
+      "container-title": "Proceedings of the 39th Conference on Learning Theory (COLT)",
+      "issued": {
+        "date-parts": [
+          [
+            2026
+          ]
+        ]
+      }
+    },
+    "version": "v1"
+  }
+}
