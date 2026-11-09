@@ -1,69 +1,62 @@
 # Ito2026Adversarial
 
-Lean 4 formalization of the paper
+A Lean 4 formalization of *Adversarial Learning in Games with Bandit Feedback: Logarithmic
+Pure-Strategy Maximin Regret* (Shinji Ito, Haipeng Luo, Arnab Maiti, Taira Tsuchiya and Yue Wu,
+COLT 2026, [arXiv:2602.06348](https://arxiv.org/abs/2602.06348)), on top of
+[LMLExplore](https://github.com/LeanMachineLearning/LMLExplore), and so of
+[LML](https://github.com/LeanMachineLearning/LML), [Tau Ceti](https://github.com/TauCetiProject/TauCeti)
+and [Mathlib](https://github.com/leanprover-community/mathlib4). It follows the layout of
+[lml-paper-template](https://github.com/LeanMachineLearning/lml-paper-template).
 
-> Shinji Ito, Haipeng Luo, Arnab Maiti, Taira Tsuchiya, Yue Wu, *Adversarial Learning in Games
-> with Bandit Feedback: Logarithmic Pure-Strategy Maximin Regret*, COLT 2026,
-> [arXiv:2602.06348](https://arxiv.org/abs/2602.06348),
+It formalizes the pure-strategy maximin regret bounds of the paper for a learner playing a
+zero-sum game against an adaptive adversary with bandit feedback: Tsallis-INF (Theorem 1) and its
+matching lower bound (Theorem 2), Maximin-UCB (Theorem 4), Tsallis-FTRL-SPM and Maximin-LinUCB in
+bilinear games (Theorems 5, 6 and 12), and Lemmas 7–11 and 13, together with the analyses that the
+paper cites (Tsallis-INF, Tsallis-FTRL with stability-penalty matching, the self-normalized
+confidence ellipsoid, the elliptical potential lemma). Theorems 1, 4 and 5 and Lemma 10 are stated
+in a corrected form: see the errata. Every headline result is proved, with no `sorry`.
 
-built on Mathlib and the [Lean Machine Learning](https://github.com/LeanMachineLearning/LML)
-library (LML, branch `rename`). The development is blueprint-driven:
-[blueprint](https://remydegenne.github.io/Ito2026Adversarial/blueprint/),
-[dependency graph](https://remydegenne.github.io/Ito2026Adversarial/blueprint/dep_graph_document.html).
-
-**Status: complete.** The 12 results of the paper are stated and proved in Lean, with no
-`sorry`; they depend only on the standard axioms `propext`, `Classical.choice`, `Quot.sound`,
-and the regret analyses the paper cites (Tsallis-INF, Tsallis-FTRL with stability-penalty
-matching, the self-normalized confidence ellipsoid, the elliptical potential lemma) are proved in
-the library. They are listed in [`formalization.yaml`](formalization.yaml) and are standalone challenges for
-[comparator](https://github.com/leanprover/comparator) in [`comparator/`](comparator/).
-
-## Layout
-
-* `Ito2026Adversarial/ILMTW2026/`: the paper, one file per result (`Theorem1.lean`, …,
-  `Lemma13.lean`), namespace `Ito2026Adversarial`; the algorithms and bilinear games are in
-  `Setting.lean`.
-* `Ito2026Adversarial/ForLMLExplore/`: library-shaped material (partly from `LMLPapers`), under
-  LMLExplore's paths: repeated zero-sum games with bandit feedback (`Game/`), Tsallis-INF and FTRL
-  on the simplex (regret decomposition, Tsallis-1/2 and hybrid regularizers, stability-penalty
-  matching), importance weighting, the ridge regression state of linear bandits, the
-  self-normalized bound and the elliptical potential lemma, online learners and regret; and, at
-  Mathlib's paths, two-point laws, the Bernoulli KL divergence, Pinsker's and Bretagnolle-Huber's
-  inequalities, Ville's inequality, Gaussian integrals of quadratic forms, `log det`, Mahalanobis
-  norms, the simplex, Fenchel conjugates, matrices. Upstreaming candidates:
-  `notes/upstreaming-candidates.md`.
-* `blueprint/src/`: the blueprint (Part I follows the paper, Part II the prerequisites, including
-  the regret analyses the paper cites); `notes/blueprint-outline.md`: the outline it was written
-  from (labels, corrections, proof routes); `source/`: the paper's LaTeX source.
+- Website: https://RemyDegenne.github.io/Ito2026Adversarial/, with the blueprint, the referee site
+  and the literature links (which declarations formalize which results of the paper). CI builds it
+  on each push to `main`. `scripts/formalize.sh` also commits the literature links, as
+  `literature/annotations.jsonl`, when the paper is formalized and after the final bump.
+- The paper: `source/`. Errors found in it, with their corrections: `notes/paper-errata.md`.
+- The paper's results: `Ito2026Adversarial/ILMTW2026/`, one file per result, listed with their
+  status in `formalization.yaml`; comparator challenges in `comparator/`.
+- Library-shaped material: `Ito2026Adversarial/ForLMLExplore/`, which Tau Ceti workers port to
+  LMLExplore; `PAPER_ROADMAP.md` says where each item goes.
+- The blueprint outline, the phase-2 plan and the upstreaming candidates: `notes/`.
 
 ## Results of the paper
 
 | Result | Lean declaration | Notes |
 |---|---|---|
-| Theorem 1 (Tsallis-INF, uninformed) | `exists_psmr_tsallisINFHalf_le` | strict-PSNE bound in the proof's form; `Δ^mix > 0` instead of "no PSNE" |
+| Theorem 1 (Tsallis-INF, uninformed) | `exists_psmr_tsallisINFHalf_le` | errata E1, E2 |
 | Theorem 2 (lower bound) | `exists_forall_psmr_ge` | |
-| Remark 3 | — | remark |
-| Theorem 4 (Maximin-UCB, informed) | `exists_psmr_maximinUCB_le` | additive `m_x m_y` in the instance-dependent bound; constant `24` instead of `6` in the proof |
-| Theorem 5 (Tsallis-FTRL-SPM, bilinear) | `forall_exists_psmr_tsallisSPMPaper_le` | as Theorem 1; variance ratio with `S(p₀) ≻ 0`; additive term `m_x log² m_x` (the paper's `m_x log m_x` is false) |
+| Theorem 4 (Maximin-UCB, informed) | `exists_psmr_maximinUCB_le` | errata E4 |
+| Theorem 5 (Tsallis-FTRL-SPM, bilinear) | `forall_exists_psmr_tsallisSPMPaper_le` | errata E1–E3 |
 | Theorem 6 (Maximin-LinUCB, informal) | `exists_forall_exists_psmr_maximinLinUCB_le` | |
 | Lemma 7 | `sqrt_mul_sub_mul_le` | |
 | Lemma 8 (self-bounding) | `le_add_sqrt_add_of_le_sqrt_add` | |
 | Lemma 9 (KL of two-point laws) | `klDiv_twoPoint_le` | |
-| Lemma 10 (`Δ^mix ≥ Δ_M² / 4`) | `sq_entryGap_div_four_le_mixGap` | no PSNE instead of a unique equilibrium |
-| Lemma 11 (anytime confidence bounds) | `probReal_forall_abs_sub_div_le_ge` | the paper's `u ∈ [-1, 1]` is dropped (implied by the reward hypotheses) |
+| Lemma 10 (`Δ^mix ≥ Δ_M² / 4`) | `sq_entryGap_div_four_le_mixGap` | errata E7 |
+| Lemma 11 (anytime confidence bounds) | `probReal_forall_abs_sub_div_le_ge` | without the implied `u ∈ [-1, 1]` |
 | Theorem 12 (Maximin-LinUCB) | `exists_psmr_maximinLinUCB_le` | |
 | Lemma 13 (confidence ellipsoid) | `probReal_forall_sqrt_mahalanobisSq_le_ge` | |
 
-The corrections and the proof routes are explained in the blueprint and in
-`notes/blueprint-outline.md` (sections 3 and 4).
+## Building
 
-## Building and checking
+```bash
+scripts/build.sh
+```
 
-```
-lake exe cache get
-lake build Ito2026Adversarial
-lake exe runLinter Ito2026Adversarial
-python3 scripts/check-blueprint.py && leanblueprint pdf && leanblueprint web
-lake exe checkdecls blueprint/lean_decls
-python3 scripts/make-challenges.py && lake build Comparator
-```
+The script fetches Mathlib's and Tau Ceti's prebuilt files, then runs `lake build`; its arguments go
+to `lake build`.
+
+## Working on it
+
+The workflow is the `formalize-paper` skill of the `lml` Claude Code plugin
+([lml-claude](https://github.com/LeanMachineLearning/lml-claude)). The paper is formalized; what is
+left is to contribute its library-shaped part. `scripts/formalize.sh`, in a terminal or tmux, tags
+`PAPER_ROADMAP.md`, sends the reusable parts to LMLExplore, and once they are merged moves the paper
+to the current LMLExplore.

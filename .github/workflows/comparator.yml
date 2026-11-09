@@ -36,12 +36,22 @@ jobs:
       - name: Checkout project
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
+      - name: Install elan
+        # Retried: the installer downloads elan from GitHub's releases, which sometimes time out.
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4; do
+            if curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+                | sh -s -- -y --default-toolchain none; then
+              break
+            fi
+            [ "$attempt" = 4 ] && exit 1
+            sleep $((attempt * 30))
+          done
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
       - name: Build project
-        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9 # 2025-07-02
-        with:
-          build: true
-          lint: false
-          mk_all-check: false
+        run: scripts/build.sh
 
       - name: Run comparator on every config
         run: scripts/comparator-verify.sh --insecure

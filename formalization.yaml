@@ -41,7 +41,7 @@ sources:
       - "Arnab Maiti"
       - "Taira Tsuchiya"
       - "Yue Wu"
-    id: "COLT 2026; arXiv:2602.06348"
+    id: "arXiv:2602.06348v1 (COLT 2026)"
     type: "conference-paper"
     location: "Theorems 1, 2, 4, 5, 6, 12 and Lemmas 7-11, 13; see status.scope"
     relationship: "formalizes"
@@ -55,7 +55,8 @@ sources:
       Tsallis-FTRL-SPM, self-normalized confidence bounds); the blueprint is a derived artifact
       of this project, not an independent source. The statements started from the
       statement-only formalization of the paper in `LMLPapers` (COLT2026/Ito2026Adversarial).
-      The formalizer is not an author of the paper.
+      The formalizer is not an author of the paper. The errors found in the paper, with their
+      corrections, are in `notes/paper-errata.md`.
 
 related_formalizations: []   # no earlier or parallel formalization with proofs is known
 
@@ -92,7 +93,8 @@ status:
     (`exists_psmr_maximinLinUCB_le`), Lemma 13 (`probReal_forall_sqrt_mahalanobisSq_le_ge`).
     Not formalized: Remark 3 and the discussion sections.
 
-    Corrections to the paper's statements (`notes/blueprint-outline.md`, section 3): the
+    Corrections to the paper's statements (`notes/blueprint-outline.md`, section 3, and
+    `notes/paper-errata.md`, E1-E8): the
     strict-PSNE bounds of Theorems 1 and 5 are stated in the form their proofs give,
     `(1 + 1/Δᶜ_min)(1 + log T)` (the paper's form is false in Lean for an adversary with one
     action, `Δᶜ_min` being then `0`); the no-PSNE bounds of Theorems 1 and 5 assume
