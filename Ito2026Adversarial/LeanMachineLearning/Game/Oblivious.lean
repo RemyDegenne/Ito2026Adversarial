@@ -124,10 +124,9 @@ lemma obliviousBandit_twoPointNoise [Fintype 𝒴] [Countable 𝒳] [MeasurableS
     obliviousBandit q (twoPointNoise u) t x = twoPoint (∑ y, (q t).real {y} * u x y) := by
   rw [← sum_smul_twoPoint (fun _ _ ↦ measureReal_nonneg) (by simp) fun y _ ↦ hu x y]
   ext s hs
-  rw [obliviousBandit_apply t x hs, lintegral_fintype, Measure.coe_finsetSum,
-    Finset.sum_apply]
+  rw [obliviousBandit_apply t x hs, lintegral_fintype, _root_.sum_apply]
   refine Finset.sum_congr rfl fun y _ ↦ ?_
-  rw [Measure.smul_apply, smul_eq_mul, ofReal_measureReal, twoPointNoise_apply, mul_comm]
+  rw [_root_.smul_apply, smul_eq_mul, ofReal_measureReal, twoPointNoise_apply, mul_comm]
 
 end Learning.RepeatedGame
 

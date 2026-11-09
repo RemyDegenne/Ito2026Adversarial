@@ -46,7 +46,7 @@ noncomputable def weightedMeasure (p : ι → ℝ) : Measure ι :=
 /-- The mass of a measurable set under `weightedMeasure p`. -/
 lemma weightedMeasure_apply (p : ι → ℝ) {s : Set ι} (hs : MeasurableSet s) :
     weightedMeasure p s = ∑ i, ENNReal.ofReal (p i) * s.indicator 1 i := by
-  simp [weightedMeasure, Finset.sum_apply, Measure.dirac_apply' _ hs]
+  simp [weightedMeasure, Measure.dirac_apply' _ hs]
 
 /-- The total mass of `weightedMeasure p`. -/
 lemma weightedMeasure_univ (p : ι → ℝ) :

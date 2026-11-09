@@ -8,10 +8,11 @@ autoImplicit = false
 relaxedAutoImplicit = false
 weak.linter.mathlibStandardSet = true
 
+# LMLExplore brings Mathlib, Tau Ceti and LML at the versions it pins: never require them here.
 [[require]]
-name = "LeanMachineLearning"
-git = "https://github.com/LeanMachineLearning/LML"
-rev = "rename"
+name = "LMLExplore"
+git = "https://github.com/LeanMachineLearning/LMLExplore"
+rev = "main"
 
 [[require]]
 name = "checkdecls"

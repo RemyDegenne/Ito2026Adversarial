@@ -415,14 +415,14 @@ variable (hu : ∀ x y, u x y ∈ Set.Icc (-1) 1) (hRu : R.HasMean u)
     (Player.ofUninformed (tsallisINFHalf mx)) (gameEnv opp R) P)
 include h
 
-omit [NeZero my] in
+omit [NeZero my] [IsProbabilityMeasure P] in
 /-- The distribution of round `t` of a run is measurable. -/
 lemma measurable_halfDist_run (t : ℕ) :
     Measurable fun ω ↦ (halfDist (fun s ↦ ((), X s ω, Rw s ω)) t : Fin mx → ℝ) := by
   have := (measurable_halfDistHist (my := my) t).comp (h.measurable_history t)
   exact this
 
-omit [NeZero my] in
+omit [NeZero my] [IsProbabilityMeasure P] in
 /-- The utility `f x_t y_t` of the actions of round `t` of a run is measurable. -/
 lemma measurable_utility_run (t : ℕ) (f : Fin mx → Fin my → ℝ) :
     Measurable fun ω ↦ f (X t ω) (Y t ω) := by

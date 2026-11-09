@@ -103,7 +103,7 @@ lemma action_index_ae_eq {idx : (n : ℕ) → Hist 𝓞 𝓐 𝓨 n × 𝓞 → 
     {hidx : ∀ n, Measurable (idx n)} (h : IsAlgEnvSeq O A Y (Algorithm.index idx hidx) env P)
     (n : ℕ) :
     A n =ᵐ[P] fun ω ↦ argmax (idx n (history O A Y n ω, O n ω)) :=
-  action_deterministic_ae_eq h n
+  action_ae_eq_deterministic h n
 
 /-- **Runs of an index algorithm.** In a run of an index algorithm, the action of round `n`
 maximizes the index, almost surely. -/
@@ -114,7 +114,7 @@ lemma idx_le_idx_action_index {idx : (n : ℕ) → Hist 𝓞 𝓐 𝓨 n × 𝓞
       idx n (history O A Y n ω, O n ω) a ≤ idx n (history O A Y n ω, O n ω) (A n ω) := by
   filter_upwards [h.action_index_ae_eq n] with ω hω a
   rw [hω]
-  exact isMaxOn_argmax _ a
+  exact isMaxOn_univ_iff.1 (isMaxOn_argmax _) a
 
 variable {s0 : σ} {upd : ℕ → σ → Round 𝓞 𝓐 𝓨 → σ}
   {hupd : Measurable fun p : ℕ × σ × Round 𝓞 𝓐 𝓨 ↦ upd p.1 p.2.1 p.2.2}
@@ -125,7 +125,7 @@ of the index computed from the state and the observation. -/
 lemma action_statefulIndex_ae_eq
     (h : IsAlgEnvSeq O A Y (Algorithm.statefulIndex s0 upd hupd idx hidx) env P) (n : ℕ) :
     A n =ᵐ[P] fun ω ↦ argmax (idx n (stateProcess upd s0 O A Y n ω) (O n ω)) :=
-  action_deterministic_ae_eq h n
+  action_ae_eq_deterministic h n
 
 /-- **Runs of a stateful index algorithm.** In a run of a stateful index algorithm, the action of
 round `n` maximizes the index computed from the state and the observation, almost surely. -/
@@ -135,7 +135,7 @@ lemma idx_le_idx_action_statefulIndex
       ≤ idx n (stateProcess upd s0 O A Y n ω) (O n ω) (A n ω) := by
   filter_upwards [h.action_statefulIndex_ae_eq n] with ω hω a
   rw [hω]
-  exact isMaxOn_argmax _ a
+  exact isMaxOn_univ_iff.1 (isMaxOn_argmax _) a
 
 end IsAlgEnvSeq
 

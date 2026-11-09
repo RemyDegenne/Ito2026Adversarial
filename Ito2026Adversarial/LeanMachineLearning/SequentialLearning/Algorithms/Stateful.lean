@@ -257,6 +257,7 @@ namespace IsAlgEnvSeq
 variable {alg : Algorithm 𝓞 𝓐 𝓨} {env : Environment 𝓞 𝓐 𝓨} {P : Measure Ω} [IsFiniteMeasure P]
   {O : ℕ → Ω → 𝓞} {A : ℕ → Ω → 𝓐} {Y : ℕ → Ω → 𝓨} {s0 : σ} {upd : ℕ → σ → Round 𝓞 𝓐 𝓨 → σ}
 
+omit [IsFiniteMeasure P] in
 /-- The state after round `t` is measurable with respect to the σ-algebra of the first `t + 1`
 rounds. -/
 lemma measurable_stateProcess_succ_filtration (h : IsAlgEnvSeq O A Y alg env P)
@@ -264,6 +265,7 @@ lemma measurable_stateProcess_succ_filtration (h : IsAlgEnvSeq O A Y alg env P)
     Measurable[h.filtration t] (stateProcess upd s0 O A Y (t + 1)) :=
   (measurable_foldHistIdx hupd s0 (t + 1)).comp (h.measurable_history_succ_filtration t)
 
+omit [IsFiniteMeasure P] in
 /-- The state before round `t` is measurable with respect to the σ-algebra of the first `t`
 rounds and the observation of round `t`. -/
 lemma measurable_stateProcess_filtrationObs (h : IsAlgEnvSeq O A Y alg env P)
@@ -283,7 +285,7 @@ lemma hasCondDistrib_action_stateful
     (hf := ((measurable_foldHistIdx hupd s0 n).comp measurable_fst).prodMk measurable_snd)
     (h.hasCondDistrib_action n)
 
-variable [IsProbabilityMeasure P] [MeasurableEq 𝓐] {a : ℕ → σ → 𝓞 → 𝓐}
+variable [MeasurableEq 𝓐] {a : ℕ → σ → 𝓞 → 𝓐}
   {hupd : Measurable fun p : ℕ × σ × Round 𝓞 𝓐 𝓨 ↦ upd p.1 p.2.1 p.2.2}
   {ha : Measurable fun p : ℕ × σ × 𝓞 ↦ a p.1 p.2.1 p.2.2}
 
@@ -292,14 +294,14 @@ of round `n` is almost surely `a n s (O n)` for the state `s = stateProcess upd 
 lemma action_detStateful_ae_eq
     (h : IsAlgEnvSeq O A Y (Algorithm.detStateful s0 upd hupd a ha) env P) (n : ℕ) :
     A n =ᵐ[P] fun ω ↦ a n (stateProcess upd s0 O A Y n ω) (O n ω) :=
-  action_deterministic_ae_eq h n
+  action_ae_eq_deterministic h n
 
 /-- In a run of `Algorithm.detStateful`, almost surely, the action of every round `n` is
 `a n s (O n)` for the state `s = stateProcess upd s0 O A Y n`. -/
 lemma action_detStateful_ae_all_eq
     (h : IsAlgEnvSeq O A Y (Algorithm.detStateful s0 upd hupd a ha) env P) :
     ∀ᵐ ω ∂P, ∀ n, A n ω = a n (stateProcess upd s0 O A Y n ω) (O n ω) :=
-  action_deterministic_ae_all_eq h
+  action_ae_all_eq_deterministic h
 
 end IsAlgEnvSeq
 
