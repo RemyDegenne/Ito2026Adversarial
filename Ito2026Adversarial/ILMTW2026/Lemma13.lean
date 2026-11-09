@@ -6,9 +6,9 @@ Authors: Rémy Degenne
 module
 
 public import Ito2026Adversarial.ILMTW2026.Setting
-public import Ito2026Adversarial.LeanMachineLearning.EllipticalPotential
-public import Ito2026Adversarial.LeanMachineLearning.Game.Concentration
-public import Ito2026Adversarial.LeanMachineLearning.Online.Bandit.Linear.ConfidenceEllipsoid
+public import Ito2026Adversarial.ForLMLExplore.Analysis.Matrix.EllipticalPotential
+public import Ito2026Adversarial.ForLMLExplore.Game.Concentration
+public import Ito2026Adversarial.ForLMLExplore.Bandits.LinearBandit.ConfidenceEllipsoid
 
 /-!
 # Lemma 13: confidence ellipsoid of Maximin-LinUCB

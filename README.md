@@ -23,15 +23,15 @@ the library. They are listed in [`formalization.yaml`](formalization.yaml) and a
 * `Ito2026Adversarial/ILMTW2026/`: the paper, one file per result (`Theorem1.lean`, …,
   `Lemma13.lean`), namespace `Ito2026Adversarial`; the algorithms and bilinear games are in
   `Setting.lean`.
-* `Ito2026Adversarial/LeanMachineLearning/`: material for LML (partly from `LMLPapers`):
-  repeated zero-sum games with bandit feedback (`Game/`), Tsallis-INF and FTRL on the simplex
-  (regret decomposition, Tsallis-1/2 and hybrid regularizers, stability-penalty matching),
-  importance weighting, the ridge regression state of linear bandits, the self-normalized bound
-  and the elliptical potential lemma, online learners and regret.
-* `Ito2026Adversarial/Mathlib/`: material for Mathlib (partly from `LMLPapers`): two-point laws,
-  the Bernoulli KL divergence, Pinsker's and Bretagnolle-Huber's inequalities, Ville's inequality,
-  Gaussian integrals of quadratic forms, `log det`, Mahalanobis norms, the simplex, Fenchel
-  conjugates, matrices. Upstreaming candidates: `notes/upstreaming-candidates.md`.
+* `Ito2026Adversarial/ForLMLExplore/`: library-shaped material (partly from `LMLPapers`), under
+  LMLExplore's paths: repeated zero-sum games with bandit feedback (`Game/`), Tsallis-INF and FTRL
+  on the simplex (regret decomposition, Tsallis-1/2 and hybrid regularizers, stability-penalty
+  matching), importance weighting, the ridge regression state of linear bandits, the
+  self-normalized bound and the elliptical potential lemma, online learners and regret; and, at
+  Mathlib's paths, two-point laws, the Bernoulli KL divergence, Pinsker's and Bretagnolle-Huber's
+  inequalities, Ville's inequality, Gaussian integrals of quadratic forms, `log det`, Mahalanobis
+  norms, the simplex, Fenchel conjugates, matrices. Upstreaming candidates:
+  `notes/upstreaming-candidates.md`.
 * `blueprint/src/`: the blueprint (Part I follows the paper, Part II the prerequisites, including
   the regret analyses the paper cites); `notes/blueprint-outline.md`: the outline it was written
   from (labels, corrections, proof routes); `source/`: the paper's LaTeX source.

@@ -5,14 +5,14 @@ Authors: Rémy Degenne
 -/
 module
 
-public import Ito2026Adversarial.LeanMachineLearning.SequentialLearning.Algorithms.Index
-public import Ito2026Adversarial.LeanMachineLearning.Online.Bandit.TsallisINF
-public import Ito2026Adversarial.LeanMachineLearning.DesignMatrix
-public import Ito2026Adversarial.LeanMachineLearning.Online.Bandit.Linear.Ridge
-public import Ito2026Adversarial.Mathlib.Analysis.InnerProductSpace.Mahalanobis
-public import Ito2026Adversarial.Mathlib.Analysis.Matrix.MeasurableSpace
-public import Ito2026Adversarial.Mathlib.Probability.Distributions.TwoPoint
-public import Ito2026Adversarial.LeanMachineLearning.Game.RepeatedGame
+public import Ito2026Adversarial.ForLMLExplore.SequentialLearning.Algorithms.Index
+public import Ito2026Adversarial.ForLMLExplore.Bandits.TsallisINF
+public import Ito2026Adversarial.ForLMLExplore.Analysis.Matrix.DesignMatrix
+public import Ito2026Adversarial.ForLMLExplore.Bandits.LinearBandit.Ridge
+public import Ito2026Adversarial.ForLMLExplore.Analysis.InnerProductSpace.Mahalanobis
+public import Ito2026Adversarial.ForLMLExplore.Analysis.Matrix.MeasurableSpace
+public import Ito2026Adversarial.ForLMLExplore.Probability.Distributions.TwoPoint
+public import Ito2026Adversarial.ForLMLExplore.Game.RepeatedGame
 public import LeanMachineLearning.ForMathlib.MeasureTheory.Order.MeasurableArg
 public import LeanMachineLearning.SequentialLearning.Deterministic
 public import Mathlib.Analysis.SpecialFunctions.Log.Basic
@@ -47,7 +47,7 @@ see the adversary's action. The performance measure is the pure-strategy maximin
     parameters of Theorem 5.
   - `maximinLinUCB φ ψ λ β` (Maximin-LinUCB, Algorithm 4), informed: ridge regression of
     `vec(A)` on the features `vec(x_t y_tᵀ)` with regularization `λ` (`linUpdate`, the library's
-    `ridgeUpdate` and `ridgeEstimate`, `Online/Bandit/Linear/Ridge.lean`), optimistic index
+    `ridgeUpdate` and `ridgeEstimate`, `Bandits/LinearBandit/Ridge.lean`), optimistic index
     `U_t(x, y) = ⟪a, Â_t⟫ + β_t ‖a‖_{V_{t-1}⁻¹}` (`linIndex`, the library's `ucbIndex`)
     and pure maximin action `argmax_x min_y U_t(x, y)` (`linAction`). `linRadius d λ δ t` is the
     paper's radius `β_t`, `linState φ ψ λ X Y R t` the ridge state `(V_t, b_t)` after `t` rounds

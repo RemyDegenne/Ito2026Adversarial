@@ -6,8 +6,8 @@ Authors: Rémy Degenne
 module
 
 public import Ito2026Adversarial.ILMTW2026.Setting
-public import Ito2026Adversarial.LeanMachineLearning.Online.Bandit.HybridTsallis
-public import Ito2026Adversarial.LeanMachineLearning.Online.StabilityPenaltyMatching
+public import Ito2026Adversarial.ForLMLExplore.OnlineLearning.HybridTsallis
+public import Ito2026Adversarial.ForLMLExplore.OnlineLearning.StabilityPenaltyMatching
 
 /-!
 # Tsallis-FTRL-SPM along a sequence of rounds

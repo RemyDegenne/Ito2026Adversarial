@@ -6,7 +6,7 @@ Authors: Rémy Degenne
 module
 
 public import Ito2026Adversarial.ILMTW2026.TsallisSPMPath
-public import Ito2026Adversarial.LeanMachineLearning.Game.Run
+public import Ito2026Adversarial.ForLMLExplore.Game.Run
 public import Ito2026Adversarial.ILMTW2026.TsallisINFRegret
 
 /-!

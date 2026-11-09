@@ -36,7 +36,7 @@ have their own counter.
 
 As in `LMLPapers` (see `notes/lmlpapers-README.md`, "Formalization choices"):
 
-* **Repeated games** (`LeanMachineLearning/Game/RepeatedGame.lean`): a round of the learner is
+* **Repeated games** (`ForLMLExplore/Game/RepeatedGame.lean`): a round of the learner is
   `Round Unit 𝒳 (𝒴 × ℝ)` (action `x_t`, feedback `(y_t, r_t)`); informed learners are
   `Player 𝒳 𝒴 = Algorithm Unit 𝒳 (𝒴 × ℝ)`, uninformed ones `Algorithm Unit 𝒳 ℝ` lifted by
   `Player.ofUninformed` (they ignore `y_t`). The adaptive adversary is a `Player 𝒴 𝒳` acting on the

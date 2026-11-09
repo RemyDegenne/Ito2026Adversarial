@@ -6,9 +6,9 @@ Authors: Rémy Degenne
 module
 
 public import Ito2026Adversarial.ILMTW2026.Setting
-public import Ito2026Adversarial.LeanMachineLearning.Online.Bandit.TsallisHalf
-public import Ito2026Adversarial.LeanMachineLearning.Game.Run
-public import Ito2026Adversarial.LeanMachineLearning.Game.Regret
+public import Ito2026Adversarial.ForLMLExplore.OnlineLearning.TsallisHalf
+public import Ito2026Adversarial.ForLMLExplore.Game.Run
+public import Ito2026Adversarial.ForLMLExplore.Game.Regret
 public import Ito2026Adversarial.ILMTW2026.Lemma7
 public import Ito2026Adversarial.ILMTW2026.Lemma8
 public import Mathlib.Analysis.Convex.Integral

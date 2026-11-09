@@ -6,8 +6,8 @@ Authors: Rémy Degenne
 module
 
 public import Ito2026Adversarial.ILMTW2026.Lemma11
-public import Ito2026Adversarial.LeanMachineLearning.Game.Maximin
-public import Ito2026Adversarial.LeanMachineLearning.Game.Regret
+public import Ito2026Adversarial.ForLMLExplore.Game.Maximin
+public import Ito2026Adversarial.ForLMLExplore.Game.Regret
 
 /-!
 # Analysis of Maximin-UCB

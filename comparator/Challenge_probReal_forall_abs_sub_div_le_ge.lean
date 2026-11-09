@@ -188,7 +188,7 @@ variable {α δ : Type*} [MeasurableSpace δ] [SemilatticeInf α] {m : Measurabl
 attribute [to_dual existing] MeasurableInf₂
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.Game.RepeatedGame ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Game.RepeatedGame ═══
 @[expose] public section
 open MeasureTheory ProbabilityTheory Finset
 open scoped ProbabilityTheory

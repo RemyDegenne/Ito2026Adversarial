@@ -244,7 +244,7 @@ lemma measurable_argmax [MeasurableSpace ι] [MeasurableEq α] [MeasurableSup₂
 end Argmax
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.SequentialLearning.Algorithms.Index ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.SequentialLearning.Algorithms.Index ═══
 @[expose] public section
 open MeasureTheory ProbabilityTheory
 namespace Learning
@@ -259,7 +259,7 @@ noncomputable def Algorithm.index (idx : (n : ℕ) → Hist 𝓞 𝓐 𝓨 n × 
 end Learning
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.Game.ZeroSum ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Game.ZeroSum ═══
 @[expose] public section
 open Finset
 namespace Learning.ZeroSumGame
@@ -275,7 +275,7 @@ noncomputable def pairGap (u : 𝒳 → 𝒴 → ℝ) (x : 𝒳) (y : 𝒴) : �
 end Learning.ZeroSumGame
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.Game.RepeatedGame ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Game.RepeatedGame ═══
 @[expose] public section
 open MeasureTheory ProbabilityTheory Finset
 open scoped ProbabilityTheory

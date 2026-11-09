@@ -101,7 +101,7 @@ variable {α δ : Type*} [MeasurableSpace δ] [SemilatticeInf α] {m : Measurabl
 attribute [to_dual existing] MeasurableInf₂
 end
 
--- ═══ Ito2026Adversarial.Mathlib.Analysis.Convex.Simplex ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Analysis.Convex.Simplex ═══
 @[expose] public section
 open MeasureTheory
 namespace Learning
@@ -117,7 +117,7 @@ instance instCoeFunElemEuclideanSpaceRealSimplexForall : CoeFun (simplex ι) (fu
 end Learning
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.Game.ZeroSum ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Game.ZeroSum ═══
 @[expose] public section
 open Finset
 namespace Learning.ZeroSumGame

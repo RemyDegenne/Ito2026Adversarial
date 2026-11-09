@@ -6,7 +6,7 @@ Authors: Rémy Degenne
 module
 
 public import Ito2026Adversarial.ILMTW2026.Setting
-public import Ito2026Adversarial.LeanMachineLearning.Game.Maximin
+public import Ito2026Adversarial.ForLMLExplore.Game.Maximin
 
 /-!
 # Lemma 10: the mixed gap of a `2 × 2` game

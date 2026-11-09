@@ -186,7 +186,7 @@ end IsAlgEnvSeq
 end Learning
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.SequentialLearning.Algorithms.Stateful ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.SequentialLearning.Algorithms.Stateful ═══
 @[expose] public section
 open MeasureTheory ProbabilityTheory
 namespace Learning
@@ -215,7 +215,7 @@ variable {α δ : Type*} [MeasurableSpace δ] [SemilatticeInf α] {m : Measurabl
 attribute [to_dual existing] MeasurableInf₂
 end
 
--- ═══ Ito2026Adversarial.Mathlib.Analysis.InnerProductSpace.Mahalanobis ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Analysis.InnerProductSpace.Mahalanobis ═══
 @[expose] public section
 open Matrix
 namespace Matrix
@@ -228,7 +228,7 @@ def mahalanobisSq (A : Matrix ι ι ℝ) (x : EuclideanSpace ℝ ι) : ℝ :=
 end Matrix
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.DesignMatrix ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Analysis.Matrix.DesignMatrix ═══
 @[expose] public section
 open Matrix Real
 open scoped RealInnerProductSpace
@@ -247,7 +247,7 @@ variable [DecidableEq ι]
 end Learning
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.Online.Bandit.Linear.Ridge ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Bandits.LinearBandit.Ridge ═══
 @[expose] public section
 open MeasureTheory Finset Matrix Learning
 open scoped RealInnerProductSpace
@@ -275,7 +275,7 @@ end Estimate
 end Bandits.Linear
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.Game.RepeatedGame ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Game.RepeatedGame ═══
 @[expose] public section
 open MeasureTheory ProbabilityTheory Finset
 open scoped ProbabilityTheory

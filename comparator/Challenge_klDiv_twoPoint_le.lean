@@ -110,7 +110,7 @@ variable {α δ : Type*} [MeasurableSpace δ] [SemilatticeInf α] {m : Measurabl
 attribute [to_dual existing] MeasurableInf₂
 end
 
--- ═══ Ito2026Adversarial.Mathlib.Probability.Distributions.TwoPoint ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Probability.Distributions.TwoPoint ═══
 @[expose] public section
 open MeasureTheory Set unitInterval
 namespace ProbabilityTheory

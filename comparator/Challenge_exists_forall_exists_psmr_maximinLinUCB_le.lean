@@ -208,7 +208,7 @@ def Algorithm.deterministic (nextA : (n : ℕ) → (Hist 𝓞 𝓐 𝓨 n × �
 end Learning
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.SequentialLearning.Algorithms.Stateful ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.SequentialLearning.Algorithms.Stateful ═══
 @[expose] public section
 open MeasureTheory ProbabilityTheory
 namespace Learning
@@ -279,7 +279,7 @@ lemma measurable_argmax [MeasurableSpace ι] [MeasurableEq α] [MeasurableSup₂
 end Argmax
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.SequentialLearning.Algorithms.Index ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.SequentialLearning.Algorithms.Index ═══
 @[expose] public section
 open MeasureTheory ProbabilityTheory
 namespace Learning
@@ -295,7 +295,7 @@ noncomputable def Algorithm.statefulIndex (s0 : σ) (upd : ℕ → σ → Round 
 end Learning
 end
 
--- ═══ Ito2026Adversarial.Mathlib.Analysis.InnerProductSpace.Mahalanobis ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Analysis.InnerProductSpace.Mahalanobis ═══
 @[expose] public section
 open Matrix
 namespace Matrix
@@ -308,7 +308,7 @@ def mahalanobisSq (A : Matrix ι ι ℝ) (x : EuclideanSpace ℝ ι) : ℝ :=
 end Matrix
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.DesignMatrix ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Analysis.Matrix.DesignMatrix ═══
 @[expose] public section
 open Matrix Real
 open scoped RealInnerProductSpace
@@ -327,7 +327,7 @@ variable [DecidableEq ι]
 end Learning
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.Online.Bandit.Linear.Ridge ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Bandits.LinearBandit.Ridge ═══
 @[expose] public section
 open MeasureTheory Finset Matrix Learning
 open scoped RealInnerProductSpace
@@ -360,7 +360,7 @@ end Estimate
 end Bandits.Linear
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.Game.ZeroSum ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Game.ZeroSum ═══
 @[expose] public section
 open Finset
 namespace Learning.ZeroSumGame
@@ -376,7 +376,7 @@ noncomputable def pairGap (u : 𝒳 → 𝒴 → ℝ) (x : 𝒳) (y : 𝒴) : �
 end Learning.ZeroSumGame
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.Game.RepeatedGame ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Game.RepeatedGame ═══
 @[expose] public section
 open MeasureTheory ProbabilityTheory Finset
 open scoped ProbabilityTheory

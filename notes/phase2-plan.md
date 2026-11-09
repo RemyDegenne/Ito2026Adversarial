@@ -8,7 +8,7 @@ Interface files and headline theorems (statements fixed; their owner replaces th
 
 | File | Declarations | Owner |
 |---|---|---|
-| `Ito2026Adversarial/LeanMachineLearning/Game/RegretRelations.lean` | `nashRegret_eq_psmr_add`, `nashRegret_le_externalRegret`, `IsStrictPSNE.colGapMin_mul_le`, `IsPSNE.integral_sum_rowGap_sub_le` | E |
+| `Ito2026Adversarial/ForLMLExplore/Game/RegretRelations.lean` | `nashRegret_eq_psmr_add`, `nashRegret_le_externalRegret`, `IsStrictPSNE.colGapMin_mul_le`, `IsPSNE.integral_sum_rowGap_sub_le` | E |
 | `ILMTW2026/Lemma7.lean`, `Lemma8.lean`, `Lemma9.lean`, `Lemma10.lean` (frozen) | `sqrt_mul_sub_mul_le`, `le_add_sqrt_add_of_le_sqrt_add`, `klDiv_twoPoint_le`, `sq_entryGap_div_four_le_mixGap` | E |
 | `ILMTW2026/Theorem2.lean` (frozen) | `exists_forall_psmr_ge` | L |
 | `ILMTW2026/Theorem1.lean` (frozen) | `exists_psmr_tsallisINFHalf_le` | T |
@@ -28,7 +28,7 @@ the headline statements were not affected.
 
 * Read `notes/blueprint-outline.md` (sections 3, 4 and 6: corrections, proof routes, the numeral
   `2`), the blueprint chapters of your package (`blueprint/src/chapters/*.tex`),
-  `Ito2026Adversarial/ILMTW2026/Setting.lean`, `Ito2026Adversarial/LeanMachineLearning/Game/*.lean`
+  `Ito2026Adversarial/ILMTW2026/Setting.lean`, `Ito2026Adversarial/ForLMLExplore/Game/*.lean`
   and the files you build on. Lean conventions: every file `module` + `public import …` + module
   docstring + `@[expose] public section`, copyright header `Rémy Degenne` (as the existing files),
   every declaration with a docstring, `lemma` (never `theorem`, except the headline results already
@@ -47,9 +47,9 @@ the headline statements were not affected.
   (outline, section 6): write `((2 : ℕ) : ℝ)` and `WithLp.toLp _`. In lemmas and proofs numerals
   are fine.
 * Prove the general statement and derive the specialization; drop hypotheses the proof does not
-  use from *new* lemmas. New library-shaped material goes to `Ito2026Adversarial/Mathlib/` (Mathlib
-  path and namespaces) or `Ito2026Adversarial/LeanMachineLearning/` (LML path, namespaces `Learning`
-  or `Bandits`); paper-specific material to `Ito2026Adversarial/ILMTW2026/` (namespace
+  use from *new* lemmas. New library-shaped material goes to `Ito2026Adversarial/ForLMLExplore/`
+  (Mathlib paths and namespaces for Mathlib-shaped material, namespaces `Learning` or `Bandits`
+  for LML-shaped material); paper-specific material to `Ito2026Adversarial/ILMTW2026/` (namespace
   `Ito2026Adversarial`). State laws as `HasLaw`/`HasCondDistrib` rather than `Measure.map`
   equations. No structures bundling a function with its measurability.
 * Only edit your own files and, in the blueprint, the environments of your package. Re-read a
@@ -69,7 +69,8 @@ the headline statements were not affected.
   `lake env lean File.lean` in your scratchpad directory. `~/Documents/Lean/LMLPapers` has more
   library material (read-only for you): copy what you need into this repository, mapping
   `LMLPapers.LeanMachineLearning.ForMathlib.X` to `Ito2026Adversarial.Mathlib.X` and
-  `LMLPapers.LeanMachineLearning.X` to `Ito2026Adversarial.LeanMachineLearning.X`; if two packages
+  `LMLPapers.LeanMachineLearning.X` to `Ito2026Adversarial.LeanMachineLearning.X` (both now under
+  `Ito2026Adversarial.ForLMLExplore`); if two packages
   need the same LMLPapers file, the first to copy it owns it, the other imports it (check before
   copying).
 * Report: what was proved (names, files), any deviation from the plan, anything left.
@@ -80,10 +81,10 @@ Prove the four interfaces of `RegretRelations.lean` (pathwise identities and bou
 integrals of bounded functions; `nashRegret_le_externalRegret` needs a maximin mixed strategy, i.e.
 that the supremum defining `nashValue` is attained, `lem:maximin_attained`, by compactness of the
 simplex), and the frozen Lemmas 7, 8 (elementary real analysis), 9 (KL of two-point laws: the
-library has `twoPoint` in `Mathlib/Probability/Distributions/TwoPoint.lean` and the Bernoulli KL
-in `Mathlib/InformationTheory/KullbackLeibler/Bernoulli.lean`; the paper's derivative argument)
-and 10 (`lem:two_by_two_value`: the explicit value of a `2 × 2` game without PSNE, with a symmetry
-lemma for row/column swaps).
+library has `twoPoint` in `ForLMLExplore/Probability/Distributions/TwoPoint.lean` and the
+Bernoulli KL in `ForLMLExplore/InformationTheory/KullbackLeibler/Bernoulli.lean`; the paper's
+derivative argument) and 10 (`lem:two_by_two_value`: the explicit value of a `2 × 2` game without
+PSNE, with a symmetry lemma for row/column swaps).
 
 ## L. Lower bound (`lower_bound.tex`; `prereq_information.tex`)
 
@@ -106,8 +107,8 @@ Prove the frozen `exists_psmr_tsallisINFHalf_le` (Theorem 1), using the interfac
 Tsallis-INF for rewards in `[-1, 1]` against adaptive adversaries (`lem:tsallis_inf_worst`,
 `lem:tsallis_inf_self_bound`), with any universal constants. First write the generic FTRL
 decomposition (penalty and stability terms for time-varying regularizers, telescoping of the
-value function `ftrlValue` of `Online/Bandit/SimplexFTRL.lean`) in a library file
-`Ito2026Adversarial/LeanMachineLearning/Online/Bandit/FTRLRegret.lean`, which package S may import;
+value function `ftrlValue` of `OnlineLearning/SimplexFTRL.lean`) in a library file
+`Ito2026Adversarial/ForLMLExplore/OnlineLearning/FTRLRegret.lean`, which package S may import;
 then the stability bound of the Tsallis-1/2 regularizer for the reduced-variance estimate
 (`lem:tsallis_stability`; the classical route of Zimmert–Seldin 2021 / Ito et al. 2025: the
 conjugate of the Tsallis entropy and its local norms), the conditional unbiasedness of the
@@ -121,7 +122,7 @@ Prove the frozen `forall_exists_psmr_tsallisSPMPaper_le` (Theorem 5), using the 
 Tsallis-FTRL-SPM (Ito, Tsuchiya, Honda 2024, Eq. (26) with the parameters of their Section 4.3,
 `lem:tsallis_spm_regret`): FTRL with the hybrid regularizer, stability-penalty matching learning
 rates, exploration with variance ratio `c`, linear estimates. For the generic FTRL decomposition,
-use `LeanMachineLearning/Online/Bandit/FTRLRegret.lean` if package T has written it (do not edit
+use `ForLMLExplore/OnlineLearning/FTRLRegret.lean` if package T has written it (do not edit
 it), otherwise write what you need in your own files. This is the largest package; if it cannot
 be finished, report precisely which sublemmas are proved and which remain (with statements).
 

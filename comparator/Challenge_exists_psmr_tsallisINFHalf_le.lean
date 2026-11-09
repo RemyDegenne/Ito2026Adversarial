@@ -247,7 +247,7 @@ end Comap
 end Learning
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.SequentialLearning.Algorithms.Stateful ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.SequentialLearning.Algorithms.Stateful ═══
 @[expose] public section
 open MeasureTheory ProbabilityTheory
 namespace Learning
@@ -285,7 +285,7 @@ variable {α δ : Type*} [MeasurableSpace δ] [SemilatticeInf α] {m : Measurabl
 attribute [to_dual existing] MeasurableInf₂
 end
 
--- ═══ Ito2026Adversarial.Mathlib.Analysis.Convex.Simplex ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Analysis.Convex.Simplex ═══
 @[expose] public section
 open MeasureTheory
 namespace Learning
@@ -316,7 +316,7 @@ instance instNonemptyElemEuclideanSpaceRealSimplex [Nonempty ι] : Nonempty (sim
 end Learning
 end
 
--- ═══ Ito2026Adversarial.Mathlib.MeasureTheory.Measure.Weighted ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.MeasureTheory.Measure.Weighted ═══
 @[expose] public section
 open scoped ENNReal
 namespace MeasureTheory
@@ -336,7 +336,7 @@ lemma measurable_weightedMeasure : Measurable (weightedMeasure (ι := ι)) := so
 end MeasureTheory
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.Online.Bandit.ImportanceWeighting ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Bandits.ImportanceWeighting ═══
 @[expose] public section
 open MeasureTheory ProbabilityTheory Finset
 namespace Learning
@@ -363,7 +363,7 @@ noncomputable def importanceWeighted (p : ι → ℝ) (i : ι) (v : ℝ) (j : ι
 end Bandits
 end
 
--- ═══ Ito2026Adversarial.Mathlib.MeasureTheory.MeasurableSpace.ToSet ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.MeasureTheory.MeasurableSpace.ToSet ═══
 @[expose] public section
 namespace Learning
 variable {X : Type*} {K : Set X} [Nonempty K] {v : X}
@@ -376,7 +376,7 @@ noncomputable def toSet (K : Set X) [Nonempty K] (v : X) : K :=
 end Learning
 end
 
--- ═══ Ito2026Adversarial.Mathlib.Analysis.Convex.FenchelConjugate ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Analysis.Convex.FenchelConjugate ═══
 @[expose] public section
 open scoped RealInnerProductSpace
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E] {s t : Set E} {f : E → ℝ} {x θ : E}
@@ -388,7 +388,7 @@ noncomputable def fenchelConjugateOn (s : Set E) (f : E → ℝ) (θ : E) : ERea
 
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.Online.Bandit.SimplexFTRL ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.OnlineLearning.SimplexFTRL ═══
 @[expose] public section
 open MeasureTheory Finset
 open scoped RealInnerProductSpace
@@ -415,7 +415,7 @@ noncomputable def tsallisEntropy (α : ℝ) (p : EuclideanSpace ℝ ι) : ℝ :=
 end Learning
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.Online.Bandit.TsallisINF ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Bandits.TsallisINF ═══
 @[expose] public section
 open MeasureTheory ProbabilityTheory Finset Learning
 open scoped RealInnerProductSpace
@@ -472,7 +472,7 @@ noncomputable def tsallisINF (α : ℝ) (η : ℕ → ℝ) : Algorithm Unit ι �
 end Bandits
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.Game.ZeroSum ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Game.ZeroSum ═══
 @[expose] public section
 open Finset
 namespace Learning.ZeroSumGame
@@ -517,7 +517,7 @@ end Mixed
 end Learning.ZeroSumGame
 end
 
--- ═══ Ito2026Adversarial.LeanMachineLearning.Game.RepeatedGame ═══
+-- ═══ Ito2026Adversarial.ForLMLExplore.Game.RepeatedGame ═══
 @[expose] public section
 open MeasureTheory ProbabilityTheory Finset
 open scoped ProbabilityTheory

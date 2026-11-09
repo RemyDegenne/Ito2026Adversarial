@@ -6,8 +6,8 @@ Authors: Rémy Degenne
 module
 
 public import Ito2026Adversarial.ILMTW2026.Setting
-public import Ito2026Adversarial.Mathlib.InformationTheory.KullbackLeibler.Pinsker
-public import Ito2026Adversarial.Mathlib.InformationTheory.KullbackLeibler.TwoPoint
+public import Ito2026Adversarial.ForLMLExplore.InformationTheory.KullbackLeibler.Pinsker
+public import Ito2026Adversarial.ForLMLExplore.InformationTheory.KullbackLeibler.TwoPoint
 
 /-!
 # Lemma 9: KL divergence between two-point distributions

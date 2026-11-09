@@ -6,7 +6,7 @@ Authors: Rémy Degenne
 module
 
 public import Ito2026Adversarial.ILMTW2026.Setting
-public import Ito2026Adversarial.LeanMachineLearning.Game.Concentration
+public import Ito2026Adversarial.ForLMLExplore.Game.Concentration
 
 /-!
 # Lemma 11: confidence bounds of Maximin-UCB
