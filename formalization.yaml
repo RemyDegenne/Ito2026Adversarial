@@ -142,3 +142,110 @@ status:
     library has no `set_option` and no `@[nolint]`.
   sorry_count: 0
   sorry_in_definitions: 0
+
+alignment:
+  namespace: "Ito2026Adversarial"
+  note: >-
+    The full source-to-Lean map is the blueprint: each environment of blueprint/src/chapters/*.tex
+    carries a \lean{} tag. Only the headline statements are repeated here: the 12 comparator
+    challenges, which formalize every numbered theorem and lemma of the paper (Remark 3 is not
+    formalized). Results are numbered as in arXiv:2602.06348v1, with one counter for theorems,
+    lemmas and remarks. Each has its Literature Links relation, read "paper relation Lean":
+    exactMatch, closeMatch, broadMatch (the Lean statement is more general), narrowMatch (the
+    paper's is) or hasPart; and its entries in notes/paper-errata.md when the paper had to be
+    corrected.
+  statements:
+    - source: "thm:tsallis — Theorem 1, Tsallis-INF in normal-form games"
+      lean: "Ito2026Adversarial.exists_psmr_tsallisINFHalf_le"
+      module: "Ito2026Adversarial.ILMTW2026.Theorem1"
+      status: "proved"
+      relation: "narrowMatch"
+      erratum: "E1, E2"
+      note: >-
+        The strict-PSNE bound is the proof's C (1 + 1/Δᶜ_min) ∑_{x ≠ x*} (1 + log T) / Δʳ_x, which
+        gives the paper's only for m_y ≥ 2 and T ≥ 2; the m_x / Δ^mix bound assumes Δ^mix > 0
+        instead of the absence of PSNE, which does not imply it.
+    - source: "thm:uninformed_lb — Theorem 2, lower bound for uninformed learners"
+      lean: "Ito2026Adversarial.exists_forall_psmr_ge"
+      module: "Ito2026Adversarial.ILMTW2026.Theorem2"
+      status: "proved"
+      relation: "exactMatch"
+      note: >-
+        "Small enough gaps, large enough T" as ∃ Δ₀ > 0, ∃ T₀, uniformly; the game has
+        Δʳ_min = Δʳ and Δᶜ_min = Δᶜ exactly. E8 corrects typos in the proof only.
+    - source: "thm:pureucb — Theorem 4, Maximin-UCB in normal-form games"
+      lean: "Ito2026Adversarial.exists_psmr_maximinUCB_le"
+      module: "Ito2026Adversarial.ILMTW2026.Theorem4"
+      status: "proved"
+      relation: "narrowMatch"
+      erratum: "E4"
+      note: >-
+        The instance-dependent bound has the additive term m_x m_y of the failure event of the
+        confidence bounds, which the paper claims to absorb; for T ≥ 2. The worst-case bound is
+        the paper's (E5 and E6 correct the proof only).
+    - source: "thm:tsallis_bilinear — Theorem 5, Tsallis-FTRL-SPM in bilinear games"
+      lean: "Ito2026Adversarial.forall_exists_psmr_tsallisSPMPaper_le"
+      module: "Ito2026Adversarial.ILMTW2026.Theorem5"
+      status: "proved"
+      relation: "narrowMatch"
+      erratum: "E1, E2, E3"
+      note: >-
+        The additive term of the three bounds is m_x log² m_x, not m_x log m_x, and the strict-PSNE
+        and no-PSNE bounds are corrected as in Theorem 1. For m_x ≥ 2 and every exploration
+        distribution p₀ of variance ratio c (with S(p₀) invertible), the constant depending on c.
+    - source: "thm:purelinucb_informal — Theorem 6, Maximin-LinUCB in bilinear games, informal"
+      lean: "Ito2026Adversarial.exists_forall_exists_psmr_maximinLinUCB_le"
+      module: "Ito2026Adversarial.ILMTW2026.Theorem6"
+      status: "proved"
+      relation: "narrowMatch"
+      note: >-
+        The parameters (λ, β) of Maximin-LinUCB, which the paper fixes in Theorem 12, are
+        existentially quantified after the game and the horizon T ≥ 2, so they may depend on the
+        game; Theorem 12 below has the paper's parameters.
+    - source: "lem:sqrt_func — Lemma 7, maximum of √(ax) - bx"
+      lean: "Ito2026Adversarial.sqrt_mul_sub_mul_le"
+      module: "Ito2026Adversarial.ILMTW2026.Lemma7"
+      status: "proved"
+      relation: "exactMatch"
+    - source: "lem:self_bound — Lemma 8, self-bounding inequality"
+      lean: "Ito2026Adversarial.le_add_sqrt_add_of_le_sqrt_add"
+      module: "Ito2026Adversarial.ILMTW2026.Lemma8"
+      status: "proved"
+      relation: "exactMatch"
+    - source: "lem:kl_bernoulli — Lemma 9, KL divergence of two-point distributions"
+      lean: "Ito2026Adversarial.klDiv_twoPoint_le"
+      module: "Ito2026Adversarial.ILMTW2026.Lemma9"
+      status: "proved"
+      relation: "exactMatch"
+    - source: "lem:delta_comparison — Lemma 10, Δ^mix ≥ Δ_M² / 4 in 2 × 2 games"
+      lean: "Ito2026Adversarial.sq_entryGap_div_four_le_mixGap"
+      module: "Ito2026Adversarial.ILMTW2026.Lemma10"
+      status: "proved"
+      relation: "narrowMatch"
+      erratum: "E7"
+      note: >-
+        Assumes that the game has no PSNE instead of a unique mixed-strategy Nash equilibrium,
+        under which the lemma fails when that equilibrium is pure; a 2 × 2 game without PSNE has a
+        unique one.
+    - source: "lem:ucb_ucb — Lemma 11, anytime confidence bounds"
+      lean: "Ito2026Adversarial.probReal_forall_abs_sub_div_le_ge"
+      module: "Ito2026Adversarial.ILMTW2026.Lemma11"
+      status: "proved"
+      relation: "broadMatch"
+      note: >-
+        For the run of any informed player, not only of Maximin-UCB, in whose analysis the paper
+        states it.
+    - source: "thm:purelinucb — Theorem 12, Maximin-LinUCB in bilinear games"
+      lean: "Ito2026Adversarial.exists_psmr_maximinLinUCB_le"
+      module: "Ito2026Adversarial.ILMTW2026.Theorem12"
+      status: "proved"
+      relation: "exactMatch"
+      note: "For T ≥ 2, where the bounds in log T are meaningful."
+    - source: "lem:conf_ellipsoid — Lemma 13, confidence ellipsoid"
+      lean: "Ito2026Adversarial.probReal_forall_sqrt_mahalanobisSq_le_ge"
+      module: "Ito2026Adversarial.ILMTW2026.Lemma13"
+      status: "proved"
+      relation: "broadMatch"
+      note: >-
+        For the run of any informed player, not only of Maximin-LinUCB, in whose analysis the
+        paper states it, and for all t ≥ 0.
