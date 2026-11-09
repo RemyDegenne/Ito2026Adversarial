@@ -32,7 +32,7 @@ universe u
 
 namespace Ito2026Adversarial
 
-/-- **Theorem 2** (Ito, Luo, Maiti, Tsuchiya, Wu 2026). There are `c > 0`, `Δ₀ > 0` and `T₀`
+/-- **Theorem 2** [ILMTW26, Theorem 2]. There are `c > 0`, `Δ₀ > 0` and `T₀`
 such that for all gaps `Δʳ, Δᶜ ∈ (0, Δ₀)`, all `T ≥ T₀` and every uninformed learner, there is a
 `2 × 2` game `u` with utilities in `[-1, 1]` and a strict PSNE `(x*, y*)` with
 `Δʳ_min = Δʳ`, `Δᶜ_min = Δᶜ`, an adversary and a reward noise (with conditional mean `u` and

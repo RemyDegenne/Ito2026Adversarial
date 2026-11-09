@@ -23,7 +23,7 @@ universe u
 
 namespace Ito2026Adversarial
 
-/-- **Lemma 7** (Ito, Luo, Maiti, Tsuchiya, Wu 2026). For `a, b > 0`, `√(a x) - b x ≤ a / (4 b)`
+/-- **Lemma 7** [ILMTW26, Lemma 7]. For `a, b > 0`, `√(a x) - b x ≤ a / (4 b)`
 for all `x ≥ 0`, with equality at `x = a / (4 b²)`. -/
 theorem sqrt_mul_sub_mul_le (a b : ℝ) (ha : 0 < a) (hb : 0 < b) :
     (∀ x : ℝ, 0 ≤ x → √(a * x) - b * x ≤ a / (4 * b)) ∧

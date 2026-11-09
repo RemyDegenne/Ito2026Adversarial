@@ -25,7 +25,7 @@ universe u
 
 namespace Ito2026Adversarial
 
-/-- **Lemma 9** (Ito, Luo, Maiti, Tsuchiya, Wu 2026). For `|a|, |b| ≤ 1/2`, the KL divergence
+/-- **Lemma 9** [ILMTW26, Lemma 9]. For `|a|, |b| ≤ 1/2`, the KL divergence
 between the two-point distributions on `{-1, 1}` with means `a` and `b` is at most `(a - b)²`. -/
 theorem klDiv_twoPoint_le {a b : ℝ} (ha : |a| ≤ 1 / 2) (hb : |b| ≤ 1 / 2) :
     klDiv (twoPoint a) (twoPoint b) ≤ ENNReal.ofReal ((a - b) ^ 2) := by

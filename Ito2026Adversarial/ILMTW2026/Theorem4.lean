@@ -24,7 +24,7 @@ universe u
 
 namespace Ito2026Adversarial
 
-/-- **Theorem 4** (Ito, Luo, Maiti, Tsuchiya, Wu 2026). There is a universal constant `C` such
+/-- **Theorem 4** [ILMTW26, Theorem 4]. There is a universal constant `C` such
 that for every game `u` with utilities in `[-1, 1]`, every adaptive adversary, every reward noise
 with conditional mean `u` and rewards in `[-1, 1]` and every `T ≥ 2`, the run of Maximin-UCB
 with `δ = 1 / T` satisfies both

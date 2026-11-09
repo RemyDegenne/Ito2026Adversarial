@@ -114,7 +114,7 @@ lemma log_det_regGram_div_le {ι : Type*} [Fintype ι] [DecidableEq ι] {lam : �
     field_simp
   linarith
 
-/-- **Lemma 13** (Ito, Luo, Maiti, Tsuchiya, Wu 2026; confidence ellipsoid). In a run of any
+/-- **Lemma 13** [ILMTW26, Lemma 13] (confidence ellipsoid). In a run of any
 informed player in a bilinear game, against any adaptive adversary and with reward noise of
 conditional mean `u` and rewards in `[-1, 1]`, for `λ > 0` and `δ ∈ (0, 1)`, with probability at
 least `1 - δ`, for all `t`, `‖vec(A) - V_t⁻¹ b_t‖_{V_t} ≤ β_t`, where `(V_t, b_t)` is the ridge

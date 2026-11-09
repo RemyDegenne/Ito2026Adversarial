@@ -34,7 +34,7 @@ universe u
 
 namespace Ito2026Adversarial
 
-/-- **Theorem 5** (Ito, Luo, Maiti, Tsuchiya, Wu 2026). For every variance ratio `c > 0` there is
+/-- **Theorem 5** [ILMTW26, Theorem 5]. For every variance ratio `c > 0` there is
 a constant `C` such that for every bilinear game (`IsBilinearGame`) with `m_x ≥ 2` actions of the
 learner, every exploration distribution `p₀` of variance ratio `c`, every adaptive adversary and
 every reward noise with conditional mean `u` and rewards in `[-1, 1]`, the run of

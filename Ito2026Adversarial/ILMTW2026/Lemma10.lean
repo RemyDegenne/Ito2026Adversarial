@@ -30,7 +30,7 @@ private lemma sq_div_four_le_mul_div {Δ x y D : ℝ} (hΔ : 0 ≤ Δ) (hx : Δ 
   rw [le_div_iff₀ hD]
   nlinarith [mul_le_mul hx hy hΔ (hΔ.trans hx), sq_nonneg Δ]
 
-/-- **Lemma 10** (Ito, Luo, Maiti, Tsuchiya, Wu 2026). Let `u` be a `2 × 2` zero-sum game with
+/-- **Lemma 10** [ILMTW26, Lemma 10]. Let `u` be a `2 × 2` zero-sum game with
 entries in `[-1, 1]` and without pure-strategy Nash equilibrium. Then `Δ^mix ≥ Δ_M² / 4`, where
 `Δ_M = min {|a - b|, |a - c|, |b - d|, |c - d|}` is the minimum entry gap.
 

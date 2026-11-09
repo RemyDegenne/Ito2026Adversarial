@@ -22,7 +22,7 @@ universe u
 
 namespace Ito2026Adversarial
 
-/-- **Lemma 8** (Ito, Luo, Maiti, Tsuchiya, Wu 2026). If `x, a, b, c ≥ 0` and
+/-- **Lemma 8** [ILMTW26, Lemma 8]. If `x, a, b, c ≥ 0` and
 `x ≤ √(a x + b) + c`, then `x ≤ a + √b + 2 c`. -/
 theorem le_add_sqrt_add_of_le_sqrt_add {x a b c : ℝ} (hx : 0 ≤ x) (ha : 0 ≤ a) (hb : 0 ≤ b)
     (hc : 0 ≤ c) (h : x ≤ √(a * x + b) + c) :
