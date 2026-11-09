@@ -140,8 +140,30 @@ status:
     silenced: the paper's `u ∈ [-1, 1]` in Lemma 11 (it follows from the reward hypotheses) and
     the instances `NeZero m_x`, `NeZero m_y` in both. Their challenges were regenerated. The
     library has no `set_option` and no `@[nolint]`.
+
+    Comparator, 2026-11-09: scripts/formalize.sh ran scripts/comparator-verify.sh on the
+    regenerated challenges, and comparator verifies all 12 headline results.
   sorry_count: 0
   sorry_in_definitions: 0
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["claude-opus-5-5"]
+      framework: "Claude Code"
+      tool_setup: >-
+        Claude Code in a local checkout, with the blueprint-driven workflow that became the
+        formalize-paper skill of the lml plugin (https://github.com/LeanMachineLearning/lml-claude).
+        Converted to lml-paper-template on 2026-11-09; since then scripts/formalize.sh drives the
+        unattended rounds, and Tau Ceti workers port the library-shaped results to LMLExplore.
+
+review:
+  status: "agent-reviewed"
+  reviewers: []
+  notes: >-
+    An AI agent (Claude Code) checked the headline statements against the paper, in the
+    phase-1 statement check of 2026-10-08; no human has reviewed them yet. Comparator verifies
+    that the project proves exactly them (12 challenges, all verified on 2026-11-09).
 
 alignment:
   namespace: "Ito2026Adversarial"
